@@ -60,6 +60,14 @@ namespace SuperScan
             sky6ObjectInformation tsx_obj = new sky6ObjectInformation();
             sky6Dome tsx_dm = new sky6Dome();
 
+            //Clear any camera set up stuff that might be hanging around
+            //  and there has been some on occasion
+            ccdsoftCamera tsx_cc = new ccdsoftCamera()
+            {
+                Delay = 0,
+                Subframe = 0
+            };
+
             LogEntry("Finding coordinates for " + freshImageName);
             tsx_sc.Find(freshImageName);
 
@@ -70,24 +78,45 @@ namespace SuperScan
             double tDec = tsx_obj.ObjInfoPropOut; ;
             //Make sure that the mount commands are synchronous
             tsx_mt.Asynchronous = 0;
-            LogEntry("Initial slew to target");
-            //Slew the mount and dome should follow before completion...
-            tsx_mt.SlewToRaDec(tRA, tDec, freshImageName);
-            //But wait for a second, anyway
-            Task.Delay(5000);
+            //LogEntry("Initial slew to target");
+            ////Slew the mount and dome should follow before completion...
+            // try { tsx_mt.SlewToRaDec(tRA, tDec, freshImageName); }
+            //catch (Exception ex) { LogEntry("Slew error: " + ex.Message); }
+           
+            //Test to see if a dome tracking operation is underway.
+            // If so, doing a IsGotoComplete will throw an Error 212.
+            //  Ignore it a wait a few seconds for stuff to clear
+  
+            sky6Dome tsxd = new sky6Dome();
+            int testDomeTrack;
+            try { testDomeTrack = tsxd.IsGotoComplete; }
+            catch (Exception ex) { Task.Delay(5000); }
+
+            //Wait for any ERror 123's to clear
+
             LogEntry("Precision slew (CLS) to target");
-            //Now try the CLS
-            try
+            //Now try the CLS, but if an Error 123 is thrown, keep trying
+            //  every five seconds until the dome slew catches up.
+            int clsStatus = 123;
+            while (clsStatus == 123)
             {
-                tsx_cl.exec();
+                try { clsStatus = tsx_cl.exec(); }
+                catch (Exception ex)
+                {
+                    clsStatus = ex.HResult - 1000;
+                    LogEntry("CLS Error: " + ex.Message);
+                };
             }
-            catch
+            if (clsStatus == 0)
             {
-                LogEntry("CLS failed");
+                LogEntry("CLS successful");
+                return true;
+            }
+            else
+            {
+                LogEntry("CLS unsucessful: Error: " + clsStatus.ToString());
                 return false;
-            };
-            LogEntry("CLS successful");
-            return true;
+            }
         }
 
         private void ShootGalaxy()

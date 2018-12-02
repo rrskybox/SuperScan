@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 using TheSkyXLib;
 
 namespace SuperScan
@@ -91,9 +92,17 @@ namespace SuperScan
             ccdsoftImage tsxim = new ccdsoftImage();
             tsxim.Path = followUpPath + "\\" + galaxyName + ".fit";
             tsxim.Open();
+            //Try to image link.  If not successful, probably too few stars
+            //  if so, just return out of this;
             ImageLink tsxil = new ImageLink();
             tsxil.pathToFITS = tsxim.Path;
-            tsxil.execute();
+            try { tsxil.execute(); }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Image Link Error: " + ex.Message);
+                return;
+            }
+            
             ImageLinkResults tsxilr = new ImageLinkResults();
             int rlt = tsxilr.succeeded;
             string rltText = tsxilr.errorText;

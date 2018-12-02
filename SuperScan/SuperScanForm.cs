@@ -57,6 +57,12 @@
 /// 1.9.3 -- 9/26/18
 ///                 1.Changed "Threading.Sleep" to "Task.Delay" in FreshImage to allow moving the form around during image capture
 ///                 2.Added WatchWeather as a checkbox and stored in configuration to disable weather monitoring function
+/// 1.9.4 -- 10/28/18
+///                 1.Changed the unsafe weather procedure to park the telescope -- to keep it from continuing to track
+/// 1.10.0 -- 12/1/18
+///                 1. Added the avoidance code to prevent an Error 123 from blowing up a CLS
+///                 2. Modified the Suspect Report to handle a thrown Image Link/Show Inventory exception.
+///                 3. Modified the Suspect Report to update and redisplay the suspect list after a suspect has been cleared.
 /// ------------------------------------------------------------------------
 using System;
 using System.Deployment.Application;
@@ -292,6 +298,8 @@ namespace SuperScan
                     if (!WeatherSafe())
                     {
                         LogEventHandler("Waiting on unsafe weather conditions...");
+                        LogEventHandler("Parking telescope");
+                        ss_hwp.TelescopeShutDown();
                         LogEventHandler("Closing Dome");
                         ss_hwp.CloseDome();
                         do
@@ -304,7 +312,10 @@ namespace SuperScan
                         { break; };
                         if (WeatherSafe())
                         {
-                            LogEventHandler("Weather safe now -- opening dome");
+                            LogEventHandler("Weather conditions safe");
+                            LogEventHandler("Unparking telescope");
+                            ss_hwp.TelescopeStartUp();
+                            LogEventHandler("Opening Dome");
                             ss_hwp.OpenDome();
                         }
                     }

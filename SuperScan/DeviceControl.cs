@@ -13,10 +13,6 @@
 /// 
 /// ------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheSkyXLib;
 
 namespace SuperScan
@@ -27,9 +23,10 @@ namespace SuperScan
         {
             //Method for connecting and initializing the TSX mount
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            tsxm.Connect();
+            if (tsxm.IsConnected == 0) { tsxm.Connect(); }
             try
             {
+                if (tsxm.IsParked()) { tsxm.Unpark(); }
                 //tsxm.FindHome();
             }
             catch
@@ -66,16 +63,10 @@ namespace SuperScan
         //Method for connecting and parking the TSX mount
         {
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            tsxm.Connect();
-            try
-            {
-                tsxm.Park();
-            }
-            catch
-            {
-                //ignor failure 
-                return;
-            }
+            if (tsxm.IsConnected == 0) { tsxm.Connect(); }
+            try { tsxm.Park(); }
+            catch //ignor failure
+            { return; }
         }
 
         public void CameraStartUp()
@@ -105,14 +96,8 @@ namespace SuperScan
             // use exception handlers to check for dome commands, opt out if none
             //  couple the dome to telescope if everything works out
             sky6Dome tsxd = new sky6Dome();
-            try
-            {
-                tsxd.Connect();
-            }
-            catch
-            {
-                return;
-            }
+            try { tsxd.Connect(); }
+            catch { return; }
             //If a connection is set, then make sure the dome is coupled to the telescope slews
             tsxd.IsCoupled = Convert.ToInt32(true);
             return;
@@ -127,20 +112,15 @@ namespace SuperScan
             sky6RASCOMTele tsxt = new sky6RASCOMTele();
             //disconnect mount so dome won't keep chasing it
             tsxt.Disconnect();
-            try
-            {
-                tsxd.Connect();
-            }
-            catch
-            {
-                return;
-            }
+            try { tsxd.Connect(); }
+            catch { return; }
             //If a connection is set, then open the dome shutter
             tsxd.OpenSlit();
             System.Threading.Thread.Sleep(10000);  //Wait for close command to clear TSX and ASCOM driver
             while (tsxd.IsOpenComplete == 0)
-            { System.Threading.Thread.Sleep(1000); } //one second wait loop
-            tsxt.Connect();
+            { System.Threading.Thread.Sleep(5000); } //five second wait loop
+            //reconnect the mount
+            if (tsxt.IsConnected != 0) { tsxt.Connect(); }
             return;
         }
 
@@ -162,7 +142,7 @@ namespace SuperScan
             tsxd.CloseSlit();
             System.Threading.Thread.Sleep(10000);  //Wait for close command to clear TSX and ASCOM driver
             while (tsxd.IsCloseComplete == 0)
-            { System.Threading.Thread.Sleep(1000); } //one second wait loop
+            { System.Threading.Thread.Sleep(5000); } //five second wait loop
             return;
         }
     }

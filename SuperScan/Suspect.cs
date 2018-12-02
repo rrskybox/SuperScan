@@ -12,11 +12,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
-using TheSkyXLib;
 
 namespace SuperScan
 {
@@ -49,50 +45,20 @@ namespace SuperScan
         //Class for encapsulating galaxyname and eventtime for suspects
         public class Perp
         {
-            private bool suspicion;
-            private string gName;
-            private DateTime sDate;
-
             public Perp()
-            {
-                suspicion = true;
-                gName = "";
-                sDate = DateTime.Now;
-                return;
-            }
+            { }
 
             public Perp(string galaxyName, DateTime suspectDate, bool suspectSuspicion)
             {
-                suspicion = suspectSuspicion;
-                gName = galaxyName;
-                sDate = suspectDate;
+                Suspicion = suspectSuspicion;
+                Galaxy = galaxyName;
+                EventDate = suspectDate;
                 return;
             }
-            public bool Suspicion
-            {
-                get
-                { return suspicion; }
-                set
-                { suspicion = value; }
-            }
+            public bool Suspicion { get; set; } = true;
+            public string Galaxy { get; set; } = "";
+            public DateTime EventDate { get; set; } = DateTime.Now;
 
-            public string Galaxy
-            {
-                get
-                { return gName; }
-                set
-                { gName = value; }
-            }
-
-            public DateTime EventDate
-            {
-                get
-                {
-                    return sDate;
-                }
-                set
-                { sDate = value; }
-            }
         }
 
         public List<Perp> PerpList()
@@ -119,7 +85,12 @@ namespace SuperScan
                 DateTime susEvent = Convert.ToDateTime(suspect.Element("SuspectEvent").Value.ToString());
                 //Convert the XML Cleared status to a boolean
                 bool susCleared = Convert.ToBoolean(suspect.Element("Cleared").Value.ToString());
-                Perp entry = new Perp(susGalaxy, susEvent, susCleared);
+                Perp entry = new Perp
+                {
+                    Galaxy = susGalaxy,
+                    EventDate = susEvent,
+                    Suspicion = susCleared
+                };
                 suslist.Add(entry);
             }
             return (suslist);
@@ -186,7 +157,7 @@ namespace SuperScan
             //Add the record and save the file
             proXfile.Add(proRecord);
             proXfile.Save(susFilePath);
-            
+
             return;
         }
 
@@ -219,11 +190,11 @@ namespace SuperScan
                     //Add the record and save the file
                     suspect.ReplaceWith(newXRecord);
                     susXall.Save(susFilePath);
-                    
+
                     return;
                 }
             }
-            
+
             return;
         }
 
@@ -238,105 +209,54 @@ namespace SuperScan
             }
             return;
         }
-        
+
         internal bool Cleared
         {
-            get
-            {
-                return (pCleared);
-            }
-            set
-            {
-                pCleared = value;
-            }
+            get => (pCleared);
+            set => pCleared = value;
         }
 
         internal DateTime Event
         {
-            get
-            {
-                return (pEvent);
-            }
-            set
-            {
-                pEvent = value;
-            }
+            get => (pEvent);
+            set => pEvent = value;
         }
 
         internal string GalaxyName
         {
-            get
-            {
-                return (pGalName);
-            }
-            set
-            {
-                pGalName = value;
-            }
+            get => (pGalName);
+            set => pGalName = value;
         }
-
 
         internal string ImageBankPath
         {
-            get
-            {
-                return (pImageBankPath);
-            }
-            set
-            {
-                pImageBankPath = value;
-            }
+            get => (pImageBankPath);
+            set => pImageBankPath = value;
         }
-
-
 
         internal double SuspectRA
         {
-            get
-            {
-                return (pRA);
-            }
-            set
-            {
-                pRA = value;
-            }
+            get => (pRA);
+            set => pRA = value;
         }
 
         internal double SuspectDec
         {
-            get
-            {
-                return (pDec);
-            }
-            set
-            {
-                pDec = value;
-            }
+            get => (pDec);
+            set => pDec = value;
         }
 
         internal double SuspectCurrentLocationX
         {
-            get
-            {
-                return (pCurLocX);
-            }
-            set
-            {
-                pCurLocX = value;
-            }
+            get => (pCurLocX);
+            set => pCurLocX = value;
         }
 
 
         internal double SuspectCurrentLocationY
         {
-            get
-            {
-                return (pCurLocY);
-            }
-            set
-            {
-                pCurLocY = value;
-            }
+            get => (pCurLocY);
+            set => pCurLocY = value;
         }
     }
 }

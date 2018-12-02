@@ -143,6 +143,7 @@ namespace SuperScan
                 suspect = null;
                 ss_dd = null;
                 GC.Collect();
+                ListSuspects();
                 return;
             }
             return;

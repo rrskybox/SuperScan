@@ -82,17 +82,17 @@ namespace SuperScan
             ////Slew the mount and dome should follow before completion...
             // try { tsx_mt.SlewToRaDec(tRA, tDec, freshImageName); }
             //catch (Exception ex) { LogEntry("Slew error: " + ex.Message); }
-           
+
             //Test to see if a dome tracking operation is underway.
             // If so, doing a IsGotoComplete will throw an Error 212.
             //  Ignore it a wait a few seconds for stuff to clear
-  
-            sky6Dome tsxd = new sky6Dome();
-            int testDomeTrack;
-            try { testDomeTrack = tsxd.IsGotoComplete; }
-            catch (Exception ex) { Task.Delay(5000); }
 
-            //Wait for any ERror 123's to clear
+            //Toggle dome coupling:  this appears to clear most Error 123 problems
+            tsx_dm.IsCoupled = 0;
+            System.Threading.Thread.Sleep(1000);
+            tsx_dm.IsCoupled = 1;
+
+            //Wait for any Error 123's to clear
 
             LogEntry("Precision slew (CLS) to target");
             //Now try the CLS, but if an Error 123 is thrown, keep trying

@@ -1,11 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace SuperScan
@@ -21,16 +14,19 @@ namespace SuperScan
             InitializeComponent();
             Configuration ss_cfg = new Configuration();
             StagingDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.StageSystemOn);
-            StartingDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.StartUpOn);
-            EndingDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.ShutDownOn);
             StageSystemFilePathBox.Text = ss_cfg.StageSystemPath;
-            StartUpFilePathBox.Text = ss_cfg.StartUpPath;
-            ShutDownFilePathBox.Text = ss_cfg.ShutDownPath;
             StagingDateTimePicker.Value = DateTime.Now;
+
+            StartingDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.StartUpOn);
+            StartUpFilePathBox.Text = ss_cfg.StartUpPath;
             StartingDateTimePicker.Value = DateTime.Now;
-            //Set end time to 5AM.  OK button below should set it to the proper day
-            EndingDateTimePicker.Value = DateTime.Today + TimeSpan.FromHours(5);
-            return;
+
+            ShutdownDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.ShutDownOn);
+            ShutDownFilePathBox.Text = ss_cfg.ShutDownPath;
+            DateTime sddt = Convert.ToDateTime(ss_cfg.ShutDownTime);
+
+            if (sddt > StartingDateTimePicker.Value) ShutdownDateTimePicker.Value = sddt;
+            else ShutdownDateTimePicker.Value = sddt.AddDays(1);
         }
 
         private void StageSystemBrowseButton_Click(object sender, EventArgs e)
@@ -97,7 +93,7 @@ namespace SuperScan
             //Store program switches
             ss_cfg.StageSystemOn = StagingDateTimePicker.Checked.ToString();
             ss_cfg.StartUpOn = StartingDateTimePicker.Checked.ToString();
-            ss_cfg.ShutDownOn = EndingDateTimePicker.Checked.ToString();
+            ss_cfg.ShutDownOn = ShutdownDateTimePicker.Checked.ToString();
             //Store Program times for each
             //  Get the time from the form
             //  Check the current AM or PM and compare against the program AM or PM
@@ -115,7 +111,7 @@ namespace SuperScan
                 sut = sut.AddDays(1);
             }
 
-            DateTime sdt = DateTime.Now.Date + EndingDateTimePicker.Value.TimeOfDay;
+            DateTime sdt = DateTime.Now.Date + ShutdownDateTimePicker.Value.TimeOfDay;
             if (IsTomorrowAM(sdt))
             {
                 sdt = sdt.AddDays(1);
@@ -125,8 +121,8 @@ namespace SuperScan
             ss_cfg.StageSystemTime = StagingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
             StartingDateTimePicker.Value = sut;
             ss_cfg.StartUpTime = StartingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
-            EndingDateTimePicker.Value = sdt;
-            ss_cfg.ShutDownTime = EndingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            ShutdownDateTimePicker.Value = sdt;
+            ss_cfg.ShutDownTime = ShutdownDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
             Close();
             return;
         }

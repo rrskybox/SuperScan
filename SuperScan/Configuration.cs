@@ -14,8 +14,8 @@
 
 using System;
 using System.IO;
-using System.Xml.Linq;
 using System.Reflection;
+using System.Xml.Linq;
 
 namespace SuperScan
 {
@@ -23,7 +23,7 @@ namespace SuperScan
     {
         //Private data
         string SuperScanFolderName = "SuperScan";
-        string SuperScanQueryFolder = "Documents\\Software Bisque\\TheSkyX Professional Edition\\Database Queries";
+        string SuperScanQueryFolder = "Software Bisque\\TheSkyX Professional Edition\\Database Queries";
 
         string SuperScanImageBankFoldername = "Image Bank";
         string SuperScanGalaxyListFilename = "GalaxyList.xml";
@@ -47,7 +47,7 @@ namespace SuperScan
             //Check to see if the Log folder exists.  If not, create it.
             //Check to see if the FollowUp folder exists.  If not, create it.
 
-            ssdir = "C:\\Users\\" + System.Environment.UserName + "\\Documents\\" + SuperScanFolderName;
+            ssdir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)+"\\" + SuperScanFolderName;
 
             InstallDBQ();
 
@@ -64,7 +64,7 @@ namespace SuperScan
                     new XElement("ImageBankFoldername", (ssdir + "\\" + SuperScanImageBankFoldername)),
                     new XElement("FreshImagePath", (ssdir + "\\" + SuperScanFreshImageFilename)),
                     new XElement("DifferenceImagePath", (ssdir + "\\" + SuperScanDifferenceImageFilename)),
-                    new XElement("SuperScanQueryPath", ("C:\\Users\\" + System.Environment.UserName + "\\Documents\\Software Bisque\\TheSkyX Professional Edition\\Database Queries\\" + SuperScanQueryFilename)),
+                    new XElement("SuperScanQueryPath", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" +"Software Bisque\\TheSkyX Professional Edition\\Database Queries\\" + SuperScanQueryFilename),
                     new XElement("LogFoldername", (ssdir + "\\" + SuperScanLogFoldername)),
                     new XElement("FollowUpFoldername", (ssdir + "\\" + SuperScanFollowUpFoldername)),
                     new XElement("SuspectsFilePath", (ssdir + "\\" + SuperScanSuspectsFilename)),
@@ -98,7 +98,7 @@ namespace SuperScan
             if (!Directory.Exists(ssdir + "\\" + SuperScanLogFoldername))
             {
                 Directory.CreateDirectory(ssdir + "\\" + SuperScanLogFoldername);
-   
+
             }
             if (!Directory.Exists(ssdir + "\\" + SuperScanFollowUpFoldername))
             {
@@ -167,7 +167,7 @@ namespace SuperScan
             }
         }
 
-       public string FollowUpFolder
+        public string FollowUpFolder
         {
             get
             {
@@ -678,7 +678,7 @@ namespace SuperScan
             //Installs the dbq file in the proper destination folder if it is not installed already.
             //
             //  Generate the install path from the defaults.            
-            string DBQInstallPath = "C:\\Users\\" + System.Environment.UserName + "\\" + SuperScanQueryFolder + "\\" + SuperScanQueryFilename;
+            string DBQInstallPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + SuperScanQueryFolder + "\\" + SuperScanQueryFilename;
             if (!File.Exists(DBQInstallPath))
             {
                 Assembly dassembly = Assembly.GetExecutingAssembly();

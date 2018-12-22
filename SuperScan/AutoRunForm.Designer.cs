@@ -46,7 +46,7 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.StagingDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.groupBox6 = new System.Windows.Forms.GroupBox();
-            this.EndingDateTimePicker = new System.Windows.Forms.DateTimePicker();
+            this.ShutdownDateTimePicker = new System.Windows.Forms.DateTimePicker();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -58,13 +58,13 @@
             // StartingDateTimePicker
             // 
             this.StartingDateTimePicker.Checked = false;
-            this.StartingDateTimePicker.CustomFormat = "HH:mm";
+            this.StartingDateTimePicker.CustomFormat = "MMM dd HH:mm";
             this.StartingDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.StartingDateTimePicker.Location = new System.Drawing.Point(10, 21);
             this.StartingDateTimePicker.Name = "StartingDateTimePicker";
             this.StartingDateTimePicker.ShowCheckBox = true;
             this.StartingDateTimePicker.ShowUpDown = true;
-            this.StartingDateTimePicker.Size = new System.Drawing.Size(104, 20);
+            this.StartingDateTimePicker.Size = new System.Drawing.Size(117, 20);
             this.StartingDateTimePicker.TabIndex = 0;
             // 
             // StartUpFilePathBox
@@ -199,19 +199,19 @@
             // StagingDateTimePicker
             // 
             this.StagingDateTimePicker.Checked = false;
-            this.StagingDateTimePicker.CustomFormat = "HH:mm";
+            this.StagingDateTimePicker.CustomFormat = "MMM dd HH:mm";
             this.StagingDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.StagingDateTimePicker.Location = new System.Drawing.Point(10, 21);
             this.StagingDateTimePicker.Name = "StagingDateTimePicker";
             this.StagingDateTimePicker.ShowCheckBox = true;
             this.StagingDateTimePicker.ShowUpDown = true;
-            this.StagingDateTimePicker.Size = new System.Drawing.Size(104, 20);
+            this.StagingDateTimePicker.Size = new System.Drawing.Size(117, 20);
             this.StagingDateTimePicker.TabIndex = 0;
             // 
             // groupBox6
             // 
             this.groupBox6.BackColor = System.Drawing.Color.SkyBlue;
-            this.groupBox6.Controls.Add(this.EndingDateTimePicker);
+            this.groupBox6.Controls.Add(this.ShutdownDateTimePicker);
             this.groupBox6.ForeColor = System.Drawing.SystemColors.ControlText;
             this.groupBox6.Location = new System.Drawing.Point(12, 116);
             this.groupBox6.Name = "groupBox6";
@@ -222,15 +222,15 @@
             // 
             // EndingDateTimePicker
             // 
-            this.EndingDateTimePicker.Checked = false;
-            this.EndingDateTimePicker.CustomFormat = "HH:mm";
-            this.EndingDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
-            this.EndingDateTimePicker.Location = new System.Drawing.Point(10, 21);
-            this.EndingDateTimePicker.Name = "EndingDateTimePicker";
-            this.EndingDateTimePicker.ShowCheckBox = true;
-            this.EndingDateTimePicker.ShowUpDown = true;
-            this.EndingDateTimePicker.Size = new System.Drawing.Size(104, 20);
-            this.EndingDateTimePicker.TabIndex = 0;
+            this.ShutdownDateTimePicker.Checked = false;
+            this.ShutdownDateTimePicker.CustomFormat = "MMM dd HH:mm";
+            this.ShutdownDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
+            this.ShutdownDateTimePicker.Location = new System.Drawing.Point(10, 21);
+            this.ShutdownDateTimePicker.Name = "EndingDateTimePicker";
+            this.ShutdownDateTimePicker.ShowCheckBox = true;
+            this.ShutdownDateTimePicker.ShowUpDown = true;
+            this.ShutdownDateTimePicker.Size = new System.Drawing.Size(117, 20);
+            this.ShutdownDateTimePicker.TabIndex = 0;
             // 
             // AutoRunForm
             // 
@@ -280,6 +280,6 @@
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.DateTimePicker StagingDateTimePicker;
         private System.Windows.Forms.GroupBox groupBox6;
-        private System.Windows.Forms.DateTimePicker EndingDateTimePicker;
+        private System.Windows.Forms.DateTimePicker ShutdownDateTimePicker;
     }
 }

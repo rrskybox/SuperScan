@@ -105,7 +105,7 @@ namespace WeatherWatch
 
         public WeatherFileReader()
         {
-            weatherFilePath = "C:\\Users\\" + System.Environment.UserName + "\\Documents\\" + "CloudWatcher\\AAG_CCDAP4.dat";
+            weatherFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) +"\\CloudWatcher\\AAG_CCDAP4.dat";
             weaList = ReadWeatherDataIn();
             return;
         }

@@ -13,7 +13,6 @@
 /// ------------------------------------------------------------------------
 
 using System;
-using System.Threading.Tasks;
 using TheSkyXLib;
 
 namespace SuperScan
@@ -145,8 +144,7 @@ namespace SuperScan
             //Wait for completion
             while (tsx_cc.State != ccdsoftCameraState.cdStateNone)
             {
-                //System.Threading.Thread.Sleep(1000);
-                Task.Delay(1000);
+                System.Threading.Thread.Sleep(1000);
                 System.Windows.Forms.Application.DoEvents();
             }
             tsx_im.AttachToActiveImager();

@@ -117,9 +117,13 @@ namespace SuperScan
                 //Set the FOV size to  the galaxy size
                 tsx_sc.FieldOfView = galaxis / 60;
                 //Set the center of view to the suspect's RA/Dec and light up the target icon
-                tsx_sc.Find(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString());
+                //tsx_sc.Find(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString());
                 tsx_sc.RightAscension = suspect.SuspectRA;
                 tsx_sc.Declination = suspect.SuspectDec;
+                //Check TNS for supernova reports for 60 arc seconds around this location for the last 10 days
+                TNSReader tnsReport = new TNSReader();
+                List<string> snList = tnsReport.RunLocaleQuery(suspect.SuspectRA, suspect.SuspectDec, 60, 10);
+                if (snList != null) MessageBox.Show("Supernova " + snList[0] + " reported at this location");
                 //Give the user an opportunity to clear the suspect by updating its status to cleared -- or not.
                 Clipboard.Clear();
                 try { Clipboard.SetText(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString()); }

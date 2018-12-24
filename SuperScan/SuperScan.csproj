@@ -112,6 +112,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Net" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -156,6 +157,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Suspect.cs" />
     <Compile Include="DeviceControl.cs" />
+    <Compile Include="TNSReader.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WeatherFileReader.cs" />
     <EmbeddedResource Include="AutoRunForm.resx">

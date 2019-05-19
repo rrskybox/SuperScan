@@ -294,7 +294,8 @@ namespace SuperScan
                 //Check weather conditions, if enabled
                 //  if unsafe then spin until it is safe or endingtime occurs.
                 if (WatchWeatherCheckBox.Checked)
-                { LogEventHandler("Checking Weather");
+                {
+                    LogEventHandler("Checking Weather");
                     if (!WeatherSafe())
                     {
                         LogEventHandler("Waiting on unsafe weather conditions...");
@@ -313,10 +314,13 @@ namespace SuperScan
                         if (WeatherSafe())
                         {
                             LogEventHandler("Weather conditions safe");
-                            LogEventHandler("Unparking telescope");
-                            ss_hwp.TelescopeStartUp();
                             LogEventHandler("Opening Dome");
                             ss_hwp.OpenDome();
+                            LogEventHandler("Unparking telescope");
+                            ss_hwp.TelescopeStartUp();
+                            //Wait for 30 seconds for everything to settle
+                            LogEventHandler("Waiting for dome to settle");
+                            System.Threading.Thread.Sleep(30000);
                         }
                     }
                 } //Check for autofocus selection.  If so then run the autofocus check.

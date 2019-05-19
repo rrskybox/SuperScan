@@ -198,12 +198,13 @@ namespace SuperScan
             //Check for anomolies using TSX Sextractor (e.g. ShowInventory)
             if (NewStar(gname, dFilePath, rFilePath))
             {
-                //If a suspect is found, take and store a ten minute image for later analysis
-                //  This is going to take 20 minutes for the shot and dark, plus another dark
+                //If a suspect is found, take and store a five minute image for later analysis
+                //  Can't go longer than 5 minutes as Image Link seems to fail a lot with too many stars.
+                //  This is going to take 10 minutes for the shot and dark, plus another dark
                 //  will have to be taken for the regular scan upon resumption.
 
                 DrillDown ss_dd = new DrillDown(DateTime.Now);
-                ss_dd.Shoot(gname, 600.0);
+                ss_dd.Shoot(gname, 300.0);
             }
             return;
         }
@@ -321,8 +322,8 @@ namespace SuperScan
                             XYToRADec ss_perp = new XYToRADec(curImagePath, xCurPos, yCurPos);
                             double pRA = ss_perp.RA;
                             double pDec = ss_perp.Dec;
-                            LogEntry("Suspect's coordinates (RA,Dec) = " + pRA.ToString() + ", " + pDec.ToString());
-
+                            LogEntry("Suspect's coordinates (RA,Dec) = " + pRA.ToString() + " Hrs, " + pDec.ToString() +" Deg");
+                            
                             //Now create a new entry and save the suspect in the suspect file
                             Suspect ss_sus = new Suspect();
                             ss_sus.GalaxyName = gname;

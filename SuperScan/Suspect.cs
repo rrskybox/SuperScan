@@ -28,9 +28,9 @@ namespace SuperScan
         private double pCurLocY;
 
         public Suspect()
-        //Class for encapsulating methods/properties of a yet unidentified suspect
-        //
         {
+            //Class for encapsulating methods/properties of a yet unidentified suspect
+            //
             return;
         }
 
@@ -251,7 +251,6 @@ namespace SuperScan
             get => (pCurLocX);
             set => pCurLocX = value;
         }
-
 
         internal double SuspectCurrentLocationY
         {

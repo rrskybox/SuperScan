@@ -1,4 +1,5 @@
-﻿/// Module Name: SuspectReportForm
+﻿using AstroImage;
+/// Module Name: SuspectReportForm
 /// Purpose: Presentation of light source anomoly information
 /// Developer: Rick McAlister
 /// Creation Date:  7/15/2017
@@ -18,15 +19,7 @@
 /// --
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Xml;
-using System.Xml.Linq;
 using TheSkyXLib;
 
 namespace SuperScan
@@ -105,8 +98,8 @@ namespace SuperScan
             if (susLoad)
             {
                 DrillDown ss_dd = new DrillDown(suspect.Event);
-                ss_dd.Display(galname, suspect.SuspectRA, suspect.SuspectDec);
 
+                ss_dd.Display(galname, suspect.SuspectRA, suspect.SuspectDec);
                 sky6StarChart tsx_sc = new sky6StarChart();
                 sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
                 //Get the galaxy major axis

@@ -24,16 +24,9 @@ namespace SuperScan
             //Method for connecting and initializing the TSX mount
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
             if (tsxm.IsConnected == 0) { tsxm.Connect(); }
-            try
-            {
-                if (tsxm.IsParked()) { tsxm.Unpark(); }
-                //tsxm.FindHome();
-            }
+            try { if (tsxm.IsParked()) { tsxm.Unpark(); } }
             catch
-            {
-                //ignor failures -- probably just not a Paramount} 
-                return;
-            }
+            { return; }
         }
 
         /// <summary>
@@ -127,23 +120,28 @@ namespace SuperScan
         public void CloseDome()
         {
             //Method for closing the TSX dome
+            // Mount should be parked at this time
             // use exception handlers to check for dome commands, opt out if none
-            //  couple the dome to telescope if everything works out
             sky6Dome tsxd = new sky6Dome();
-            try
+            try { tsxd.Connect(); }
+            catch { return; }
+            //Stop whatever the dome is doing, if any and wait a few seconds for it to clear
+            try { tsxd.Abort(); }
+            catch (Exception e) { return; }
+            //Close up the dome:  Connect, Home (so power is to the dome), Close the slit
+            if (tsxd.IsConnected == 1)
             {
-                tsxd.Connect();
+                //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
+                tsxd.FindHome();
+                System.Threading.Thread.Sleep(10000);
+                while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
+                //Close slit
+                tsxd.CloseSlit();
+                System.Threading.Thread.Sleep(10000);
+                while (tsxd.IsCloseComplete == 0) { System.Threading.Thread.Sleep(5000); }
             }
-            catch
-            {
-                return;
-            }
-            //If a connection is set, then close the dome shutter
-            tsxd.CloseSlit();
-            System.Threading.Thread.Sleep(10000);  //Wait for close command to clear TSX and ASCOM driver
-            while (tsxd.IsCloseComplete == 0)
-            { System.Threading.Thread.Sleep(5000); } //five second wait loop
-            return;
+            //disconnect dome controller
+            tsxd.Disconnect();
         }
     }
 }

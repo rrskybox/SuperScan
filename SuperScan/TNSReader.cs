@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Xml.Linq;
+using System.Windows.Forms;
 
 namespace SuperScan
 {
@@ -43,16 +44,16 @@ namespace SuperScan
             queryURL = MakeSearchQuery();
         }
         
-        public List<string> RunLocaleQuery(double ra, double dec, double radius, int days)
+        public List<string> RunLocaleQuery(double raHrs, double decDeg, double radiusArcSec, int days)
         {
             //Configures the query to return the list of recent (last days) supernovae from TNS
             //  at a radius of radius arcsecs, centered on ra/dec
             //  ra in decimal degrees (0 to 360).  dec in decimal degrees (-90 to +90), radius in arcsecs
             ChangeQuery(startDateQ,DateTime.Now.AddDays(-days).ToString("yyyy-MM-dd"));
             ChangeQuery(endDateQ, DateTime.Now.ToString("yyyy-MM-dd"));
-            ChangeQuery(raQ, ra.ToString());
-            ChangeQuery(decQ, dec.ToString());
-            ChangeQuery(radiusQ, radius.ToString());
+            ChangeQuery(raQ, (raHrs*360.0/24.0).ToString());
+            ChangeQuery(decQ, decDeg.ToString());
+            ChangeQuery(radiusQ, radiusArcSec.ToString());
             //Run query
             RunTNSQuery();
             //queryXResult contains results
@@ -75,10 +76,19 @@ namespace SuperScan
         public XElement RunTNSQuery()
         {
             // url of TNS and TNS-sandbox api                                     
-            
+            string contents;
+
             WebClient client = new WebClient();
             string urlQuery = url_tns_search + queryURL.ToString();
-            string contents = client.DownloadString(urlQuery);
+            try
+            {
+                contents = client.DownloadString(urlQuery);
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return null;
+            }
 
             //Clean up the column headers so they can be used as XML item names
             string[] lines = contents.Split('\n');

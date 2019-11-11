@@ -39,8 +39,10 @@ namespace SuperScan
         public void TelescopePrePosition(string side)
         {
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            //DeviceControl dctl = new DeviceControl();
             tsxm.Asynchronous = 0;
             tsxm.Connect();
+            //dctl.DomeTrackingOff();
             if (side == "East")
             {
                 tsxm.SlewToAzAlt(90.0, 80.0, "");
@@ -49,6 +51,7 @@ namespace SuperScan
             {
                 tsxm.SlewToAzAlt(270.0, 80.0, "");
             }
+            //dctl.DomeTrackingOn();
             return;
         }
 
@@ -139,9 +142,131 @@ namespace SuperScan
                 tsxd.CloseSlit();
                 System.Threading.Thread.Sleep(10000);
                 while (tsxd.IsCloseComplete == 0) { System.Threading.Thread.Sleep(5000); }
+                //Close slit
+                //Standard false stop avoidance code
+                bool slitClosed = false;
+                tsxd.CloseSlit();
+                System.Threading.Thread.Sleep(10000);
+                try
+                {
+                    while (tsxd.IsCloseComplete == 0)
+                    {
+                        System.Threading.Thread.Sleep(5000);
+                    }
+                    //Report success  
+                    slitClosed = true;
+                }
+                catch
+                {
+                    slitClosed = false;
+                }
+
+                //Check to see if slit got closed, if not, then try one more time
+                if (!slitClosed)
+                {
+                    tsxd.CloseSlit();
+                    System.Threading.Thread.Sleep(10000);
+                    try
+                    {
+                        while (tsxd.IsCloseComplete == 0)
+                        {
+                            System.Threading.Thread.Sleep(5000);
+                        }
+                        //Report success  
+                    }
+                    catch
+                    {
+                    }
+                }
             }
             //disconnect dome controller
             tsxd.Disconnect();
+        }
+
+        public void ReliableRADecSlew(double RA, double Dec, string name)
+        {
+            //
+            //Checks for dome tracking underway, waits half second if so -- doesn't solve race condition, but may avoid 
+            sky6RASCOMTele tsxt = new sky6RASCOMTele();
+            while (IsDomeTrackingUnderway()) System.Threading.Thread.Sleep(500);
+            int result = -1;
+            while (result != 0)
+            {
+                result = 0;
+                try { tsxt.SlewToRaDec(RA, Dec, name); }
+                catch (Exception ex) { result = ex.HResult - 1000; }
+            }
+            return;
+        }
+
+        public int ReliableClosedLoopSlew(double RA, double Dec, string name)
+        {
+            //Tries to perform CLS without running into dome tracking race condition
+            //
+            ReliableRADecSlew(RA, Dec, name);
+            //Turn off tracking
+            DomeCouplingOff();
+            ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
+            int clsStatus = 123;
+            while (clsStatus == 123)
+            {
+                try { clsStatus = tsx_cl.exec(); }
+                catch (Exception ex)
+                {
+                    clsStatus = ex.HResult - 1000;
+                };
+                if (clsStatus == 123) System.Threading.Thread.Sleep(500);
+            }
+            DomeCouplingOn();
+            return clsStatus;
+        }
+
+
+        private bool IsDomeTrackingUnderway()
+        {
+            //Test to see if a dome tracking operation is underway.
+            // If so, doing a IsGotoComplete will throw an Error 212.
+            // return true
+            // otherwise return false
+            sky6Dome tsxd = new sky6Dome();
+            int testDomeTrack;
+            try { testDomeTrack = tsxd.IsGotoComplete; }
+            catch { return true; }
+            if (testDomeTrack == 0) return true;
+            else return false;
+        }
+
+        public void ToggleDomeCoupling()
+        {
+            //Uncouple dome tracking, then recouple dome tracking (synchronously)
+            sky6Dome tsxd = new sky6Dome();
+            tsxd.IsCoupled = 0;
+            System.Threading.Thread.Sleep(1000);
+            tsxd.IsCoupled = 1;
+            //Wait for all dome activity to stop
+            while (IsDomeTrackingUnderway()) { System.Threading.Thread.Sleep(1000); }
+            return;
+        }
+
+        public void DomeCouplingOn()
+        {
+            //Uncouple dome tracking, then recouple dome tracking (synchronously)
+
+            sky6Dome tsxd = new sky6Dome();
+            tsxd.IsCoupled = 1;
+            System.Threading.Thread.Sleep(500);
+            while (IsDomeTrackingUnderway()) { System.Threading.Thread.Sleep(1000); }
+            return;
+        }
+
+        public void DomeCouplingOff()
+        {
+            //Uncouple dome tracking, then recouple dome tracking (synchronously)
+            sky6Dome tsxd = new sky6Dome();
+            tsxd.IsCoupled = 0;
+            System.Threading.Thread.Sleep(500);
+            while (IsDomeTrackingUnderway()) { System.Threading.Thread.Sleep(1000); }
+            return;
         }
     }
 }

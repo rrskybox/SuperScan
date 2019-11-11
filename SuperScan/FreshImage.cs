@@ -96,16 +96,19 @@ namespace SuperScan
             LogEntry("Precision slew (CLS) to target");
             //Now try the CLS, but if an Error 123 is thrown, keep trying
             //  every five seconds until the dome slew catches up.
-            int clsStatus = 123;
-            while (clsStatus == 123)
-            {
-                try { clsStatus = tsx_cl.exec(); }
-                catch (Exception ex)
-                {
-                    clsStatus = ex.HResult - 1000;
-                    LogEntry("CLS Error: " + ex.Message);
-                };
-            }
+            //int clsStatus = 123;
+            //while (clsStatus == 123)
+            //{
+            //    try { clsStatus = tsx_cl.exec(); }
+            //    catch (Exception ex)
+            //    {
+            //        clsStatus = ex.HResult - 1000;
+            //        LogEntry("CLS Error: " + ex.Message);
+            //    };
+            //}
+            DeviceControl dctl = new DeviceControl();
+
+            int clsStatus = dctl.ReliableClosedLoopSlew(tRA, tDec, freshImageName);
             if (clsStatus == 0)
             {
                 LogEntry("CLS successful");

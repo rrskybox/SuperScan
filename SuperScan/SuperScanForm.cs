@@ -63,6 +63,11 @@
 ///                 1. Added the avoidance code to prevent an Error 123 from blowing up a CLS
 ///                 2. Modified the Suspect Report to handle a thrown Image Link/Show Inventory exception.
 ///                 3. Modified the Suspect Report to update and redisplay the suspect list after a suspect has been cleared.
+/// 1.11.0 --  10/30/19
+///                 1. Added code to continue to try to close dome in the event of a dome close failure.
+/// 2.0.1  --  11/11/19
+///                 1. Modified Suspect routines to add blink capability on last two images
+///                 
 /// ------------------------------------------------------------------------
 using System;
 using System.Deployment.Application;
@@ -343,7 +348,7 @@ namespace SuperScan
                 //Check altitude.  If too low then pass on this one.
                 if (gList.Altitude(targetName) < gList.MinAltitude)
                 {
-                    LogEventHandler("Target too low" + targetName);
+                    LogEventHandler(targetName+ " Target too low");
                 }
                 else
                 {
@@ -355,15 +360,16 @@ namespace SuperScan
                     fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
                     if (fso.ImagePath == "")
                     {
-                        LogEventHandler("Imaging capture failed -- probably CLS." + targetName);
+                        LogEventHandler(targetName + ": "+"Imaging capture failed -- probably CLS.");
+                        LogEventHandler("");
                     }
                     else
                     {
-                        LogEventHandler("Imaging capture complete." + targetName);
-                        LogEventHandler("Looking in Image Bank for most recent image." + targetName);
+                        LogEventHandler(targetName + "Imaging capture complete.");
+                        LogEventHandler(targetName + "Looking in Image Bank for most recent image." );
                         //Save Image
                         ImageBank sio = new ImageBank(targetName);
-                        LogEventHandler("Banking new image." + targetName + " in " + ss_cfg.FreshImagePath);
+                        LogEventHandler(targetName + ": " + "Banking new image in " + ss_cfg.FreshImagePath);
                         sio.AddImage(ss_cfg.FreshImagePath);
                         //Increment the galaxy count for reporting purposes
                         gSuccessfulCount++;

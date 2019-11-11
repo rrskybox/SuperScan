@@ -27,10 +27,16 @@ using System.Threading;
 using System.Windows.Forms;
 using TheSkyXLib;
 using AstroImage;
+using System.Diagnostics;
+using System.IO;
+using System.Linq;
+using System.Globalization;
+using System.Drawing;
+
 
 namespace SuperScan
 {
-    class DrillDown
+    public class DrillDown
     {
         enum ccdsoftInventoryIndex
         {
@@ -46,6 +52,14 @@ namespace SuperScan
         };
 
         public string FollowUpPath { get; set; }
+        public string ImageBankPath { get; set; }
+
+        public string TargetName { get; set; }
+        public double TargetRAhrs { get; set; }
+        public double TargetDecdeg { get; set; }
+        public string TargetImageDir { get; set; }
+        public AstroImage.FitsFile TargetFits;
+
         public string FitsFilePath { get; set; }
 
         public DrillDown(DateTime edate)
@@ -57,6 +71,12 @@ namespace SuperScan
             {
                 System.IO.Directory.CreateDirectory(FollowUpPath);
             }
+            ImageBankPath = ss_cfg.ImageBankFolder;
+            if (!System.IO.Directory.Exists(ImageBankPath))
+            {
+                System.IO.Directory.CreateDirectory(ImageBankPath);
+            }
+
             return;
         }
 
@@ -84,35 +104,29 @@ namespace SuperScan
             tsx_im.Save();
         }
 
-        public void Display(string galaxyName, double hoursRA, double degreesDec)
+        public string Display(string galaxyName, double suspectRAhrs, double suspectDecdeg)
         {
             const int sampleSize = 20;
 
             //Test code for PlateSolve2 Wrapper
             //CancellationToken cToken;
-            string fileName = FollowUpPath + "\\" + galaxyName + ".fit";
-            //PS2ReRap.Coordinate ps = PS2ReRap.StartPlateSolve(fileName,
-            //                                                  hoursRA,
-            //                                                  degreesDec,
-            //                                                  48,
-            //                                                  32,
-            //                                                  300,
-            //                                                  @"C:\Program Files (x86)\PlaneWave Instruments\PlateSolve2.28\PlateSolve2.exe",
-            //                                                  cToken);
-
+            TargetName = galaxyName;
+            TargetRAhrs = suspectRAhrs;
+            TargetDecdeg = suspectDecdeg;
+            string followUpfileName = FollowUpPath + "\\" + TargetName + ".fit";
+            TargetImageDir = ImageBankPath + "\\" + TargetName;
             //Show suspect in astroimage form, if PlateSolve2 is installed
             // if not, then an exception will be thrown
-            AstroImage.FitsFile af = new FitsFile(fileName, true);
-            try
-            {
-                AstroImage.AstroDisplay astd = new AstroDisplay(af, hoursRA, degreesDec);
-                astd.Show();
-                System.Windows.Forms.Application.DoEvents();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
+
+            //
+            //test code
+            //fileName = "C:\\Users\\Rick McAlister\\Documents\\SuperScan\\Image Bank\\NGC 1023\\NGC 1023_2019-10-31-2138.fit";
+            //fileName = "C:\\Users\\Rick McAlister\\Documents\\SuperScan\\Image Bank\\NGC 1023\\CurrentImage.fit";
+            //
+
+            TargetFits = new FitsFile(followUpfileName, true);
+            double pixSize = 1;
+            if (TargetFits.FocalLength != 0) pixSize = (206.265 / TargetFits.FocalLength) * TargetFits.XpixSz;
             //
             ccdsoftImage tsxim = new ccdsoftImage();
             tsxim.Path = FollowUpPath + "\\" + galaxyName + ".fit";
@@ -124,8 +138,7 @@ namespace SuperScan
             try { tsxil.execute(); }
             catch (Exception ex)
             {
-                MessageBox.Show("Image Link Error: " + ex.Message);
-                return;
+                return ("Image Link Error: " + ex.Message);
             }
             //Show pic on scrren
             tsxim.Visible = 0;
@@ -142,18 +155,15 @@ namespace SuperScan
             catch (Exception ex)
             {
                 string evx = ex.Message;
-                System.Windows.Forms.MessageBox.Show(evx);
-                return;
+                return (evx);
             }
 
             //Look for a light source within 10 pixels of the target RA/Dec
             //The developer is picking an arbitrary 10 pixel square box as "near"
-            int iLS = FindClosestLightSource(tsxim, hoursRA, degreesDec, 10);
+            int iLS = FindClosestLightSource(tsxim, TargetRAhrs, TargetDecdeg, 10);
             if (iLS == -1)
             {
-                System.Windows.Forms.MessageBox.Show("No light source found at suspect location\r\n  **Aborting check**");
-                GC.Collect();
-                return;
+                return ("No light source found at suspect location\r\n  **Aborting check**");
             }
 
             //Success -- light source at target location.  Get magnitude and X,Y coordinates for all light sources
@@ -241,35 +251,30 @@ namespace SuperScan
             //Set the center of view to the suspect's RA/Dec and light up the target icon
             //
             //Recenter the star chart on the RA/Dec coordinates
-            tsxsc.RightAscension = hoursRA;
-            tsxsc.Declination = degreesDec;
+            tsxsc.RightAscension = TargetRAhrs;
+            tsxsc.Declination = TargetDecdeg;
             int Xtcen = tsxsc.WidthInPixels / 2;
             int Ytcen = tsxsc.HeightInPixels / 2;
             //find the star at the center of the chart
             tsxsc.ClickFind(Xtcen, Ytcen);
             tsxoi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_NAME1);
             string starName = tsxoi.ObjInfoPropOut;
-            //tsxsc.Find(tRA.ToString() + ", " + tDec.ToString());
-
-            //Report on computed apparant magnitude
-            System.Windows.Forms.MessageBox.Show("Nearest star: " + starName + "\r\n" +
-                                                   "Adjusted apparent magnitude = " +
-                                                   avgTgtAdjMag.ToString() + "  +/- " +
-                                                   meanDevTgtAdjMag.ToString());
+            //Open astrodisplay form of follow up image
 
             tsxim = null;
             tsxoi = null;
             tsxsc = null;
-            GC.Collect();
-            return;
-
+            //Report on computed apparant magnitude
+            return ("Nearest star: " + starName + "\r\n" +
+                                                   "Adjusted apparent magnitude = " +
+                                                   avgTgtAdjMag.ToString() + "  +/- " +
+                                                   meanDevTgtAdjMag.ToString());
         }
 
         private int FindClosestLightSource(ccdsoftImage tsxim, double sRA, double sDec, int pDistance)
-        //Searches for a "near" light source to the location SRA, SDec and returns it's index
-        //if not, then -1 is returned
-
         {
+            //Searches for a "near" light source to the location SRA, SDec and returns it's index
+            //if not, then -1 is returned
 
             tsxim.RADecToXY(sRA, sDec);
             double tLocX = tsxim.RADecToXYResultX();
@@ -294,6 +299,42 @@ namespace SuperScan
                 }
             }
             return (-1);  //Error return
+        }
+
+        public Image GetFollowUpImage(int zoom) => AstroImage.AstroDisplay.FitsToTargetImage(TargetFits, TargetRAhrs, TargetDecdeg, zoom);
+
+        public Image[] GetBlinkImages(int zoom)
+        {
+            string imageDir = ImageBankPath + "\\" + TargetName;
+            DirectoryInfo dinfo = new DirectoryInfo(imageDir);
+            var allFiles = dinfo.GetFiles("*.fit").OrderByDescending(p => p.CreationTime).ToArray();
+            string[] imageFiles = { allFiles[0].FullName, allFiles[1].FullName };
+            return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAhrs, TargetDecdeg, zoom);
+        }
+
+        public void ReBlinker(string targetName, double tgtRA, double tgtDec, int zoom, string firstFile, string secondFile)
+        {
+            //Creates a new process to run the AstroDisplay independently
+            string toolName = "Blinker.appref-ms";
+            string ttdir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Microsoft\\Windows\\Start Menu\\Programs\\TSXToolkit\\TSXToolkit";
+            //string blinkerPath = Path.Combine(ttdir, toolName);
+
+            string blinkerPath = @"C:\Users\Rick McAlister\OneDrive\CS Projects\Blinker\Blinker\bin\Debug\Blinker.exe";
+            //string blinkerPath = @"C:\Users\Rick McAlister\AppData\Local\Apps\2.0\CEVNCHMT.VDQ\0JZ09JAL.1TN\blin..tion_429a632034a792cd_0001.0000_0ac1f94652a855a2\Blinker.exe";
+            Process proc = new System.Diagnostics.Process();
+            proc.StartInfo.FileName = blinkerPath;
+            proc.StartInfo.Arguments =
+                TargetName + "," +
+                MathHelpers.HoursToRad(tgtRA).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
+                MathHelpers.DegToRad(tgtDec).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
+                zoom.ToString() + "," +
+                firstFile + "," +
+                secondFile;
+            proc.Start();
+
+            while (!proc.HasExited) { Thread.Sleep(1000); }
+            proc.Dispose();
+            return;
         }
     }
 

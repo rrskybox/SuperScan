@@ -20,16 +20,31 @@
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;
+using System.Drawing;
 using TheSkyXLib;
+using System.Threading;
 
 namespace SuperScan
 {
     public partial class SuspectReportForm : Form
     {
+        //public FitsFile af { get; set; }
+        public double SuspectRA { get; set; }
+        public double SuspectDec { get; set; }
+        public string GalaxyName { get; set; }
+        public int ImageZoom { get; set; } = 4;
+        public int BlinkZoom { get; set; } = 8;
+        public Suspect CurrentSuspect { get; set; }
+        public DrillDown CurrentDrillDown { get; set; }
+        public Image CurrentFollowUpImage { get; set; }
+        public Image[] BlinkList { get; set; }
+
         public SuspectReportForm()
         {
             InitializeComponent();
             ListSuspects();
+            BlinkButton.BackColor = Color.LightSalmon;
+            ClearButton.BackColor = Color.LightSalmon;
         }
 
         //Close the form when close button is pushed.
@@ -82,24 +97,38 @@ namespace SuperScan
         //  then have TSX open the difference image, the reference image and the current image
         //  then have TSX set the FOV to the size of the galaxy, set the center of the chart to the
         //  coordinates of the suspect and place the target circle over the coordinates.
+        //
+        //Then...
+        //
         private void SuspectListbox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string susitem = SuspectListbox.Items[SuspectListbox.SelectedIndex].ToString();
+            ///If nothing selected then exit
+            ///
+            ///Parse the selected line for the galaxy name and image time.
+            ///Load up the suspect data
+            ///Lay in the clearer follow up image and prep to blink the two latest images
+            ///
+            BlinkButton.BackColor = Color.LightSalmon;
+            string susitem;
+            try { susitem = SuspectListbox.Items[SuspectListbox.SelectedIndex].ToString(); }
+            catch (Exception ex) { return; }
+
             int galLen = susitem.IndexOf("\t");
             string galname = susitem.Substring(0, galLen - 1);
             galname = galname.TrimEnd();
             int dateLen = susitem.IndexOf(":") - galLen + 2;
             string galevent = susitem.Substring(galLen + 1, dateLen);
             DateTime galdate = Convert.ToDateTime(galevent);
-            Suspect suspect = new Suspect();
+            CurrentSuspect = new Suspect();
             //Check to see if the suspect loads ok, if so then
             //  have TSX upload the image files and target the RA/Dec
-            bool susLoad = suspect.Load(galname, galdate);
+            bool susLoad = CurrentSuspect.Load(galname, galdate);
             if (susLoad)
             {
-                DrillDown ss_dd = new DrillDown(suspect.Event);
+                CurrentDrillDown = new DrillDown(CurrentSuspect.Event);
 
-                ss_dd.Display(galname, suspect.SuspectRA, suspect.SuspectDec);
+                CurrentDrillDown.Display(galname, CurrentSuspect.SuspectRA, CurrentSuspect.SuspectDec);
+
                 sky6StarChart tsx_sc = new sky6StarChart();
                 sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
                 //Get the galaxy major axis
@@ -111,38 +140,64 @@ namespace SuperScan
                 tsx_sc.FieldOfView = galaxis / 60;
                 //Set the center of view to the suspect's RA/Dec and light up the target icon
                 //tsx_sc.Find(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString());
-                tsx_sc.RightAscension = suspect.SuspectRA;
-                tsx_sc.Declination = suspect.SuspectDec;
+                tsx_sc.RightAscension = CurrentSuspect.SuspectRA;
+                tsx_sc.Declination = CurrentSuspect.SuspectDec;
                 //Check TNS for supernova reports for 60 arc seconds around this location for the last 10 days
                 TNSReader tnsReport = new TNSReader();
-                List<string> snList = tnsReport.RunLocaleQuery(suspect.SuspectRA, suspect.SuspectDec, 60, 10);
-                if (snList != null) MessageBox.Show("Supernova " + snList[0] + " reported at this location");
+                List<string> snList = tnsReport.RunLocaleQuery(CurrentSuspect.SuspectRA, CurrentSuspect.SuspectDec, 60, 10);
+                if (snList != null) NotesTextBox.AppendText("Supernova " + snList[0] + " reported at this location");
                 //Give the user an opportunity to clear the suspect by updating its status to cleared -- or not.
                 Clipboard.Clear();
-                try { Clipboard.SetText(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString()); }
-                catch (Exception ex) { System.Windows.Forms.MessageBox.Show(ex.Message); }
-                DialogResult clearResult = MessageBox.Show(this, "Suspect at " + suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString() + "\r\n" +
-                    "(RA and Dec written to clipboard)" + "\r\n" +
-                    "Clear Suspect?", "", MessageBoxButtons.YesNo);
-                if (clearResult == DialogResult.Yes)
+                try { Clipboard.SetText(CurrentSuspect.SuspectRA.ToString() + ", " + CurrentSuspect.SuspectDec.ToString()); }
+                catch (Exception ex)
                 {
-                    suspect.Cleared = true;
-                    suspect.Update();
+                    NotesTextBox.AppendText(ex.Message);
+                    return;
                 }
-                else
-                {
-                    suspect.Cleared = false;
-                    suspect.Update();
-                }
-                //Close images and Garbage collect...
-                tsx_sc = null;
-                tsx_oi = null;
-                suspect = null;
-                ss_dd = null;
-                GC.Collect();
-                ListSuspects();
+                //Display the suspect position information
+                NotesTextBox.AppendText("Suspect RA and Dec written to clipboard");
+                LocationTextBox.Text = CurrentSuspect.SuspectRA.ToString() + ", " + CurrentSuspect.SuspectDec.ToString();
+                Show();
+                System.Windows.Forms.Application.DoEvents();
+                //Show followup Image in picture box
+                CurrentFollowUpImage = CurrentDrillDown.GetFollowUpImage(ImageZoom);
+                ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                ImagePictureBox.Image = CurrentFollowUpImage;
+                BlinkButton.BackColor = Color.LightGreen;
+                ClearButton.BackColor = Color.LightGreen;
+
                 return;
             }
+            return;
+        }
+
+        private void BlinkButton_Click(object sender, EventArgs e)
+        {
+            BlinkButton.BackColor = Color.LightSalmon;
+            if (BlinkList == null)
+                BlinkList = CurrentDrillDown.GetBlinkImages(BlinkZoom);
+            ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom ;
+            ImagePictureBox.Image = BlinkList[0];
+            Show();
+            System.Windows.Forms.Application.DoEvents();
+            System.Threading.Thread.Sleep(2000);
+            ImagePictureBox.Image = BlinkList[1];
+            Show();
+            System.Windows.Forms.Application.DoEvents();
+            System.Threading.Thread.Sleep(2000);
+            ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+            ImagePictureBox.Image = CurrentFollowUpImage;
+            Show();
+            System.Windows.Forms.Application.DoEvents();
+            BlinkButton.BackColor = Color.LightGreen;
+            return;
+        }
+
+        private void ClearButton_Click(object sender, EventArgs e)
+        {
+            CurrentSuspect.Cleared = true;
+            CurrentSuspect.Update();
+            ListSuspects();
             return;
         }
     }

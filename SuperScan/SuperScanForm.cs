@@ -192,6 +192,11 @@ namespace SuperScan
                 AutoRunForm ss_asf = new AutoRunForm();
                 ss_asf.ShowDialog();
                 ss_cfg.AutoStart = "True";
+                {
+                    if (Convert.ToBoolean(ss_cfg.StageSystemOn)) { LogEventHandler("Staging set for " + ss_cfg.StageSystemTime); }
+                    if (Convert.ToBoolean(ss_cfg.StartUpOn)) { LogEventHandler("Start up set for " + ss_cfg.StartUpTime); }
+                    if (Convert.ToBoolean(ss_cfg.ShutDownOn)) { LogEventHandler("Shut down set for " + ss_cfg.ShutDownTime); }
+                }
             }
             else
             { ss_cfg.AutoStart = "False"; }
@@ -348,7 +353,7 @@ namespace SuperScan
                 //Check altitude.  If too low then pass on this one.
                 if (gList.Altitude(targetName) < gList.MinAltitude)
                 {
-                    LogEventHandler(targetName+ " Target too low");
+                    LogEventHandler(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
                 }
                 else
                 {
@@ -360,16 +365,16 @@ namespace SuperScan
                     fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
                     if (fso.ImagePath == "")
                     {
-                        LogEventHandler(targetName + ": "+"Imaging capture failed -- probably CLS.");
+                        LogEventHandler(targetName + ": " + " Image capture failed -- probably CLS failure.");
                         LogEventHandler("");
                     }
                     else
                     {
-                        LogEventHandler(targetName + "Imaging capture complete.");
-                        LogEventHandler(targetName + "Looking in Image Bank for most recent image." );
+                        LogEventHandler(targetName + " Image capture complete.");
+                        LogEventHandler(targetName + " Looking in Image Bank for most recent image.");
                         //Save Image
                         ImageBank sio = new ImageBank(targetName);
-                        LogEventHandler(targetName + ": " + "Banking new image in " + ss_cfg.FreshImagePath);
+                        LogEventHandler(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
                         sio.AddImage(ss_cfg.FreshImagePath);
                         //Increment the galaxy count for reporting purposes
                         gSuccessfulCount++;
@@ -585,6 +590,8 @@ namespace SuperScan
                 return true;
             }
         }
+
+
 
     }
 }

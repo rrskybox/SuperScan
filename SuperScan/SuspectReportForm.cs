@@ -108,11 +108,18 @@ namespace SuperScan
             ///Load up the suspect data
             ///Lay in the clearer follow up image and prep to blink the two latest images
             ///
+
+            //Set the cursor to wait
+            UseWaitCursor = true;
+            Show();
             BlinkButton.BackColor = Color.LightSalmon;
+            //pull the selected suspect entry from the suspect list box
             string susitem;
             try { susitem = SuspectListbox.Items[SuspectListbox.SelectedIndex].ToString(); }
             catch (Exception ex) { return; }
-
+            //Clear the blink list
+            BlinkList = null;
+            //Parse the selected entry for relavent info and create a suspect object to work with
             int galLen = susitem.IndexOf("\t");
             string galname = susitem.Substring(0, galLen - 1);
             galname = galname.TrimEnd();
@@ -120,7 +127,7 @@ namespace SuperScan
             string galevent = susitem.Substring(galLen + 1, dateLen);
             DateTime galdate = Convert.ToDateTime(galevent);
             CurrentSuspect = new Suspect();
-            //Check to see if the suspect loads ok, if so then
+            //Check to see if the stored suspect info loads ok, if so then
             //  have TSX upload the image files and target the RA/Dec
             bool susLoad = CurrentSuspect.Load(galname, galdate);
             if (susLoad)
@@ -165,7 +172,8 @@ namespace SuperScan
                 ImagePictureBox.Image = CurrentFollowUpImage;
                 BlinkButton.BackColor = Color.LightGreen;
                 ClearButton.BackColor = Color.LightGreen;
-
+                UseWaitCursor = false;
+                Show();
                 return;
             }
             return;
@@ -173,6 +181,8 @@ namespace SuperScan
 
         private void BlinkButton_Click(object sender, EventArgs e)
         {
+            UseWaitCursor= true;
+            Show();
             BlinkButton.BackColor = Color.LightSalmon;
             if (BlinkList == null)
                 BlinkList = CurrentDrillDown.GetBlinkImages(BlinkZoom);
@@ -190,6 +200,8 @@ namespace SuperScan
             Show();
             System.Windows.Forms.Application.DoEvents();
             BlinkButton.BackColor = Color.LightGreen;
+            UseWaitCursor = false;
+            Show();
             return;
         }
 

@@ -15,18 +15,20 @@ namespace SuperScan
             Configuration ss_cfg = new Configuration();
             StagingDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.StageSystemOn);
             StageSystemFilePathBox.Text = ss_cfg.StageSystemPath;
-            StagingDateTimePicker.Value = DateTime.Now;
+            StagingDateTimePicker.Value = Convert.ToDateTime(ss_cfg.StageSystemTime);
 
             StartingDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.StartUpOn);
             StartUpFilePathBox.Text = ss_cfg.StartUpPath;
-            StartingDateTimePicker.Value = DateTime.Now;
+            StartingDateTimePicker.Value = Convert.ToDateTime(ss_cfg.StartUpTime);
 
             ShutdownDateTimePicker.Checked = Convert.ToBoolean(ss_cfg.ShutDownOn);
             ShutDownFilePathBox.Text = ss_cfg.ShutDownPath;
-            DateTime sddt = Convert.ToDateTime(ss_cfg.ShutDownTime);
+            ShutdownDateTimePicker.Value = Convert.ToDateTime(ss_cfg.ShutDownTime);
 
-            if (sddt > StartingDateTimePicker.Value) ShutdownDateTimePicker.Value = sddt;
-            else ShutdownDateTimePicker.Value = sddt.AddDays(1);
+            //if (sddt > StartingDateTimePicker.Value) ShutdownDateTimePicker.Value = sddt;
+            //else ShutdownDateTimePicker.Value = sddt.AddDays(1);
+
+            ResyncSchedule();
         }
 
         private void StageSystemBrowseButton_Click(object sender, EventArgs e)
@@ -83,57 +85,71 @@ namespace SuperScan
         private void OKButton_Click(object sender, EventArgs e)
         {
             //Upon clicking the OK button,
-            //  a new datetime is created from the current date and the time of day from the starttime box
-            //  if this new datetime is earlier than the current date and time, then it is assumed that
-            //  the user means the following morning.  If so, a day is added to this new datetime.
-            //  The the startime box is updated and the new datetime is stored, as a time of day, in the 
-            //   configuration file
-
+            //Save configured times and close form
             Configuration ss_cfg = new Configuration();
+            ss_cfg.StageSystemTime = StagingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            ss_cfg.StartUpTime = StartingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            ss_cfg.ShutDownTime = ShutdownDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
             //Store program switches
             ss_cfg.StageSystemOn = StagingDateTimePicker.Checked.ToString();
             ss_cfg.StartUpOn = StartingDateTimePicker.Checked.ToString();
             ss_cfg.ShutDownOn = ShutdownDateTimePicker.Checked.ToString();
+            Close();
+            return;
+        }
+
+        private void ResyncSchedule()
+        {
+
+            //Values for stage, start and shutdown times are reset to the current datetime, if
+            //their current values precede the current datetime.
+            //Otherwise, it is assumpted that the operator knows what he/she is doing
+
+            Configuration ss_cfg = new Configuration();
             //Store Program times for each
             //  Get the time from the form
             //  Check the current AM or PM and compare against the program AM or PM
             //    if the same then leave the date as the same, 
             //    if different, then set date as next day (i.e. morning)
-            DateTime sst = DateTime.Now.Date + StagingDateTimePicker.Value.TimeOfDay;
-            if (IsTomorrowAM(sst))
-            {
-                sst = sst.AddDays(1);
-            }
+            DateTime currentMoment = DateTime.Now;
+            Boolean currentlyAM = IsAM(currentMoment);
 
-            DateTime sut = DateTime.Now.Date + StartingDateTimePicker.Value.TimeOfDay;
-            if (IsTomorrowAM(sut))
-            {
-                sut = sut.AddDays(1);
-            }
+            //if stage time is earlier than current time then set stage time to now
+            DateTime sst = StagingDateTimePicker.Value;
+            if (sst < currentMoment) sst = DateTime.Now;
 
-            DateTime sdt = DateTime.Now.Date + ShutdownDateTimePicker.Value.TimeOfDay;
-            if (IsTomorrowAM(sdt))
-            {
-                sdt = sdt.AddDays(1);
-            }
+            //if start time is earlier than current time then set start to now
+            DateTime sut = StartingDateTimePicker.Value;
+            if (sut < currentMoment) sut = DateTime.Now;
+
+            //If end time is earlier than current time then change the end time
+            //  to tomorrow, at the same time of day
+            DateTime sdt = ShutdownDateTimePicker.Value;
+            if (sdt < currentMoment) sdt = DateTime.Now.Date.AddDays(1) + sdt.TimeOfDay;
+            //figure out how long this session is going to be.  If greater than a day, cut the
+            // shut down time by one day.
+            while ((sdt - sut).Days >= 1) sdt = sdt.AddDays(-1);
             //Save the entered datetimes to the configuration.xml file and close out
             StagingDateTimePicker.Value = sst;
-            ss_cfg.StageSystemTime = StagingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
             StartingDateTimePicker.Value = sut;
-            ss_cfg.StartUpTime = StartingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
             ShutdownDateTimePicker.Value = sdt;
-            ss_cfg.ShutDownTime = ShutdownDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
-            Close();
-            return;
         }
 
-        private Boolean IsTomorrowAM(DateTime dayTime)
+        private Boolean IsAM(DateTime dayTime)
         {
             //Returns true is this dayTime is between 0 and 11:59 and the current time is not, that is in the AM.
             if ((dayTime.Hour < 12) && (DateTime.Now.Hour > 12))
             { return true; }
             else
             { return false; }
+        }
+
+        private DateTime UpdateToNow(DateTime oldDate)
+        {
+            //if oldDate is earlier than the current datetime, then return the
+            //current datetime, otherwise return the old datetime
+            if (oldDate < DateTime.Now) return DateTime.Now;
+            return oldDate;
         }
     }
 }

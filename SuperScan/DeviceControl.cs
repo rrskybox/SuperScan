@@ -139,17 +139,14 @@ namespace SuperScan
                 System.Threading.Thread.Sleep(10000);
                 while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
                 //Close slit
-                tsxd.CloseSlit();
-                System.Threading.Thread.Sleep(10000);
-                while (tsxd.IsCloseComplete == 0) { System.Threading.Thread.Sleep(5000); }
-                //Close slit
                 //Standard false stop avoidance code
+                System.Threading.Thread.Sleep(5000);
                 bool slitClosed = false;
-                tsxd.CloseSlit();
-                System.Threading.Thread.Sleep(10000);
                 try
                 {
-                    while (tsxd.IsCloseComplete == 0)
+                 tsxd.CloseSlit();
+                 System.Threading.Thread.Sleep(10000);
+                  while (tsxd.IsCloseComplete == 0)
                     {
                         System.Threading.Thread.Sleep(5000);
                     }

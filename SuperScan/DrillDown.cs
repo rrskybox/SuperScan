@@ -307,7 +307,7 @@ namespace SuperScan
         {
             string imageDir = ImageBankPath + "\\" + TargetName;
             DirectoryInfo dinfo = new DirectoryInfo(imageDir);
-            var allFiles = dinfo.GetFiles("*.fit").OrderByDescending(p => p.CreationTime).ToArray();
+            var allFiles = dinfo.GetFiles("NGC*.fit").OrderByDescending(p => p.CreationTime).ToArray();
             string[] imageFiles = { allFiles[0].FullName, allFiles[1].FullName };
             return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAhrs, TargetDecdeg, zoom);
         }

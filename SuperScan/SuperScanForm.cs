@@ -84,6 +84,8 @@ namespace SuperScan
         private GalaxyList gList;
         private Logger ss_log = new Logger();
 
+        const int DOME_HOME_AZ = 220;
+
         public SuperScanForm()
         {
             //Initialize application form interfaces
@@ -254,9 +256,13 @@ namespace SuperScan
             // Scan Running...
             // Connect telescope mount and camera, and dome, if any
             DeviceControl ss_hwp = new DeviceControl();
-            ss_hwp.TelescopeStartUp();
-            ss_hwp.CameraStartUp();
-            ss_hwp.DomeStartUp();
+            if (ss_hwp.TelescopeStartUp()) LogEventHandler("Initializing Mount");
+            else LogEventHandler("Mount initialization failed");
+            if (ss_hwp.CameraStartUp()) LogEventHandler("Initializing Camera");
+            else LogEventHandler("Camera initialization failed");
+            if (DomeControl.DomeStartUp()) LogEventHandler("Initializing Dome");
+            else LogEventHandler("Dome initialization failed");
+            ;
             Show();
 
             //Start the sequence on the west side.
@@ -310,9 +316,11 @@ namespace SuperScan
                     {
                         LogEventHandler("Waiting on unsafe weather conditions...");
                         LogEventHandler("Parking telescope");
-                        ss_hwp.TelescopeShutDown();
+                        if (ss_hwp.TelescopeShutDown()) LogEventHandler("Mount parked");
+                        else LogEventHandler("Mount park failed");
+
                         LogEventHandler("Closing Dome");
-                        ss_hwp.CloseDome();
+                        DomeControl.CloseDome(DOME_HOME_AZ);
                         do
                         {
                             System.Threading.Thread.Sleep(10000);  //ten second wait loop
@@ -325,12 +333,15 @@ namespace SuperScan
                         {
                             LogEventHandler("Weather conditions safe");
                             LogEventHandler("Opening Dome");
-                            ss_hwp.OpenDome();
+                            DomeControl.OpenDome(DOME_HOME_AZ);
                             LogEventHandler("Unparking telescope");
-                            ss_hwp.TelescopeStartUp();
+                            if (ss_hwp.TelescopeStartUp()) LogEventHandler("Mount unparked");
+                            
                             //Wait for 30 seconds for everything to settle
                             LogEventHandler("Waiting for dome to settle");
                             System.Threading.Thread.Sleep(30000);
+                            //Recouple dome
+                            DomeControl.IsDomeCoupled = true;
                         }
                     }
                 } //Check for autofocus selection.  If so then run the autofocus check.
@@ -425,11 +436,9 @@ namespace SuperScan
 
             //Park the telescope so it doesn't drift too low
             ss_hwp.TelescopeShutDown();
-            ss_hwp.TelescopeShutDown();
             LogEventHandler("AutoRun Running Shut Down Program **********" + "\r\n");
             ss_exe.RunShutDown();
             StartScanButton.BackColor = scanbuttoncolorsave;
-
             return;
         }
 
@@ -570,10 +579,8 @@ namespace SuperScan
 
         private void MinAltitudeSetting_ValueChanged(object sender, EventArgs e)
         {
-            if (gList != null)
-            {
-                gList.MinAltitude = (double)MinAltitudeSetting.Value;
-            }
+            if (gList != null) gList.MinAltitude = (double)MinAltitudeSetting.Value;
+            return;
         }
 
         private bool WeatherSafe()
@@ -581,14 +588,8 @@ namespace SuperScan
             //Returns true if no weather alert, false if it is unsafe
 
             WeatherFileReader wmon = new WeatherFileReader();
-            if (wmon.AlertFlag == WeatherFileReader.WeaAlert.Alert)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            if (wmon.AlertFlag == WeatherFileReader.WeaAlert.Alert) return false;
+            else return true;
         }
 
 

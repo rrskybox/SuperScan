@@ -19,14 +19,16 @@ namespace SuperScan
 {
     class DeviceControl
     {
-        public void TelescopeStartUp()
+        public bool TelescopeStartUp()
         {
             //Method for connecting and initializing the TSX mount
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            if (tsxm.IsConnected == 0) { tsxm.Connect(); }
-            try { if (tsxm.IsParked()) { tsxm.Unpark(); } }
-            catch
-            { return; }
+            if (tsxm.IsConnected == 0) tsxm.Connect();
+            //If parked, try to unpark, if fails return false
+            try { if (tsxm.IsParked()) tsxm.Unpark(); }
+            catch (Exception ex) { return false; }
+            //Otherwise return true;
+            return true;
         }
 
         /// <summary>
@@ -55,22 +57,23 @@ namespace SuperScan
             return;
         }
 
-        public void TelescopeShutDown()
+        public bool TelescopeShutDown()
         //Method for connecting and parking the TSX mount
         {
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
             if (tsxm.IsConnected == 0) { tsxm.Connect(); }
             try { tsxm.Park(); }
-            catch //ignor failure
-            { return; }
+            catch (Exception ex) { return false; }
+            return true;
         }
 
-        public void CameraStartUp()
+        public bool CameraStartUp()
         {
             //Method for connecting and initializing the TSX camera
             ccdsoftCamera tsxc = new ccdsoftCamera();
-            tsxc.Connect();
-            return;
+            try { tsxc.Connect(); }
+            catch (Exception ex) { return false}
+            return true;
         }
 
         public void SetCameraTemperature(double settemp)
@@ -84,100 +87,6 @@ namespace SuperScan
                 System.Threading.Thread.Sleep(1);
             };
             return;
-        }
-
-        public void DomeStartUp()
-        {
-            //Method for connecting and initializing the TSX dome, if any
-            // use exception handlers to check for dome commands, opt out if none
-            //  couple the dome to telescope if everything works out
-            sky6Dome tsxd = new sky6Dome();
-            try { tsxd.Connect(); }
-            catch { return; }
-            //If a connection is set, then make sure the dome is coupled to the telescope slews
-            tsxd.IsCoupled = Convert.ToInt32(true);
-            return;
-        }
-
-        public void OpenDome()
-        {
-            //Method for opening the TSX dome
-            // use exception handlers to check for dome commands, opt out if none
-            //  couple the dome to telescope if everything works out
-            sky6Dome tsxd = new sky6Dome();
-            sky6RASCOMTele tsxt = new sky6RASCOMTele();
-            //disconnect mount so dome won't keep chasing it
-            tsxt.Disconnect();
-            try { tsxd.Connect(); }
-            catch { return; }
-            //If a connection is set, then open the dome shutter
-            tsxd.OpenSlit();
-            System.Threading.Thread.Sleep(10000);  //Wait for close command to clear TSX and ASCOM driver
-            while (tsxd.IsOpenComplete == 0)
-            { System.Threading.Thread.Sleep(5000); } //five second wait loop
-            //reconnect the mount
-            if (tsxt.IsConnected != 0) { tsxt.Connect(); }
-            return;
-        }
-
-        public void CloseDome()
-        {
-            //Method for closing the TSX dome
-            // Mount should be parked at this time
-            // use exception handlers to check for dome commands, opt out if none
-            sky6Dome tsxd = new sky6Dome();
-            try { tsxd.Connect(); }
-            catch { return; }
-            //Stop whatever the dome is doing, if any and wait a few seconds for it to clear
-            try { tsxd.Abort(); }
-            catch (Exception e) { return; }
-            //Close up the dome:  Connect, Home (so power is to the dome), Close the slit
-            if (tsxd.IsConnected == 1)
-            {
-                //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
-                tsxd.FindHome();
-                System.Threading.Thread.Sleep(10000);
-                while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
-                //Close slit
-                //Standard false stop avoidance code
-                System.Threading.Thread.Sleep(5000);
-                bool slitClosed = false;
-                try
-                {
-                 tsxd.CloseSlit();
-                 System.Threading.Thread.Sleep(10000);
-                  while (tsxd.IsCloseComplete == 0)
-                    {
-                        System.Threading.Thread.Sleep(5000);
-                    }
-                    //Report success  
-                    slitClosed = true;
-                }
-                catch
-                {
-                    slitClosed = false;
-                }
-
-                //Check to see if slit got closed, if not, then try one more time
-                if (!slitClosed)
-                {
-                    tsxd.CloseSlit();
-                    System.Threading.Thread.Sleep(10000);
-                    try
-                    {
-                        while (tsxd.IsCloseComplete == 0)
-                        {
-                            System.Threading.Thread.Sleep(5000);
-                        }
-                        //Report success  
-                    }
-                    catch
-                    {
-                    }
-                }
-            }
-            //disconnect dome controller
-            tsxd.Disconnect();
         }
 
         public void ReliableRADecSlew(double RA, double Dec, string name)

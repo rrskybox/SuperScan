@@ -105,10 +105,10 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox1.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox1.Controls.Add(this.StartUpBrowseButton);
             this.groupBox1.Controls.Add(this.StartUpFilePathBox);
-            this.groupBox1.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.groupBox1.ForeColor = System.Drawing.Color.White;
             this.groupBox1.Location = new System.Drawing.Point(173, 63);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(568, 47);
@@ -118,10 +118,10 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox2.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox2.Controls.Add(this.ShutDownBrowseButton);
             this.groupBox2.Controls.Add(this.ShutDownFilePathBox);
-            this.groupBox2.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(173, 116);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(568, 47);
@@ -131,9 +131,9 @@
             // 
             // groupBox3
             // 
-            this.groupBox3.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox3.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox3.Controls.Add(this.StartingDateTimePicker);
-            this.groupBox3.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.groupBox3.ForeColor = System.Drawing.Color.White;
             this.groupBox3.Location = new System.Drawing.Point(12, 63);
             this.groupBox3.Name = "groupBox3";
             this.groupBox3.Size = new System.Drawing.Size(133, 47);
@@ -154,10 +154,10 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox4.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox4.Controls.Add(this.StageSystemBrowseButton);
             this.groupBox4.Controls.Add(this.StageSystemFilePathBox);
-            this.groupBox4.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.groupBox4.ForeColor = System.Drawing.Color.White;
             this.groupBox4.Location = new System.Drawing.Point(173, 10);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(568, 47);
@@ -186,9 +186,9 @@
             // 
             // groupBox5
             // 
-            this.groupBox5.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox5.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox5.Controls.Add(this.StagingDateTimePicker);
-            this.groupBox5.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.groupBox5.ForeColor = System.Drawing.Color.White;
             this.groupBox5.Location = new System.Drawing.Point(12, 10);
             this.groupBox5.Name = "groupBox5";
             this.groupBox5.Size = new System.Drawing.Size(133, 47);
@@ -210,9 +210,9 @@
             // 
             // groupBox6
             // 
-            this.groupBox6.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox6.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox6.Controls.Add(this.ShutdownDateTimePicker);
-            this.groupBox6.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.groupBox6.ForeColor = System.Drawing.Color.White;
             this.groupBox6.Location = new System.Drawing.Point(12, 116);
             this.groupBox6.Name = "groupBox6";
             this.groupBox6.Size = new System.Drawing.Size(133, 47);
@@ -220,13 +220,13 @@
             this.groupBox6.TabStop = false;
             this.groupBox6.Text = "Ending Time";
             // 
-            // EndingDateTimePicker
+            // ShutdownDateTimePicker
             // 
             this.ShutdownDateTimePicker.Checked = false;
             this.ShutdownDateTimePicker.CustomFormat = "MMM dd HH:mm";
             this.ShutdownDateTimePicker.Format = System.Windows.Forms.DateTimePickerFormat.Custom;
             this.ShutdownDateTimePicker.Location = new System.Drawing.Point(10, 21);
-            this.ShutdownDateTimePicker.Name = "EndingDateTimePicker";
+            this.ShutdownDateTimePicker.Name = "ShutdownDateTimePicker";
             this.ShutdownDateTimePicker.ShowCheckBox = true;
             this.ShutdownDateTimePicker.ShowUpDown = true;
             this.ShutdownDateTimePicker.Size = new System.Drawing.Size(117, 20);
@@ -236,7 +236,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.BackColor = System.Drawing.Color.DarkCyan;
             this.ClientSize = new System.Drawing.Size(753, 206);
             this.Controls.Add(this.groupBox6);
             this.Controls.Add(this.groupBox5);

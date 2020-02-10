@@ -44,6 +44,7 @@
             this.CurrentGalaxySizeArcmin = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.WatchWeatherCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.MinGalaxySetting = new System.Windows.Forms.NumericUpDown();
             this.label3 = new System.Windows.Forms.Label();
@@ -56,7 +57,6 @@
             this.LogBox = new System.Windows.Forms.TextBox();
             this.SuspectsButton = new System.Windows.Forms.Button();
             this.AbortButton = new System.Windows.Forms.Button();
-            this.WatchWeatherCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.ExposureTimeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinAltitudeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FilterNumberSetting)).BeginInit();
@@ -233,13 +233,14 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox1.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox1.Controls.Add(this.CurrentGalaxySizeArcmin);
             this.groupBox1.Controls.Add(this.label2);
             this.groupBox1.Controls.Add(this.GalaxyCountLabel);
             this.groupBox1.Controls.Add(this.CurrentGalaxyName);
             this.groupBox1.Controls.Add(this.CurrentGalaxyLabel);
             this.groupBox1.Controls.Add(this.GalaxyCount);
+            this.groupBox1.ForeColor = System.Drawing.Color.White;
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(260, 94);
@@ -249,7 +250,7 @@
             // 
             // groupBox2
             // 
-            this.groupBox2.BackColor = System.Drawing.Color.SkyBlue;
+            this.groupBox2.BackColor = System.Drawing.Color.LightSeaGreen;
             this.groupBox2.Controls.Add(this.WatchWeatherCheckBox);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.MinGalaxySetting);
@@ -265,12 +266,24 @@
             this.groupBox2.Controls.Add(this.MinAltitudeLabel);
             this.groupBox2.Controls.Add(this.ExposureTimeSetting);
             this.groupBox2.Controls.Add(this.MinAltitudeSetting);
+            this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(12, 122);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(260, 214);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Configuration";
+            // 
+            // WatchWeatherCheckBox
+            // 
+            this.WatchWeatherCheckBox.AutoSize = true;
+            this.WatchWeatherCheckBox.Location = new System.Drawing.Point(30, 189);
+            this.WatchWeatherCheckBox.Name = "WatchWeatherCheckBox";
+            this.WatchWeatherCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.WatchWeatherCheckBox.Size = new System.Drawing.Size(102, 17);
+            this.WatchWeatherCheckBox.TabIndex = 19;
+            this.WatchWeatherCheckBox.Text = "Watch Weather";
+            this.WatchWeatherCheckBox.UseVisualStyleBackColor = true;
             // 
             // label4
             // 
@@ -387,7 +400,8 @@
             // 
             // LogBox
             // 
-            this.LogBox.BackColor = System.Drawing.SystemColors.Window;
+            this.LogBox.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.LogBox.ForeColor = System.Drawing.Color.White;
             this.LogBox.Location = new System.Drawing.Point(12, 354);
             this.LogBox.Multiline = true;
             this.LogBox.Name = "LogBox";
@@ -418,22 +432,11 @@
             this.AbortButton.UseVisualStyleBackColor = false;
             this.AbortButton.Click += new System.EventHandler(this.AbortButton_Click);
             // 
-            // WatchWeatherCheckBox
-            // 
-            this.WatchWeatherCheckBox.AutoSize = true;
-            this.WatchWeatherCheckBox.Location = new System.Drawing.Point(30, 189);
-            this.WatchWeatherCheckBox.Name = "WatchWeatherCheckBox";
-            this.WatchWeatherCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.WatchWeatherCheckBox.Size = new System.Drawing.Size(102, 17);
-            this.WatchWeatherCheckBox.TabIndex = 19;
-            this.WatchWeatherCheckBox.Text = "Watch Weather";
-            this.WatchWeatherCheckBox.UseVisualStyleBackColor = true;
-            // 
             // SuperScanForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.BackColor = System.Drawing.Color.DarkCyan;
             this.ClientSize = new System.Drawing.Size(284, 691);
             this.Controls.Add(this.AbortButton);
             this.Controls.Add(this.SuspectsButton);

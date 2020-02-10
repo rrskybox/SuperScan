@@ -72,7 +72,7 @@ namespace SuperScan
             //Method for connecting and initializing the TSX camera
             ccdsoftCamera tsxc = new ccdsoftCamera();
             try { tsxc.Connect(); }
-            catch (Exception ex) { return false}
+            catch (Exception ex) { return false; }
             return true;
         }
 

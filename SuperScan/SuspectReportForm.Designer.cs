@@ -43,6 +43,8 @@
             // 
             // SuspectListbox
             // 
+            this.SuspectListbox.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.SuspectListbox.ForeColor = System.Drawing.Color.White;
             this.SuspectListbox.FormattingEnabled = true;
             this.SuspectListbox.Location = new System.Drawing.Point(12, 12);
             this.SuspectListbox.Name = "SuspectListbox";
@@ -69,6 +71,7 @@
             // 
             // ImagePictureBox
             // 
+            this.ImagePictureBox.BackColor = System.Drawing.Color.LightSeaGreen;
             this.ImagePictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.ImagePictureBox.Cursor = System.Windows.Forms.Cursors.Default;
             this.ImagePictureBox.Location = new System.Drawing.Point(15, 180);
@@ -90,6 +93,8 @@
             // 
             // LocationTextBox
             // 
+            this.LocationTextBox.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.LocationTextBox.ForeColor = System.Drawing.Color.White;
             this.LocationTextBox.Location = new System.Drawing.Point(82, 74);
             this.LocationTextBox.Name = "LocationTextBox";
             this.LocationTextBox.Size = new System.Drawing.Size(323, 20);
@@ -98,6 +103,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
+            this.label1.BackColor = System.Drawing.Color.LightSeaGreen;
             this.label1.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.label1.Location = new System.Drawing.Point(12, 77);
             this.label1.Name = "label1";
@@ -117,6 +123,8 @@
             // 
             // NotesTextBox
             // 
+            this.NotesTextBox.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.NotesTextBox.ForeColor = System.Drawing.Color.White;
             this.NotesTextBox.Location = new System.Drawing.Point(82, 103);
             this.NotesTextBox.Multiline = true;
             this.NotesTextBox.Name = "NotesTextBox";
@@ -126,6 +134,7 @@
             // label2
             // 
             this.label2.AutoSize = true;
+            this.label2.BackColor = System.Drawing.Color.LightSeaGreen;
             this.label2.ForeColor = System.Drawing.SystemColors.ControlLightLight;
             this.label2.Location = new System.Drawing.Point(12, 103);
             this.label2.Name = "label2";
@@ -137,7 +146,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.BackColor = System.Drawing.Color.DarkCyan;
             this.ClientSize = new System.Drawing.Size(418, 547);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.NotesTextBox);

@@ -35,8 +35,8 @@ namespace SuperScan
             return;
         }
 
-        public bool Acquire(string fsn, double exposure)
         //Creates a new instance of a FreshImage and sets the filepath for storing it
+        public bool Acquire(string fsn, double exposure)
         {
             //SuperScanConfiguration sscf = new SuperScanConfiguration();
             //freshImagePath = sscf.FreshImagePath;
@@ -49,8 +49,8 @@ namespace SuperScan
             return true;
         }
 
-        private bool SeekGalaxy()
         //Find the coordinates of the object galaxyName and perform a slew, then CLS to it.
+        private bool SeekGalaxy()
         {
             sky6StarChart tsx_sc = new sky6StarChart();
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
@@ -121,11 +121,11 @@ namespace SuperScan
             }
         }
 
-        private void ShootGalaxy()
         //Take an image via TSX.  Set the autosave path to the FreshImage path;
         //  Set exposureTime, Light Frame, AutoDark, No Autosave, Asynchronous
         //  then TakeImage 
         //  Wait for completion status, then return
+        private void ShootGalaxy()
         {
             Configuration sscf = new Configuration();
             ccdsoftImage tsx_im = new ccdsoftImage

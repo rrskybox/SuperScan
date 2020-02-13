@@ -592,8 +592,27 @@ namespace SuperScan
             else return true;
         }
 
+        /// <summary>
+        /// Runs the culling operation to clear Image Bank of all but the best image for each galaxy
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CullButton_Click(object sender, EventArgs e)
+        {
+            //Verify that the user really wants to clear the files, then cull images
+            DialogResult cleanUp = MessageBox.Show("Do you really want to clean up the Image Bank directories?", "Verify Clean Up", MessageBoxButtons.YesNo);
+            if (cleanUp == DialogResult.No) return; 
+            else
+            {
+                FormCrunchingNotice cForm = new FormCrunchingNotice();
+                cForm.Show();
+                CullImages.DeletellButBest();
+                cForm.Close();
+            }
+                
 
-
+            //
+        }
     }
 }
 

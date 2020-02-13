@@ -112,6 +112,8 @@ namespace SuperScan
             //Set the cursor to wait
             UseWaitCursor = true;
             Show();
+            FormCrunchingNotice cForm = new FormCrunchingNotice();
+            cForm.Show();
             BlinkButton.BackColor = Color.LightSalmon;
             //pull the selected suspect entry from the suspect list box
             string susitem;
@@ -173,20 +175,22 @@ namespace SuperScan
                 BlinkButton.BackColor = Color.LightGreen;
                 ClearButton.BackColor = Color.LightGreen;
                 UseWaitCursor = false;
-                Show();
-                return;
             }
+            cForm.Close();
+            Show();
             return;
         }
 
         private void BlinkButton_Click(object sender, EventArgs e)
         {
-            UseWaitCursor= true;
+            UseWaitCursor = true;
+            FormCrunchingNotice cForm = new FormCrunchingNotice();
+            cForm.Show();
             Show();
             BlinkButton.BackColor = Color.LightSalmon;
             if (BlinkList == null)
                 BlinkList = CurrentDrillDown.GetBlinkImages(BlinkZoom);
-            ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom ;
+            ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
             ImagePictureBox.Image = BlinkList[0];
             Show();
             System.Windows.Forms.Application.DoEvents();
@@ -201,6 +205,7 @@ namespace SuperScan
             System.Windows.Forms.Application.DoEvents();
             BlinkButton.BackColor = Color.LightGreen;
             UseWaitCursor = false;
+            cForm.Close();
             Show();
             return;
         }

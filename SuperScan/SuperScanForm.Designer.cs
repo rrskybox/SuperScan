@@ -57,6 +57,7 @@
             this.LogBox = new System.Windows.Forms.TextBox();
             this.SuspectsButton = new System.Windows.Forms.Button();
             this.AbortButton = new System.Windows.Forms.Button();
+            this.CullButton = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ExposureTimeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinAltitudeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FilterNumberSetting)).BeginInit();
@@ -69,9 +70,9 @@
             // StartScanButton
             // 
             this.StartScanButton.BackColor = System.Drawing.Color.LightGreen;
-            this.StartScanButton.Location = new System.Drawing.Point(11, 621);
+            this.StartScanButton.Location = new System.Drawing.Point(12, 650);
             this.StartScanButton.Name = "StartScanButton";
-            this.StartScanButton.Size = new System.Drawing.Size(75, 58);
+            this.StartScanButton.Size = new System.Drawing.Size(75, 54);
             this.StartScanButton.TabIndex = 0;
             this.StartScanButton.Text = "Scan\r\nand\r\nDectect";
             this.StartScanButton.UseVisualStyleBackColor = false;
@@ -80,7 +81,7 @@
             // CloseButton
             // 
             this.CloseButton.BackColor = System.Drawing.Color.LightGreen;
-            this.CloseButton.Location = new System.Drawing.Point(196, 656);
+            this.CloseButton.Location = new System.Drawing.Point(196, 681);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(75, 23);
             this.CloseButton.TabIndex = 1;
@@ -390,7 +391,7 @@
             // ReScanButton
             // 
             this.ReScanButton.BackColor = System.Drawing.Color.LightGreen;
-            this.ReScanButton.Location = new System.Drawing.Point(105, 621);
+            this.ReScanButton.Location = new System.Drawing.Point(105, 650);
             this.ReScanButton.Name = "ReScanButton";
             this.ReScanButton.Size = new System.Drawing.Size(75, 23);
             this.ReScanButton.TabIndex = 17;
@@ -413,7 +414,7 @@
             // SuspectsButton
             // 
             this.SuspectsButton.BackColor = System.Drawing.Color.LightGreen;
-            this.SuspectsButton.Location = new System.Drawing.Point(105, 656);
+            this.SuspectsButton.Location = new System.Drawing.Point(105, 681);
             this.SuspectsButton.Name = "SuspectsButton";
             this.SuspectsButton.Size = new System.Drawing.Size(75, 23);
             this.SuspectsButton.TabIndex = 19;
@@ -432,12 +433,24 @@
             this.AbortButton.UseVisualStyleBackColor = false;
             this.AbortButton.Click += new System.EventHandler(this.AbortButton_Click);
             // 
+            // CullButton
+            // 
+            this.CullButton.BackColor = System.Drawing.Color.LightGreen;
+            this.CullButton.Location = new System.Drawing.Point(196, 650);
+            this.CullButton.Name = "CullButton";
+            this.CullButton.Size = new System.Drawing.Size(75, 23);
+            this.CullButton.TabIndex = 21;
+            this.CullButton.Text = "Cull";
+            this.CullButton.UseVisualStyleBackColor = false;
+            this.CullButton.Click += new System.EventHandler(this.CullButton_Click);
+            // 
             // SuperScanForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DarkCyan;
-            this.ClientSize = new System.Drawing.Size(284, 691);
+            this.ClientSize = new System.Drawing.Size(284, 716);
+            this.Controls.Add(this.CullButton);
             this.Controls.Add(this.AbortButton);
             this.Controls.Add(this.SuspectsButton);
             this.Controls.Add(this.LogBox);
@@ -494,6 +507,7 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown MinGalaxySetting;
         private System.Windows.Forms.CheckBox WatchWeatherCheckBox;
+        private System.Windows.Forms.Button CullButton;
     }
 }
 

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheSkyXLib;
 
 namespace SuperScan
@@ -23,7 +19,7 @@ namespace SuperScan
 
         public static string Check()
         {
-               //check to see if current temperature is a degree different from last temperature
+            //check to see if current temperature is a degree different from last temperature
             //  If so, then set up and run @focus2
             //AtFocus2 chooses to use a 15 degree x 15 degree field of view to choose a focus star
             //  If the current position is close to the meridian then a focus star on the other

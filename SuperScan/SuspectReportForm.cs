@@ -1,5 +1,4 @@
-﻿using AstroImage;
-/// Module Name: SuspectReportForm
+﻿/// Module Name: SuspectReportForm
 /// Purpose: Presentation of light source anomoly information
 /// Developer: Rick McAlister
 /// Creation Date:  7/15/2017
@@ -19,10 +18,9 @@
 /// --
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Windows.Forms;
 using TheSkyXLib;
-using System.Threading;
 
 namespace SuperScan
 {

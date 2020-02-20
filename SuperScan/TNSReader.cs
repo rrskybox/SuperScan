@@ -17,12 +17,12 @@
 */
 
 using System;
-using System.Collections.Specialized;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
-using System.Xml.Linq;
 using System.Windows.Forms;
+using System.Xml.Linq;
 
 namespace SuperScan
 {
@@ -43,15 +43,15 @@ namespace SuperScan
         {
             queryURL = MakeSearchQuery();
         }
-        
+
         public List<string> RunLocaleQuery(double raHrs, double decDeg, double radiusArcSec, int days)
         {
             //Configures the query to return the list of recent (last days) supernovae from TNS
             //  at a radius of radius arcsecs, centered on ra/dec
             //  ra in decimal degrees (0 to 360).  dec in decimal degrees (-90 to +90), radius in arcsecs
-            ChangeQuery(startDateQ,DateTime.Now.AddDays(-days).ToString("yyyy-MM-dd"));
+            ChangeQuery(startDateQ, DateTime.Now.AddDays(-days).ToString("yyyy-MM-dd"));
             ChangeQuery(endDateQ, DateTime.Now.ToString("yyyy-MM-dd"));
-            ChangeQuery(raQ, (raHrs*360.0/24.0).ToString());
+            ChangeQuery(raQ, (raHrs * 360.0 / 24.0).ToString());
             ChangeQuery(decQ, decDeg.ToString());
             ChangeQuery(radiusQ, radiusArcSec.ToString());
             //Run query
@@ -59,11 +59,11 @@ namespace SuperScan
             //queryXResult contains results
             //  if empty,then return null
             //  if entries, then make list of SN, but probably only one
-            if (queryXResult==null) return null;
+            if (queryXResult == null) return null;
             else
             {
                 List<string> snList = new List<string>();
-                foreach (XElement xlm in queryXResult.Descendants() )
+                foreach (XElement xlm in queryXResult.Descendants())
                 {
                     snList.Add(xlm.Element("Name").Value);
                 }
@@ -84,7 +84,7 @@ namespace SuperScan
             {
                 contents = client.DownloadString(urlQuery);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
                 return null;

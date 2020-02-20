@@ -13,11 +13,7 @@
 /// ------------------------------------------------------------------------
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheSkyXLib;
 
 namespace SuperScan
 {
@@ -36,7 +32,7 @@ namespace SuperScan
             GalaxyName = targetGalaxyName;
             Configuration ss_cfg = new Configuration();
             GalaxyStoreFolder = ss_cfg.ImageBankFolder + "\\" + targetGalaxyName;
-            
+
 
             if (!System.IO.Directory.Exists(GalaxyStoreFolder))
             {

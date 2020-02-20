@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.IO;
+using System.Linq;
 
 //Class for reading Standard weather files
 namespace WeatherWatch
@@ -105,7 +103,7 @@ namespace WeatherWatch
 
         public WeatherFileReader()
         {
-            weatherFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) +"\\CloudWatcher\\AAG_CCDAP4.dat";
+            weatherFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\CloudWatcher\\AAG_CCDAP4.dat";
             weaList = ReadWeatherDataIn();
             return;
         }

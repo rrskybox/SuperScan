@@ -47,7 +47,7 @@ namespace SuperScan
             //Check to see if the Log folder exists.  If not, create it.
             //Check to see if the FollowUp folder exists.  If not, create it.
 
-            ssdir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)+"\\" + SuperScanFolderName;
+            ssdir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + SuperScanFolderName;
 
             InstallDBQ();
 
@@ -64,7 +64,7 @@ namespace SuperScan
                     new XElement("ImageBankFoldername", (ssdir + "\\" + SuperScanImageBankFoldername)),
                     new XElement("FreshImagePath", (ssdir + "\\" + SuperScanFreshImageFilename)),
                     new XElement("DifferenceImagePath", (ssdir + "\\" + SuperScanDifferenceImageFilename)),
-                    new XElement("SuperScanQueryPath", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" +"Software Bisque\\TheSkyX Professional Edition\\Database Queries\\" + SuperScanQueryFilename),
+                    new XElement("SuperScanQueryPath", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + "Software Bisque\\TheSkyX Professional Edition\\Database Queries\\" + SuperScanQueryFilename),
                     new XElement("LogFoldername", (ssdir + "\\" + SuperScanLogFoldername)),
                     new XElement("FollowUpFoldername", (ssdir + "\\" + SuperScanFollowUpFoldername)),
                     new XElement("SuspectsFilePath", (ssdir + "\\" + SuperScanSuspectsFilename)),
@@ -328,6 +328,36 @@ namespace SuperScan
                 return;
             }
         }
+
+        public string HasDome
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("HasDome") == null)
+                {
+                    sscfgXf.Add(new XElement("HasDome", "false"));
+                    sscfgXf.Save(sscfgfilename);
+                    return ("false");
+                }
+                else
+                {
+                    return (sscfgXf.Element("HasDome").Value);
+                }
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("HasDome");
+                if (sscfgXel == null) sscfgXf.Add(new XElement("HasDome", value));
+                else sscfgXel.ReplaceWith(new XElement("HasDome", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
 
         public string AutoStart
         {

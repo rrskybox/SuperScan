@@ -58,6 +58,7 @@
             this.SuspectsButton = new System.Windows.Forms.Button();
             this.AbortButton = new System.Windows.Forms.Button();
             this.CullButton = new System.Windows.Forms.Button();
+            this.DomeCheckBox = new System.Windows.Forms.CheckBox();
             ((System.ComponentModel.ISupportInitialize)(this.ExposureTimeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinAltitudeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FilterNumberSetting)).BeginInit();
@@ -252,6 +253,7 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.groupBox2.Controls.Add(this.DomeCheckBox);
             this.groupBox2.Controls.Add(this.WatchWeatherCheckBox);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.MinGalaxySetting);
@@ -285,6 +287,7 @@
             this.WatchWeatherCheckBox.TabIndex = 19;
             this.WatchWeatherCheckBox.Text = "Watch Weather";
             this.WatchWeatherCheckBox.UseVisualStyleBackColor = true;
+            this.WatchWeatherCheckBox.CheckedChanged += new System.EventHandler(this.WatchWeatherCheckBox_CheckedChanged);
             // 
             // label4
             // 
@@ -444,6 +447,18 @@
             this.CullButton.UseVisualStyleBackColor = false;
             this.CullButton.Click += new System.EventHandler(this.CullButton_Click);
             // 
+            // DomeCheckBox
+            // 
+            this.DomeCheckBox.AutoSize = true;
+            this.DomeCheckBox.Location = new System.Drawing.Point(173, 189);
+            this.DomeCheckBox.Name = "DomeCheckBox";
+            this.DomeCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.DomeCheckBox.Size = new System.Drawing.Size(54, 17);
+            this.DomeCheckBox.TabIndex = 20;
+            this.DomeCheckBox.Text = "Dome";
+            this.DomeCheckBox.UseVisualStyleBackColor = true;
+            this.DomeCheckBox.CheckedChanged += new System.EventHandler(this.DomeCheckBox_CheckedChanged);
+            // 
             // SuperScanForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -508,6 +523,7 @@
         private System.Windows.Forms.NumericUpDown MinGalaxySetting;
         private System.Windows.Forms.CheckBox WatchWeatherCheckBox;
         private System.Windows.Forms.Button CullButton;
+        private System.Windows.Forms.CheckBox DomeCheckBox;
     }
 }
 

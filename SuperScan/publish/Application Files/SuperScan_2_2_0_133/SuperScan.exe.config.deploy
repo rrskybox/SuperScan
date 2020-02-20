@@ -16,9 +16,6 @@
             <setting name="IsWeatherMonitored" serializeAs="String">
                 <value>False</value>
             </setting>
-            <setting name="HasDome" serializeAs="String">
-                <value>False</value>
-            </setting>
         </SuperScan.Properties.Settings>
     </userSettings>
 </configuration>

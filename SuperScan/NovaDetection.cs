@@ -12,12 +12,7 @@
 /// 
 /// ------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheSkyXLib;
-using System.ComponentModel;
 
 namespace SuperScan
 {
@@ -150,7 +145,7 @@ namespace SuperScan
                 }
 
             }
-  
+
             curavg = curavg / (subframeSize * subframeSize);
             refavg = refavg / (subframeSize * subframeSize);
             double difintensity = curavg / refavg;
@@ -322,8 +317,8 @@ namespace SuperScan
                             XYToRADec ss_perp = new XYToRADec(curImagePath, xCurPos, yCurPos);
                             double pRA = ss_perp.RA;
                             double pDec = ss_perp.Dec;
-                            LogEntry("Suspect's coordinates (RA,Dec) = " + pRA.ToString() + " Hrs, " + pDec.ToString() +" Deg");
-                            
+                            LogEntry("Suspect's coordinates (RA,Dec) = " + pRA.ToString() + " Hrs, " + pDec.ToString() + " Deg");
+
                             //Now create a new entry and save the suspect in the suspect file
                             Suspect ss_sus = new Suspect();
                             ss_sus.GalaxyName = gname;

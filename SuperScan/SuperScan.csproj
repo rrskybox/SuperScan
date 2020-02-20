@@ -27,7 +27,7 @@
     <ProductName>SuperScan</ProductName>
     <PublisherName>TSXToolKit</PublisherName>
     <SuiteName>TSXToolKit</SuiteName>
-    <ApplicationRevision>133</ApplicationRevision>
+    <ApplicationRevision>135</ApplicationRevision>
     <ApplicationVersion>2.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
     <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
     <Prefer32Bit>false</Prefer32Bit>
-    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vsA182.tmp\Debug\</IntermediateOutputPath>
+    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vs613B.tmp\Debug\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -56,7 +56,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
-    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vsA182.tmp\Release\</IntermediateOutputPath>
+    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vs613B.tmp\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>FC2EA5CE6CE68670847B8D83FD551D14C24CE51B</ManifestCertificateThumbprint>
@@ -81,7 +81,7 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vsA182.tmp\x64\Debug\</IntermediateOutputPath>
+    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vs613B.tmp\x64\Debug\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
     <OutputPath>bin\x64\Release\</OutputPath>
@@ -91,16 +91,9 @@
     <PlatformTarget>x64</PlatformTarget>
     <ErrorReport>prompt</ErrorReport>
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vsA182.tmp\x64\Release\</IntermediateOutputPath>
+    <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vs613B.tmp\x64\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="AstroImage, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\AstroImage\AstroImage\bin\Release\AstroImage.dll</HintPath>
-    </Reference>
-    <Reference Include="AstroMath">
-      <HintPath>..\..\AstroMath\AstroMath\bin\Release\AstroMath.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -239,6 +232,16 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\AstroImage\AstroImage\AstroImage.csproj">
+      <Project>{61a45250-d8a3-4d1b-b627-e86f1cd2a81c}</Project>
+      <Name>AstroImage</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\AstroMath\AstroMath\AstroMath.csproj">
+      <Project>{b9b7b4d6-58f8-4d34-8f40-3747462c960a}</Project>
+      <Name>AstroMath</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -12,13 +12,6 @@
 /// 
 /// ------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-
-using System.ComponentModel;
 
 namespace SuperScan
 {
@@ -31,7 +24,7 @@ namespace SuperScan
             Configuration ss_cfg = new Configuration();
             string logfilename = DateTime.Now.ToString("dd_MMM_yyyy") + ".txt";
             logfilepath = ss_cfg.LogFolder + "\\" + logfilename;
-            
+
             return;
         }
 

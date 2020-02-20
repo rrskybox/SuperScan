@@ -9,65 +9,8 @@
 /// Copyright: Rick McAlister, 2017
 /// Description:  See SuperScanIPS.doc, Sec 2.
 /// 
-/// Version Information
-/// V1.0 -- 7/20/17 1. Release on Software Bisque support forum
-/// v1.1 -- 7-27/17 1. Modified SuspectReport to disply "no prospect" when no prospects are in
-///                 the prospect XML file,
-///                 2. Added description headers where missing.
-///                 3. Changed SuperScanConfiguration class name to just Configuration
-///                 5. Renamed TSXPrep.Telescope to TSXPrep.TelescopeStartUp
-///                 6. Added TSXPrep.TelescopeShutDown method (for scope parking)
-///                 7. Renamed TSXPrep class to DeviceControl
-/// 1.2 -- 8/15/17  1. Restructured the AutoStart configuration and operation:
-///                     - Added a configuration item to save a system staging filepath and run time.
-///                     - Added a configuration item to save a drop-dead time for the SuperScan
-///                     - Added paths to run for each of the staging, start up and shut down executables
-///                     - Added checkboxes to enable each in the autorun configuration
-///                     - Changed AutoRun to segue into the scanner, and have the scanner check for the
-///                       end time after every cycle.
-///                 2. Fixed the galaxy done counter.
-///                 3. Added feature where suspect RA/Dec is copied to the clipboard for use in WikiSky, etc.
-/// 1.3 -- 8/16/17  1. Major modifications to the SuperScanForm and SuspectReportForm
-///                     a. SuperScanForm: added a subroutine to take a 10 minute deep image whenever a suspect is detected.
-///                         The image is stored inside a new subdirectory in SuperScan called FollowUp/MM-DD-YY/.  This
-///                         subdirectory can be used to store other related files if needed.
-///                     b. SuspectReportForm: deleted code to display reference, difference and current images on TSX.
-///                     c. SuspectReportForm: added code to display the deep image, centering on the suspect location.
-///                         The RA/Dec location will be loaded in the clipboard for use in WikiSky.
-///                     d. Configuration: Added configuration filename methods and file structures.
-///                     e. Created own version of FindNearest -- TSX's version does not have control of the nearness.
-/// 1.4 -- 9/7/17   1. Changed the autorun such that the galaxy list was redone upon starting up.
-/// 1.5 -- 9/10/17  1. Added Weather Check
-/// 1.6 -- 12/28/17 1. Fixed so Mininmum Altitude could be set/changed
-///                 2. Added check for current altitude.  Logged and skipped if too low.
-///                 3. Added slew before CLS because TSX was not waiting for dome slew before initiating image.
-/// 1.7 -- 12/29/17 1. Fixed CLS slew, again (and actually tested it)
-///                 2. Fixed starting time calculation so that if the starting time is in the AM, then it is made the next day.
-///                 3. Added commands to connect to and couple a dome, if present
-///                 4. Added color to scan button to indicate that a scan is underway
-///                 5. Added an abort button -- mostly just closes the app when it can
-/// 1.8 -- 1/1/18   1. Added AAGCloudWatcher ASCOM weather monitor and safety (e.g. weather) checks]\
-/// 1.9 == 1/17/18  1. Added Minimum Galaxy Size setting
-/// 1.9.1 -- 3/30/18 
-///                 1.Added search for last image to look in O: drive
-///                 2. Modified AutoFocus to move off the meridian to no more than 80 degrees altitude to avoid a meridian flip
-/// 1.9.2 -- 8/16/18
-///                 1.Added wait before IsDomeClosed and IsDomeOpened check because of inability of TSX or ASCOM driver to
-///                     handle with out throwing exception
-/// 1.9.3 -- 9/26/18
-///                 1.Changed "Threading.Sleep" to "Task.Delay" in FreshImage to allow moving the form around during image capture
-///                 2.Added WatchWeather as a checkbox and stored in configuration to disable weather monitoring function
-/// 1.9.4 -- 10/28/18
-///                 1.Changed the unsafe weather procedure to park the telescope -- to keep it from continuing to track
-/// 1.10.0 -- 12/1/18
-///                 1. Added the avoidance code to prevent an Error 123 from blowing up a CLS
-///                 2. Modified the Suspect Report to handle a thrown Image Link/Show Inventory exception.
-///                 3. Modified the Suspect Report to update and redisplay the suspect list after a suspect has been cleared.
-/// 1.11.0 --  10/30/19
-///                 1. Added code to continue to try to close dome in the event of a dome close failure.
-/// 2.0.1  --  11/11/19
-///                 1. Modified Suspect routines to add blink capability on last two images
-///                 
+/// Version Information - See SuperScan Description docx
+///  
 /// ------------------------------------------------------------------------
 using System;
 using System.Deployment.Application;
@@ -215,7 +158,6 @@ namespace SuperScan
             StartScanButton.BackColor = Color.LightCoral;
             Configuration ss_cfg = new Configuration();
             //AutoStart section
-            Launcher ss_exe = new Launcher();
             if (AutoRunCheckBox.Checked)
             //If AutoStart is enabled, then wait for 15 seconds for the user to disable, if desired
             //  Otherwise, initiate the scan
@@ -237,13 +179,13 @@ namespace SuperScan
                 if (AutoRunCheckBox.Checked)
                 {
                     LogEventHandler("Awaiting System Staging Time at " + ss_cfg.StageSystemTime.ToString() + "\r\n");
-                    ss_exe.WaitStage();
+                    Launcher.WaitStage();
                     LogEventHandler("Running System Staging Program **********" + "\r\n");
-                    ss_exe.RunStageSystem();
+                    Launcher.RunStageSystem();
                     LogEventHandler("Awaiting Start Up Time at " + ss_cfg.StartUpTime.ToString() + "\r\n");
-                    ss_exe.WaitStart();
+                    Launcher.WaitStart();
                     LogEventHandler("Running Start Up Program **********" + "\r\n");
-                    ss_exe.RunStartUp();
+                    Launcher.RunStartUp();
                 }
             }
 
@@ -260,8 +202,11 @@ namespace SuperScan
             else LogEventHandler("Mount initialization failed");
             if (ss_hwp.CameraStartUp()) LogEventHandler("Initializing Camera");
             else LogEventHandler("Camera initialization failed");
-            if (DomeControl.DomeStartUp()) LogEventHandler("Initializing Dome");
-            else LogEventHandler("Dome initialization failed");
+            if (Convert.ToBoolean(ss_cfg.HasDome))
+            {
+                if (DomeControl.DomeStartUp()) LogEventHandler("Initializing Dome");
+                else LogEventHandler("Dome initialization failed");
+            }
             ;
             Show();
 
@@ -312,7 +257,7 @@ namespace SuperScan
                 if (WatchWeatherCheckBox.Checked)
                 {
                     LogEventHandler("Checking Weather");
-                    if (!WeatherSafe())
+                    if (!IsWeatherSafe())
                     {
                         LogEventHandler("Waiting on unsafe weather conditions...");
                         LogEventHandler("Parking telescope");
@@ -320,28 +265,28 @@ namespace SuperScan
                         else LogEventHandler("Mount park failed");
 
                         LogEventHandler("Closing Dome");
-                        DomeControl.CloseDome(DOME_HOME_AZ);
+                        if (Convert.ToBoolean(ss_cfg.HasDome)) DomeControl.CloseDome(DOME_HOME_AZ);
                         do
                         {
                             System.Threading.Thread.Sleep(10000);  //ten second wait loop
-                            if (Convert.ToBoolean(ss_exe.CheckEnd()))
+                            if (Convert.ToBoolean(Launcher.CheckEnd()))
                             { break; };
-                        } while (!WeatherSafe());
-                        if (Convert.ToBoolean(ss_exe.CheckEnd()))
+                        } while (!IsWeatherSafe());
+                        if (Convert.ToBoolean(Launcher.CheckEnd()))
                         { break; };
-                        if (WeatherSafe())
+                        if (IsWeatherSafe())
                         {
                             LogEventHandler("Weather conditions safe");
                             LogEventHandler("Opening Dome");
-                            DomeControl.OpenDome(DOME_HOME_AZ);
+                            if (Convert.ToBoolean(ss_cfg.HasDome)) DomeControl.OpenDome(DOME_HOME_AZ);
                             LogEventHandler("Unparking telescope");
                             if (ss_hwp.TelescopeStartUp()) LogEventHandler("Mount unparked");
-                            
+
                             //Wait for 30 seconds for everything to settle
                             LogEventHandler("Waiting for dome to settle");
                             System.Threading.Thread.Sleep(30000);
                             //Recouple dome
-                            DomeControl.IsDomeCoupled = true;
+                            if (Convert.ToBoolean(ss_cfg.HasDome)) DomeControl.IsDomeCoupled = true;
                         }
                     }
                 } //Check for autofocus selection.  If so then run the autofocus check.
@@ -424,7 +369,7 @@ namespace SuperScan
                 Show();
                 //Check for time to shut down
                 LogEventHandler("Checking for ending time");
-                if (Convert.ToBoolean(ss_exe.CheckEnd()))
+                if (Convert.ToBoolean(Launcher.CheckEnd()))
                 {
                     LogEventHandler("Scan is past end time.  Shutting down.");
                     break;
@@ -437,7 +382,7 @@ namespace SuperScan
             //Park the telescope so it doesn't drift too low
             ss_hwp.TelescopeShutDown();
             LogEventHandler("AutoRun Running Shut Down Program **********" + "\r\n");
-            ss_exe.RunShutDown();
+            Launcher.RunShutDown();
             StartScanButton.BackColor = scanbuttoncolorsave;
             return;
         }
@@ -583,11 +528,13 @@ namespace SuperScan
             return;
         }
 
-        private bool WeatherSafe()
+        private bool IsWeatherSafe()
         {
             //Returns true if no weather alert, false if it is unsafe
 
             WeatherFileReader wmon = new WeatherFileReader();
+            //if no weather file or other problem, return false
+            if (wmon == null) return false;
             if (wmon.AlertFlag == WeatherFileReader.WeaAlert.Alert) return false;
             else return true;
         }
@@ -601,7 +548,7 @@ namespace SuperScan
         {
             //Verify that the user really wants to clear the files, then cull images
             DialogResult cleanUp = MessageBox.Show("Do you really want to clean up the Image Bank directories?", "Verify Clean Up", MessageBoxButtons.YesNo);
-            if (cleanUp == DialogResult.No) return; 
+            if (cleanUp == DialogResult.No) return;
             else
             {
                 FormCrunchingNotice cForm = new FormCrunchingNotice();
@@ -609,9 +556,36 @@ namespace SuperScan
                 CullImages.DeletellButBest();
                 cForm.Close();
             }
-                
+
 
             //
+        }
+
+        /// <summary>
+        /// Stores the WatchWeather control in Settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void WatchWeatherCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Configuration ss_cfg = new Configuration();
+            if (WatchWeatherCheckBox.Checked) ss_cfg.WatchWeather = "True";
+            else ss_cfg.WatchWeather = "False";
+            return;
+        }
+
+        /// <summary>
+        /// Stores Dome control in settings
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DomeCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Configuration ss_cfg = new Configuration();
+            if (DomeCheckBox.Checked) ss_cfg.HasDome = "True";
+            else ss_cfg.HasDome = "False";
+            return;
+
         }
     }
 }

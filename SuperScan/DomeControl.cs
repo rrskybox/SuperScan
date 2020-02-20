@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TheSkyXLib;
 
 namespace SuperScan
@@ -74,7 +70,7 @@ namespace SuperScan
             System.Threading.Thread.Sleep(10000);  //Wait for close command to clear TSX and ASCOM driver
             while (tsxd.IsOpenComplete == 0)
             { System.Threading.Thread.Sleep(5000); } //five second wait loop
-             return;
+            return;
         }
 
         /// <summary>

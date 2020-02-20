@@ -1,8 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Windows.Forms;
 using System.Drawing;
-using TheSkyXLib;
+using System.Windows.Forms;
 
 namespace SuperScan
 {
@@ -11,7 +9,7 @@ namespace SuperScan
 
         //Common utilities for TSX connections
         //
-        
+
         public static double ReduceTo360(double degrees)
         {
             degrees = Math.IEEERemainder(degrees, 360);

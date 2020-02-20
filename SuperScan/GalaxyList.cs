@@ -12,14 +12,9 @@
 /// 
 /// ------------------------------------------------------------------------
 
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheSkyXLib;
-using System.IO;
-using System.Xml;
 using System.Xml.Linq;
+using TheSkyXLib;
 
 namespace SuperScan
 {
@@ -31,7 +26,7 @@ namespace SuperScan
 
         public GalaxyList()
 
-            //Upon instantiation...
+        //Upon instantiation...
         //Open empty working XML file for galaxy list
         //Create connection to TSX DataWizard
         //Get the path to the query files, then set the path to SuperScanQuery.sdb
@@ -299,7 +294,7 @@ namespace SuperScan
                 tsx_ut.ConvertRADecToAzAlt(System.Convert.ToDouble(gRA), System.Convert.ToDouble(gDec));
                 gAlt = tsx_ut.dOut1.ToString();
                 grec.Element("Altitude").Value = gAlt;
-                
+
                 if (System.Convert.ToDouble(gHA) < 0)
                 { grec.Element("Side").Value = "East"; }
                 else
@@ -359,7 +354,7 @@ namespace SuperScan
             //Look up the target by galaxy name and get the Major Axis (in arc secs)
             Configuration ss_cfg = new Configuration();
             XElement gxgalaxies = XElement.Load(ss_cfg.GalaxyListPath);
-            
+
 
             var xgals = from grec in gxgalaxies.Elements("Galaxy") select grec;
             foreach (var grec in xgals)
@@ -378,7 +373,7 @@ namespace SuperScan
             //Look up the target by galaxy name and get the Altitude (in arc secs)
             Configuration ss_cfg = new Configuration();
             XElement gxgalaxies = XElement.Load(ss_cfg.GalaxyListPath);
-            
+
 
             var xgals = from grec in gxgalaxies.Elements("Galaxy") select grec;
             foreach (var grec in xgals)

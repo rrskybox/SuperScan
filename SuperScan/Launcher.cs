@@ -13,22 +13,14 @@
 /// 
 /// ------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
 namespace SuperScan
 {
-    class Launcher
+    public static class Launcher
     {
-        public Launcher()
-        {
-
-        }
-
-        public void WaitStage()
+ 
+        public static void WaitStage()
         {
             // Wait method gets the staging time from the superscan configuration file,
             //  then runs a one second sleep loop until the current time is greater than the
@@ -40,7 +32,7 @@ namespace SuperScan
             if (Convert.ToBoolean(ss_cfg.StageSystemOn))
             {
                 DateTime stageTime = DateTime.Parse(ss_cfg.StageSystemTime);
-                
+
                 while (stageTime > System.DateTime.Now)
                 {
                     System.Threading.Thread.Sleep(1000);
@@ -51,7 +43,7 @@ namespace SuperScan
             return;
         }
 
-        public void WaitStart()
+        public static void WaitStart()
         {
             // Wait method gets the start up time from the superscan configuration file,
             //  then runs a one second sleep loop until the current time is greater than the
@@ -60,7 +52,7 @@ namespace SuperScan
             if (Convert.ToBoolean(ss_cfg.StartUpOn))
             {
                 DateTime startTime = DateTime.Parse(ss_cfg.StartUpTime);
-                
+
                 while (startTime > System.DateTime.Now)
                 {
                     System.Threading.Thread.Sleep(1000);
@@ -71,7 +63,7 @@ namespace SuperScan
             }
         }
 
-        public bool CheckEnd()
+        public static bool CheckEnd()
         {
             // CheckEnd gets the configured end time and returns true
             //   if the datetime exceeds the end time
@@ -84,7 +76,7 @@ namespace SuperScan
                 //{
                 //    endTime = endTime.AddDays(1);
                 //}
-                
+
                 if (endTime < System.DateTime.Now)
                 {
                     return (true);
@@ -100,7 +92,7 @@ namespace SuperScan
             }
         }
 
-        public void RunStageSystem()
+        public static void RunStageSystem()
         {
             //If StageSystemOn is set, then RunStageSystem gets the StageSystem filepath from the superscan config file, if any
             //  then launches it and waits for completion.
@@ -119,7 +111,7 @@ namespace SuperScan
             return;
         }
 
-        public void RunStartUp()
+        public static void RunStartUp()
         {
             //If StageSystemOn is set, then RunStageSystem gets the StageSystem filepath from the superscan config file, if any
             //  then launches it and waits for completion.
@@ -138,7 +130,7 @@ namespace SuperScan
             return;
         }
 
-        public void RunShutDown()
+        public static void RunShutDown()
         {
             //If ShutDownOn is set, then RunShutDown gets the postscan filepath from the superscan config file, if any
             //  then launches it and waits for completion.

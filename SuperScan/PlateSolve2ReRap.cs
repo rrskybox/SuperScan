@@ -48,7 +48,7 @@ namespace SuperScan
                 AstroMath.Transform.DegreesToRadians(decDegrees).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
                 AstroMath.Transform.DegreesToRadians(fieldWidth / 60d).ToString("0.000", CultureInfo.InvariantCulture) + "," +
                 AstroMath.Transform.DegreesToRadians(fieldHeight / 60d).ToString("0.000", CultureInfo.InvariantCulture) + "," +
-                maxTiles +","+
+                maxTiles + "," +
                 ps2FilePath + "," +
                 "0";
             //_fileName = fileName;

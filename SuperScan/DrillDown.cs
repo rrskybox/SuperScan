@@ -1,4 +1,5 @@
-﻿/// DrillDown carries methods and properties for making and reading
+﻿
+/// DrillDown carries methods and properties for making and reading
 /// a long (10 minute) exposure when a suspect is detected.
 ///
 /// Instantiation of the class opens the FollowUp subdirectory and
@@ -23,16 +24,14 @@
 /// error deviation for the target object.
 /// 
 using System;
-using System.Threading;
-using System.Windows.Forms;
-using TheSkyXLib;
-using AstroImage;
 using System.Diagnostics;
+using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Globalization;
-using System.Drawing;
-
+using System.Threading;
+using TheSkyXLib;
+using AstroImage;
 
 namespace SuperScan
 {

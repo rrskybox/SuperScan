@@ -12,17 +12,13 @@
 /// 
 /// ------------------------------------------------------------------------
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TheSkyXLib;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using TheSkyXLib;
 
 namespace SuperScan
 {
@@ -90,16 +86,16 @@ namespace SuperScan
 
         public void Store(string filepath)
         //Saves the image data as a new file through TSX
-            //Adjust to 256 bit depth because TSX DataArray is still broken
-            //  Change later
+        //Adjust to 256 bit depth because TSX DataArray is still broken
+        //  Change later
         {
-           double bitdepth = 256;
+            double bitdepth = 256;
             ccdsoftImage tsx_im = new ccdsoftImage();
             tsx_im.New(pixelSizeX, pixelSizeY, pixeldepth);
             var imgarr = tsx_im.DataArray;
             for (int i = 0; i < imagePixels.Length; i++)
             {
-                imgarr[i] = imagePixels[i]/bitdepth;
+                imgarr[i] = imagePixels[i] / bitdepth;
             }
             tsx_im.DataArray = imgarr;
             tsx_im.Path = filepath;
@@ -142,7 +138,7 @@ namespace SuperScan
         //set the value at pixel location X,Y out of the image array
         {
             int lPix = (yLocation * pixelSizeX) + xLocation;
-            if ((lPix < imagePixels.Length) && (lPix >=0))
+            if ((lPix < imagePixels.Length) && (lPix >= 0))
             {
                 imagePixels[lPix] = pixValue;
             }

@@ -13,7 +13,7 @@ namespace SuperScan
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new SuperScanForm());
+            Application.Run(new FormSuperScan());
         }
     }
 }

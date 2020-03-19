@@ -73,19 +73,21 @@ namespace SuperScan
                     new XElement("MinimumGalaxySize", "5"),
                     new XElement("Filter", "3"),
                     new XElement("CCDTemp", "-20"),
-                    new XElement("Postpone", "false"),
-                    new XElement("AutoFocus", "false"),
-                    new XElement("AutoStart", "false"),
-                    new XElement("StageSystemOn", "false"),
-                    new XElement("StartUpOn", "false"),
-                    new XElement("ShutDownOn", "false"),
+                    new XElement("Postpone", "False"),
+                    new XElement("AutoFocus", "False"),
+                    new XElement("AutoStart", "False"),
+                    new XElement("StageSystemOn", "False"),
+                    new XElement("StartUpOn", "False"),
+                    new XElement("ShutDownOn", "False"),
                     new XElement("StageSystemTime", System.DateTime.Now.ToShortTimeString()),
                     new XElement("StartUpTime", System.DateTime.Now.ToShortTimeString()),
                     new XElement("ShutDownTime", System.DateTime.Now.ToShortTimeString()),
                     new XElement("StageSystemPath", ""),
                     new XElement("StartUpPath", ""),
                     new XElement("ShutDownPath", ""),
-                    new XElement("WatchWeather", "true"));
+                    new XElement("WatchWeather", "False"),
+                    new XElement("UsesDome", "False"),
+                    new XElement("FormOnTop", "False"));
 
                 cDefaultX.Save(ssdir + "\\" + SuperScanConfigurationFilename);
             }
@@ -280,9 +282,9 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("Postpone") == null)
                 {
-                    sscfgXf.Add(new XElement("Postpone", "false"));
+                    sscfgXf.Add(new XElement("Postpone", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
@@ -308,9 +310,9 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("WatchWeather") == null)
                 {
-                    sscfgXf.Add(new XElement("WatchWeather", "false"));
+                    sscfgXf.Add(new XElement("WatchWeather", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
@@ -329,30 +331,30 @@ namespace SuperScan
             }
         }
 
-        public string HasDome
+        public string UsesDome
         {
             get
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                if (sscfgXf.Element("HasDome") == null)
+                if (sscfgXf.Element("UsesDome") == null)
                 {
-                    sscfgXf.Add(new XElement("HasDome", "false"));
+                    sscfgXf.Add(new XElement("UsesDome", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
-                    return (sscfgXf.Element("HasDome").Value);
+                    return (sscfgXf.Element("UsesDome").Value);
                 }
             }
             set
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                XElement sscfgXel = sscfgXf.Element("HasDome");
-                if (sscfgXel == null) sscfgXf.Add(new XElement("HasDome", value));
-                else sscfgXel.ReplaceWith(new XElement("HasDome", value));
+                XElement sscfgXel = sscfgXf.Element("UsesDome");
+                if (sscfgXel == null) sscfgXf.Add(new XElement("UsesDome", value));
+                else sscfgXel.ReplaceWith(new XElement("UsesDome", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
             }
@@ -367,7 +369,7 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("AutoStart") == null)
                 {
-                    sscfgXf.Add(new XElement("AutoStart", "false"));
+                    sscfgXf.Add(new XElement("AutoStart", "False"));
                     sscfgXf.Save(sscfgfilename);
                     //Also means that the StartUp, ShutDown and AutoStart times are not in the config file
                     //  so force them
@@ -380,7 +382,7 @@ namespace SuperScan
                     string assc = StageSystemOn;
                     string asuc = StartUpOn;
                     string asdc = ShutDownOn;
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
@@ -406,9 +408,9 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("AutoFocus") == null)
                 {
-                    sscfgXf.Add(new XElement("AutoFocus", "false"));
+                    sscfgXf.Add(new XElement("AutoFocus", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
@@ -426,6 +428,34 @@ namespace SuperScan
             }
         }
 
+        public string FormOnTop
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("FormOnTop") == null)
+                {
+                    sscfgXf.Add(new XElement("FormOnTop", "False"));
+                    sscfgXf.Save(sscfgfilename);
+                    return ("False");
+                }
+                else
+                {
+                    return (sscfgXf.Element("FormOnTop").Value);
+                }
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("FormOnTop");
+                sscfgXel.ReplaceWith(new XElement("FormOnTop", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
         public string StageSystemOn
         {
             get
@@ -434,9 +464,9 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("StageSystemOn") == null)
                 {
-                    sscfgXf.Add(new XElement("StageSystemOn", "false"));
+                    sscfgXf.Add(new XElement("StageSystemOn", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
@@ -462,9 +492,9 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("StartUpOn") == null)
                 {
-                    sscfgXf.Add(new XElement("StartUpOn", "false"));
+                    sscfgXf.Add(new XElement("StartUpOn", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {
@@ -490,9 +520,9 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 if (sscfgXf.Element("ShutDownOn") == null)
                 {
-                    sscfgXf.Add(new XElement("ShutDownOn", "false"));
+                    sscfgXf.Add(new XElement("ShutDownOn", "False"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("false");
+                    return ("False");
                 }
                 else
                 {

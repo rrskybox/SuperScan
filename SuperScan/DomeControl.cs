@@ -61,10 +61,11 @@ namespace SuperScan
             IsDomeCoupled = false;
             //Move dome to 20 degrees short of home position
             tsxd.GotoAzEl(domeHomeAz - 20, 0);
-            //Home the dome to make sure power is supplied
+            //Wait until complete (Sync mode doesn't seem to work)
+            while (tsxd.IsGotoComplete == 0) { System.Threading.Thread.Sleep(5000); };
+            //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
             tsxd.FindHome();
-            while (tsxd.IsFindHomeComplete == 0) //one second wait loop
-            { System.Threading.Thread.Sleep(1000); }
+            while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
             // open the dome shutter
             tsxd.OpenSlit();
             System.Threading.Thread.Sleep(10000);  //Wait for close command to clear TSX and ASCOM driver
@@ -89,19 +90,23 @@ namespace SuperScan
             //Decouple the dome from the mount position
             IsDomeCoupled = false;
             sky6Dome tsxd = new sky6Dome();
+
             try { tsxd.Connect(); }
             catch { return; }
             //Stop whatever the dome is doing, if any and wait a few seconds for it to clear
             try { tsxd.Abort(); }
             catch (Exception e) { return; }
+            //Wait for a second for the command to clear
+            System.Threading.Thread.Sleep(1000);
             //Close up the dome:  Connect, Home (so power is to the dome), Close the slit
             if (tsxd.IsConnected == 1)
             {
                 //Move the dome to 20 degrees short of home
                 tsxd.GotoAzEl(domeHomeAz - 20, 0);
+                //Wait until complete (Sync mode doesn't seem to work)
+                while (tsxd.IsGotoComplete == 0) { System.Threading.Thread.Sleep(5000); };
                 //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
                 tsxd.FindHome();
-                System.Threading.Thread.Sleep(10000);
                 while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
                 //Close slit
                 //Standard false stop avoidance code
@@ -111,10 +116,7 @@ namespace SuperScan
                 {
                     tsxd.CloseSlit();
                     System.Threading.Thread.Sleep(10000);
-                    while (tsxd.IsCloseComplete == 0)
-                    {
-                        System.Threading.Thread.Sleep(5000);
-                    }
+                    while (tsxd.IsCloseComplete == 0) { System.Threading.Thread.Sleep(5000); }
                     //Report success  
                     slitClosed = true;
                 }
@@ -130,10 +132,7 @@ namespace SuperScan
                     System.Threading.Thread.Sleep(10000);
                     try
                     {
-                        while (tsxd.IsCloseComplete == 0)
-                        {
-                            System.Threading.Thread.Sleep(5000);
-                        }
+                        while (tsxd.IsCloseComplete == 0) { System.Threading.Thread.Sleep(5000); }
                         //Report success  
                     }
                     catch

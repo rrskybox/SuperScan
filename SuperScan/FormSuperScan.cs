@@ -562,8 +562,7 @@ namespace SuperScan
                 cForm.Close();
             }
 
-
-            //
+             //
         }
 
         /// <summary>

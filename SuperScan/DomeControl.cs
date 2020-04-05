@@ -61,10 +61,12 @@ namespace SuperScan
             IsDomeCoupled = false;
             //Move dome to 20 degrees short of home position
             tsxd.GotoAzEl(domeHomeAz - 20, 0);
+            System.Threading.Thread.Sleep(5000);
             //Wait until complete (Sync mode doesn't seem to work)
             while (tsxd.IsGotoComplete == 0) { System.Threading.Thread.Sleep(5000); };
             //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
             tsxd.FindHome();
+            System.Threading.Thread.Sleep(5000);
             while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
             // open the dome shutter
             tsxd.OpenSlit();
@@ -97,20 +99,21 @@ namespace SuperScan
             try { tsxd.Abort(); }
             catch (Exception e) { return; }
             //Wait for a second for the command to clear
-            System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(5000);
             //Close up the dome:  Connect, Home (so power is to the dome), Close the slit
             if (tsxd.IsConnected == 1)
             {
                 //Move the dome to 20 degrees short of home
                 tsxd.GotoAzEl(domeHomeAz - 20, 0);
+                System.Threading.Thread.Sleep(5000);
                 //Wait until complete (Sync mode doesn't seem to work)
                 while (tsxd.IsGotoComplete == 0) { System.Threading.Thread.Sleep(5000); };
                 //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
                 tsxd.FindHome();
+                System.Threading.Thread.Sleep(5000);
                 while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };
                 //Close slit
                 //Standard false stop avoidance code
-                System.Threading.Thread.Sleep(5000);
                 bool slitClosed = false;
                 try
                 {

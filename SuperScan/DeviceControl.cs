@@ -89,41 +89,56 @@ namespace SuperScan
             return;
         }
 
-        public void ReliableRADecSlew(double RA, double Dec, string name)
+        public void ReliableRADecSlew(double RA, double Dec, string name, bool hasDome)
         {
             //
-            //Checks for dome tracking underway, waits half second if so -- doesn't solve race condition, but may avoid 
+            //Checks for dome tracking underway, waits half second if so -- doesn//t solve race condition, but may avoid 
             sky6RASCOMTele tsxt = new sky6RASCOMTele();
-            while (IsDomeTrackingUnderway()) System.Threading.Thread.Sleep(500);
-            int result = -1;
-            while (result != 0)
+            if (hasDome)
             {
-                result = 0;
-                try { tsxt.SlewToRaDec(RA, Dec, name); }
-                catch (Exception ex) { result = ex.HResult - 1000; }
+                while (IsDomeTrackingUnderway()) System.Threading.Thread.Sleep(500);
+                int result = -1;
+                while (result != 0)
+                {
+                    result = 0;
+                    try { tsxt.SlewToRaDec(RA, Dec, name); }
+                    catch (Exception ex) { result = ex.HResult - 1000; }
+                }
             }
+            else tsxt.SlewToRaDec(RA, Dec, name);
             return;
         }
 
-        public int ReliableClosedLoopSlew(double RA, double Dec, string name)
+        public int ReliableClosedLoopSlew(double RA, double Dec, string name, bool hasDome)
         {
             //Tries to perform CLS without running into dome tracking race condition
             //
-            ReliableRADecSlew(RA, Dec, name);
-            //Turn off tracking
-            DomeCouplingOff();
+            ReliableRADecSlew(RA, Dec, name, hasDome);
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
             int clsStatus = 123;
-            while (clsStatus == 123)
+            //If dome, Turn off tracking
+            if (hasDome)
+            {
+                DomeCouplingOff();
+                while (clsStatus == 123)
+                {
+                    try { clsStatus = tsx_cl.exec(); }
+                    catch (Exception ex)
+                    {
+                        clsStatus = ex.HResult - 1000;
+                    };
+                    if (clsStatus == 123) System.Threading.Thread.Sleep(500);
+                }
+                DomeCouplingOn();
+            }
+            else
             {
                 try { clsStatus = tsx_cl.exec(); }
                 catch (Exception ex)
                 {
                     clsStatus = ex.HResult - 1000;
                 };
-                if (clsStatus == 123) System.Threading.Thread.Sleep(500);
             }
-            DomeCouplingOn();
             return clsStatus;
         }
 

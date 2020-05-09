@@ -34,6 +34,7 @@ namespace SuperScan
         string SuperScanFollowUpFoldername = "FollowUp";
         string SuperScanConfigurationFilename = "Configuration.xml";
         string SuperScanSuspectsFilename = "suspects.xml";
+        string SuperScanObservingListFilename = "SuperScanObservingList.txt";
 
         string ssdir;
 
@@ -61,6 +62,7 @@ namespace SuperScan
                 XElement cDefaultX = new XElement("SuperScan",
                     new XElement("SuperScanFoldername", ssdir),
                     new XElement("GalaxyListPath", (ssdir + "\\" + SuperScanGalaxyListFilename)),
+                    new XElement("ObservingListPath", (ssdir + "\\" + SuperScanObservingListFilename)),
                     new XElement("ImageBankFoldername", (ssdir + "\\" + SuperScanImageBankFoldername)),
                     new XElement("FreshImagePath", (ssdir + "\\" + SuperScanFreshImageFilename)),
                     new XElement("DifferenceImagePath", (ssdir + "\\" + SuperScanDifferenceImageFilename)),
@@ -87,7 +89,8 @@ namespace SuperScan
                     new XElement("ShutDownPath", ""),
                     new XElement("WatchWeather", "False"),
                     new XElement("UsesDome", "False"),
-                    new XElement("FormOnTop", "False"));
+                    new XElement("FormOnTop", "False"),
+                    new XElement("RefreshTargets","True"));
 
                 cDefaultX.Save(ssdir + "\\" + SuperScanConfigurationFilename);
             }
@@ -109,13 +112,25 @@ namespace SuperScan
             return;
         }
 
+        public string ObservingListPath
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("ObservingListPath") == null) return (ssdir + "\\" + SuperScanObservingListFilename);
+                else return (sscfgXf.Element("ObservingListPath").Value);
+            }
+        }
+
         public string GalaxyListPath
         {
             get
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                return (sscfgXf.Element("GalaxyListPath").Value);
+                if (sscfgXf.Element("GalaxyListPath") == null) return (ssdir + "\\" + SuperScanGalaxyListFilename);
+                else return (sscfgXf.Element("GalaxyListPath").Value);
             }
         }
 
@@ -451,6 +466,34 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 XElement sscfgXel = sscfgXf.Element("FormOnTop");
                 sscfgXel.ReplaceWith(new XElement("FormOnTop", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
+        public string RefreshTargets
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("RefreshTargets") == null)
+                {
+                    sscfgXf.Add(new XElement("RefreshTargets", "True"));
+                    sscfgXf.Save(sscfgfilename);
+                    return ("False");
+                }
+                else
+                {
+                    return (sscfgXf.Element("RefreshTargets").Value);
+                }
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("RefreshTargets");
+                sscfgXel.ReplaceWith(new XElement("RefreshTargets", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
             }

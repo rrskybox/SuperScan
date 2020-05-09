@@ -62,7 +62,7 @@ namespace SuperScan
             //Move dome to 20 degrees short of home position
             tsxd.GotoAzEl(domeHomeAz - 20, 0);
             System.Threading.Thread.Sleep(5000);
-            //Wait until complete (Sync mode doesn't seem to work)
+            //Wait until complete (Sync mode doesn//t seem to work)
             while (tsxd.IsGotoComplete == 0) { System.Threading.Thread.Sleep(5000); };
             //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
             tsxd.FindHome();
@@ -91,8 +91,10 @@ namespace SuperScan
             sky6RASCOMTele tsxt = new sky6RASCOMTele();
             //Decouple the dome from the mount position
             IsDomeCoupled = false;
-            sky6Dome tsxd = new sky6Dome();
+            //Disconnect the mount
+            tsxt.Disconnect();
 
+            sky6Dome tsxd = new sky6Dome();
             try { tsxd.Connect(); }
             catch { return; }
             //Stop whatever the dome is doing, if any and wait a few seconds for it to clear
@@ -106,9 +108,10 @@ namespace SuperScan
                 //Move the dome to 20 degrees short of home
                 tsxd.GotoAzEl(domeHomeAz - 20, 0);
                 System.Threading.Thread.Sleep(5000);
-                //Wait until complete (Sync mode doesn't seem to work)
+                //Wait until complete (Sync mode doesn//t seem to work)
                 while (tsxd.IsGotoComplete == 0) { System.Threading.Thread.Sleep(5000); };
                 //Home the dome,wait for the command to propogate, then wait until the dome reports it is homed
+                System.Threading.Thread.Sleep(5000);
                 tsxd.FindHome();
                 System.Threading.Thread.Sleep(5000);
                 while (tsxd.IsFindHomeComplete == 0) { System.Threading.Thread.Sleep(5000); };

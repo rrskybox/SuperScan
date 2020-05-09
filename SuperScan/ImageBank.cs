@@ -74,6 +74,9 @@ namespace SuperScan
         private string GetArchivedImagePath()
         //Determines the path to the most recently stored galaxy image, if any.
         //  If none or if the image will not image link, then "" is returned.
+        //Note that image file names are in the format of NGCXXX_YYYY-MM-DD-SSSS.fit
+        //  where SSSS is a sequence number.  Using the file name to do a descending
+        //  sort will leave the most recent file name path as the first in the list.
         {
             System.IO.DirectoryInfo sys_gbk = new System.IO.DirectoryInfo(GalaxyStoreFolder);
             if (sys_gbk.GetFiles("NGC*.fit").Count() > 0)

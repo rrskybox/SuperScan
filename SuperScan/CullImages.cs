@@ -42,7 +42,7 @@ namespace SuperScan
             //step through each diretory
             foreach (string gDir in gDirList)
             {
-                //form list of images in the galaxy's directory
+                //form list of images in the galaxy//s directory
                 gImageList = Directory.GetFiles(gDir).ToList<string>();
                 //delete all the *.src, *.apm files and Cropped (ImageLink Allsky fits files)
                 foreach (string imagePath in gImageList)

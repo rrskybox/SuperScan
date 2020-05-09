@@ -78,7 +78,7 @@ namespace SuperScan
                                      + susp.EventDate.ToString("yyyy-MM-dd HH:mm")
                                      + "  "
                                      + susCleared;
-                //Add the string to the form's textbox
+                //Add the string to the form//s textbox
                 //List the suspect only if uncleared
                 if (!susp.Suspicion)
                 { SuspectListbox.Items.Add(suspectdesc); }
@@ -145,7 +145,7 @@ namespace SuperScan
                 double galaxis = tsx_oi.ObjInfoPropOut;
                 //Set the FOV size to  the galaxy size
                 tsx_sc.FieldOfView = galaxis / 60;
-                //Set the center of view to the suspect's RA/Dec and light up the target icon
+                //Set the center of view to the suspect//s RA/Dec and light up the target icon
                 //tsx_sc.Find(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString());
                 tsx_sc.RightAscension = CurrentSuspect.SuspectRA;
                 tsx_sc.Declination = CurrentSuspect.SuspectDec;

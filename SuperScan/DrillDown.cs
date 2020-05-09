@@ -4,7 +4,7 @@
 ///
 /// Instantiation of the class opens the FollowUp subdirectory and
 /// creates a new "MM-DD-YY" subdirectory, based on the current date,
-/// if one doesn't exist already.  The method "Path" returns the path
+/// if one doesn//t exist already.  The method "Path" returns the path
 /// to that subdirectory.
 /// 
 /// The method "Shoot(galaxyName, exposureTime) takes an image and stores
@@ -15,7 +15,7 @@
 ///  
 /// The target object is set as the closest object to 
 /// an RA/Dec position input.  Reference objects are selected as the 
-/// brightest, un-anti-bloom'ed (under 1/2 max pixel value) sources
+/// brightest, un-anti-bloom//ed (under 1/2 max pixel value) sources
 ///
 /// The mean and deviation to mean is calculated for the reference source
 /// instrument magnitude and catalog magnitude.
@@ -83,6 +83,7 @@ namespace SuperScan
         {
             //Take a fresh image at 600 seconds
             //That will be placed in the 
+
             ccdsoftImage tsx_im = new ccdsoftImage();
             ccdsoftCamera tsx_cc = new ccdsoftCamera();
             tsx_im.Path = FollowUpPath + "\\" + gName + ".fit";
@@ -247,7 +248,7 @@ namespace SuperScan
             double meanDevTgtAdjMag = avgMagDev;
 
             //Return center of starchart to target location
-            //Set the center of view to the suspect's RA/Dec and light up the target icon
+            //Set the center of view to the suspect//s RA/Dec and light up the target icon
             //
             //Recenter the star chart on the RA/Dec coordinates
             tsxsc.RightAscension = TargetRAhrs;
@@ -272,7 +273,7 @@ namespace SuperScan
 
         private int FindClosestLightSource(ccdsoftImage tsxim, double sRA, double sDec, int pDistance)
         {
-            //Searches for a "near" light source to the location SRA, SDec and returns it's index
+            //Searches for a "near" light source to the location SRA, SDec and returns it//s index
             //if not, then -1 is returned
 
             tsxim.RADecToXY(sRA, sDec);

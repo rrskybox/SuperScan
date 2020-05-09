@@ -9,7 +9,7 @@ namespace SuperScan
         {
             //When an instance of the autostart form is created, 
             // the text boxes -- start up filepath, shutdown filepath, start up time
-            // are filled in from the superscan configuration file.  That's it.
+            // are filled in from the superscan configuration file.  That//s it.
 
             InitializeComponent();
             Configuration ss_cfg = new Configuration();

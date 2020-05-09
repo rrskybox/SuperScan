@@ -158,7 +158,7 @@ namespace SuperScan
             queryString["ext_catid"] = "";
             queryString["num_page"] = "50";
 
-            //query elements specific to displaying results on TNS webpage -- unneeded but we'll keep them around
+            //query elements specific to displaying results on TNS webpage -- unneeded but we//ll keep them around
             //queryString["display[redshift]"] = "1";
             //queryString["display[hostname]"] = "1";
             //queryString["display[host_redshift]"] = "1";

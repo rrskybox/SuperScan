@@ -57,7 +57,6 @@ namespace SuperScan
             sky6RASCOMTele tsx_mt = new sky6RASCOMTele();
             sky6Raven tsx_rv = new sky6Raven();
             sky6ObjectInformation tsx_obj = new sky6ObjectInformation();
-            sky6Dome tsx_dm = new sky6Dome();
 
             //Clear any camera set up stuff that might be hanging around
             //  and there has been some on occasion
@@ -86,12 +85,18 @@ namespace SuperScan
             // If so, doing a IsGotoComplete will throw an Error 212.
             //  Ignore it a wait a few seconds for stuff to clear
 
-            //Toggle dome coupling:  this appears to clear most Error 123 problems
-            tsx_dm.IsCoupled = 0;
-            System.Threading.Thread.Sleep(1000);
-            tsx_dm.IsCoupled = 1;
+            //If using dome, toggle dome coupling:  this appears to clear most Error 123 problems
+            Configuration ss_cfg = new Configuration();
+            bool hasDome = Convert.ToBoolean(ss_cfg.UsesDome);
+            if (hasDome)
+            {
+                sky6Dome tsx_dm = new sky6Dome();
+                tsx_dm.IsCoupled = 0;
+                System.Threading.Thread.Sleep(1000);
+                tsx_dm.IsCoupled = 1;
+            }
 
-            //Wait for any Error 123's to clear
+            //Wait for any Error 123//s to clear
 
             LogEntry("Precision slew (CLS) to target");
             //Now try the CLS, but if an Error 123 is thrown, keep trying
@@ -107,16 +112,16 @@ namespace SuperScan
             //    };
             //}
             DeviceControl dctl = new DeviceControl();
-
-            int clsStatus = dctl.ReliableClosedLoopSlew(tRA, tDec, freshImageName);
+            int clsStatus = dctl.ReliableClosedLoopSlew(tRA, tDec, freshImageName, hasDome);
+            LogEntry("Precision Slew Complete:  ");
             if (clsStatus == 0)
             {
-                LogEntry("CLS successful");
+                LogEntry("    CLS successful");
                 return true;
             }
             else
             {
-                LogEntry("CLS unsucessful: Error: " + clsStatus.ToString());
+                LogEntry("    CLS unsucessful: Error: " + clsStatus.ToString());
                 return false;
             }
         }

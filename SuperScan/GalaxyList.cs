@@ -12,9 +12,12 @@
 /// 
 /// ------------------------------------------------------------------------
 
+using System;
+using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using TheSkyXLib;
+
 
 namespace SuperScan
 {
@@ -50,60 +53,121 @@ namespace SuperScan
 
             Configuration ss_cfg = new Configuration();
 
-            ///Create object information and datawizard objects
-            sky6DataWizard tsx_dw = new sky6DataWizard();
-            ///Set query path 
-            tsx_dw.Path = ss_cfg.QueryPath;
-            tsx_dw.Open();
-            string tst = tsx_dw.Path;
-
-            sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
-            tsx_oi = tsx_dw.RunQuery;
-            ///
-            ///tsx_oi is an array (tsx_oi.Count) of object information indexed by the tsx_oi.Index property
-            ///
-            ///For each object information in the list, get the name, perform a "Find" and look for the catalog ID.  If there is one, print it.
-
-            for (int i = 0; i <= (tsx_oi.Count - 1); i++)
+            //if targets are to be refreshed, then run a new observing list query and save the results in the gXgalaxies XML list
+            if (Convert.ToBoolean(ss_cfg.RefreshTargets))
             {
-                tsx_oi.Index = i;
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_NAME1);
-                gname = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
-                gRA = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
-                gDec = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAG);
-                gMag = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAJ_AXIS_MINS);
-                gMajorAxis = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MIN_AXIS_MINS);
-                gMinorAxis = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_ALT);
-                gAltitude = tsx_oi.ObjInfoPropOut.ToString();
-                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_HA_HOURS);
-                gHA = tsx_oi.ObjInfoPropOut.ToString();
+                ///Create object information and datawizard objects
+                sky6DataWizard tsx_dw = new sky6DataWizard();
+                ///Set query path 
+                tsx_dw.Path = ss_cfg.QueryPath;
+                tsx_dw.Open();
+                string tst = tsx_dw.Path;
 
-                if (System.Convert.ToDouble(gHA) < 0)
-                { gSide = "East"; }
-                else
-                { gSide = "West"; };
+                sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
+                tsx_oi = tsx_dw.RunQuery;
+                ///
+                ///tsx_oi is an array (tsx_oi.Count) of object information indexed by the tsx_oi.Index property
+                ///
+                ///For each object information in the list, get the name, perform a "Find" and look for the catalog ID.  If there is one, print it.
 
-                gXrec = new XElement("Galaxy",
-                    new XElement("Name", gname),
-                    new XElement("RA", gRA),
-                    new XElement("Dec", gDec),
-                    new XElement("Magnitude", gMag),
-                    new XElement("MajorAxis", gMajorAxis),
-                    new XElement("MinorAxis", gMinorAxis),
-                    new XElement("Altitude", gAltitude),
-                    new XElement("HA", gHA),
-                    new XElement("Side", gSide));
-                gXgalaxies.Add(gXrec);
+                for (int i = 0; i <= (tsx_oi.Count - 1); i++)
+                {
+                    tsx_oi.Index = i;
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_NAME1);
+                    gname = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+                    gRA = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
+                    gDec = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAG);
+                    gMag = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAJ_AXIS_MINS);
+                    gMajorAxis = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MIN_AXIS_MINS);
+                    gMinorAxis = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_ALT);
+                    gAltitude = tsx_oi.ObjInfoPropOut.ToString();
+                    tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_HA_HOURS);
+                    gHA = tsx_oi.ObjInfoPropOut.ToString();
+
+                    if (System.Convert.ToDouble(gHA) < 0)
+                    { gSide = "East"; }
+                    else
+                    { gSide = "West"; };
+
+                    gXrec = new XElement("Galaxy",
+                        new XElement("Name", gname),
+                        new XElement("RA", gRA),
+                        new XElement("Dec", gDec),
+                        new XElement("Magnitude", gMag),
+                        new XElement("MajorAxis", gMajorAxis),
+                        new XElement("MinorAxis", gMinorAxis),
+                        new XElement("Altitude", gAltitude),
+                        new XElement("HA", gHA),
+                        new XElement("Side", gSide));
+                    gXgalaxies.Add(gXrec);
+                }
+
+                gXgalaxies.Save(ss_cfg.GalaxyListPath);
+                return;
             }
+            else
+            {
+                //List is not to be refreshed.  Look for the "SuperScanObservingList" in the SuperScan directory.
+                //   if one, then parse it into an XML tree
+                if (File.Exists(ss_cfg.ObservingListPath)) 
+                {
+                    ObservingListLoader oLoad = new ObservingListLoader(ss_cfg.ObservingListPath);
+                    XElement oListX = oLoad.TSXtoXML();
+                    //The XML doc may or may not have all the galaxy information that we need, so use the Find function to go through the
+                    //targets and capture all the information
+                    TheSkyXLib.sky6StarChart tsxsc = new sky6StarChart();
+                    sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
 
-            gXgalaxies.Save(ss_cfg.GalaxyListPath);
-            return;
+                    foreach (XElement galaxyXList in oListX.Elements("target"))
+                    {
+                        string gName = galaxyXList.Element("name").Value;
+                        tsxsc.Find(gName);
+                        tsx_oi.Index = 0;
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_NAME1);
+                        gname = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+                        gRA = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
+                        gDec = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAG);
+                        gMag = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAJ_AXIS_MINS);
+                        gMajorAxis = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MIN_AXIS_MINS);
+                        gMinorAxis = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_ALT);
+                        gAltitude = tsx_oi.ObjInfoPropOut.ToString();
+                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_HA_HOURS);
+                        gHA = tsx_oi.ObjInfoPropOut.ToString();
+
+                        if (System.Convert.ToDouble(gHA) < 0)
+                        { gSide = "East"; }
+                        else
+                        { gSide = "West"; };
+
+                        gXrec = new XElement("Galaxy",
+                            new XElement("Name", gname),
+                            new XElement("RA", gRA),
+                            new XElement("Dec", gDec),
+                            new XElement("Magnitude", gMag),
+                            new XElement("MajorAxis", gMajorAxis),
+                            new XElement("MinorAxis", gMinorAxis),
+                            new XElement("Altitude", gAltitude),
+                            new XElement("HA", gHA),
+                            new XElement("Side", gSide));
+                        gXgalaxies.Add(gXrec);
+
+                    }
+                    gXgalaxies.Save(ss_cfg.GalaxyListPath);
+                }
+
+            }
         }
 
 

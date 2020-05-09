@@ -141,7 +141,7 @@ namespace SuperScan
             //Generate the path to the prospect file
             Configuration ss_cfg = new Configuration();
             string susFilePath = ss_cfg.SuspectsFilePath;
-            //Create the propspect file if it doesn't exist
+            //Create the propspect file if it doesn//t exist
             FileCheck(susFilePath);
             //Load the current prospect file
             XElement proXfile = XElement.Load(susFilePath);
@@ -200,7 +200,7 @@ namespace SuperScan
 
         private void FileCheck(string fname)
         {
-            //Create the propspect file if it doesn't exist
+            //Create the propspect file if it doesn//t exist
             if (!System.IO.File.Exists(fname))
             {
                 XElement susXnull = new XElement("Suspects");

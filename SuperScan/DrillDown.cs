@@ -83,7 +83,7 @@ namespace SuperScan
         {
             //Take a fresh image at 600 seconds
             //That will be placed in the 
-
+            Configuration sscfg = new Configuration();
             ccdsoftImage tsx_im = new ccdsoftImage();
             ccdsoftCamera tsx_cc = new ccdsoftCamera();
             tsx_im.Path = FollowUpPath + "\\" + gName + ".fit";
@@ -92,7 +92,26 @@ namespace SuperScan
             tsx_cc.ExposureTime = expTime;
             tsx_cc.Frame = ccdsoftImageFrame.cdLight;
             tsx_cc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
+            switch (sscfg.CalibrationType)
+            {
+                case "None":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdNone;
+                        break;
+                    }
+                case "Auto":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
+                        break;
+                    }
+                case "Full":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdBiasDarkFlat;
+                        break;
+                    }
+            }
             tsx_cc.Asynchronous = 0;        //Asynchronous on
+
             tsx_cc.TakeImage();
             //Wait for completion
             while (tsx_cc.State != ccdsoftCameraState.cdStateNone)

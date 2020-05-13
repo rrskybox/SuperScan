@@ -105,7 +105,8 @@ namespace SuperScan
                         new XElement("Altitude", gAltitude),
                         new XElement("HA", gHA),
                         new XElement("Side", gSide));
-                    gXgalaxies.Add(gXrec);
+                    //check for galaxy size, if less than the configured minimum, then discard
+                    if (Convert.ToDouble(gMajorAxis) >= Convert.ToDouble(ss_cfg.MinGalaxySize)) gXgalaxies.Add(gXrec);
                 }
 
                 gXgalaxies.Save(ss_cfg.GalaxyListPath);
@@ -115,7 +116,7 @@ namespace SuperScan
             {
                 //List is not to be refreshed.  Look for the "SuperScanObservingList" in the SuperScan directory.
                 //   if one, then parse it into an XML tree
-                if (File.Exists(ss_cfg.ObservingListPath)) 
+                if (File.Exists(ss_cfg.ObservingListPath))
                 {
                     ObservingListLoader oLoad = new ObservingListLoader(ss_cfg.ObservingListPath);
                     XElement oListX = oLoad.TSXtoXML();
@@ -161,8 +162,8 @@ namespace SuperScan
                             new XElement("Altitude", gAltitude),
                             new XElement("HA", gHA),
                             new XElement("Side", gSide));
-                        gXgalaxies.Add(gXrec);
-
+                        //check for galaxy size, if less than the configured minimum, then discard
+                        if (Convert.ToDouble(gMajorAxis) >= Convert.ToDouble(ss_cfg.MinGalaxySize)) gXgalaxies.Add(gXrec);
                     }
                     gXgalaxies.Save(ss_cfg.GalaxyListPath);
                 }

@@ -152,7 +152,8 @@ namespace SuperScan
                 //Check TNS for supernova reports for 60 arc seconds around this location for the last 10 days
                 TNSReader tnsReport = new TNSReader();
                 List<string> snList = tnsReport.RunLocaleQuery(CurrentSuspect.SuspectRA, CurrentSuspect.SuspectDec, 60, 10);
-                if (snList != null) NotesTextBox.AppendText("Supernova " + snList[0] + " reported at this location");
+                if (snList != null) NotesTextBox.AppendText("Supernova reported for " + snList[0] + " at this location\r\n");
+                else NotesTextBox.AppendText("No supernova report for this location\r\n");
                 //Give the user an opportunity to clear the suspect by updating its status to cleared -- or not.
                 Clipboard.Clear();
                 try { Clipboard.SetText(CurrentSuspect.SuspectRA.ToString() + ", " + CurrentSuspect.SuspectDec.ToString()); }
@@ -162,7 +163,7 @@ namespace SuperScan
                     return;
                 }
                 //Display the suspect position information
-                NotesTextBox.AppendText("Suspect RA and Dec written to clipboard");
+                NotesTextBox.AppendText("Suspect RA and Dec written to clipboard\r\n");
                 LocationTextBox.Text = CurrentSuspect.SuspectRA.ToString() + ", " + CurrentSuspect.SuspectDec.ToString();
                 Show();
                 System.Windows.Forms.Application.DoEvents();

@@ -44,8 +44,10 @@
             this.CurrentGalaxySizeArcmin = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.RefreshTargetsCheckBox = new System.Windows.Forms.CheckBox();
             this.DomeCheckBox = new System.Windows.Forms.CheckBox();
+            this.CalibrationListBox = new System.Windows.Forms.ComboBox();
             this.WatchWeatherCheckBox = new System.Windows.Forms.CheckBox();
             this.label4 = new System.Windows.Forms.Label();
             this.MinGalaxySetting = new System.Windows.Forms.NumericUpDown();
@@ -258,8 +260,10 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.groupBox2.Controls.Add(this.label5);
             this.groupBox2.Controls.Add(this.RefreshTargetsCheckBox);
             this.groupBox2.Controls.Add(this.DomeCheckBox);
+            this.groupBox2.Controls.Add(this.CalibrationListBox);
             this.groupBox2.Controls.Add(this.WatchWeatherCheckBox);
             this.groupBox2.Controls.Add(this.label4);
             this.groupBox2.Controls.Add(this.MinGalaxySetting);
@@ -278,19 +282,29 @@
             this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(12, 112);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(260, 243);
+            this.groupBox2.Size = new System.Drawing.Size(260, 258);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Configuration";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(11, 137);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(88, 13);
+            this.label5.TabIndex = 25;
+            this.label5.Text = "Image Calibration";
+            this.label5.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // RefreshTargetsCheckBox
             // 
             this.RefreshTargetsCheckBox.AutoSize = true;
             this.RefreshTargetsCheckBox.Checked = true;
             this.RefreshTargetsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.RefreshTargetsCheckBox.Location = new System.Drawing.Point(31, 212);
+            this.RefreshTargetsCheckBox.Location = new System.Drawing.Point(12, 229);
             this.RefreshTargetsCheckBox.Name = "RefreshTargetsCheckBox";
-            this.RefreshTargetsCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.RefreshTargetsCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.RefreshTargetsCheckBox.Size = new System.Drawing.Size(102, 17);
             this.RefreshTargetsCheckBox.TabIndex = 21;
             this.RefreshTargetsCheckBox.Text = "Refresh Targets";
@@ -300,21 +314,34 @@
             // DomeCheckBox
             // 
             this.DomeCheckBox.AutoSize = true;
-            this.DomeCheckBox.Location = new System.Drawing.Point(173, 189);
+            this.DomeCheckBox.Location = new System.Drawing.Point(169, 229);
             this.DomeCheckBox.Name = "DomeCheckBox";
-            this.DomeCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.DomeCheckBox.Size = new System.Drawing.Size(54, 17);
+            this.DomeCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.DomeCheckBox.Size = new System.Drawing.Size(76, 17);
             this.DomeCheckBox.TabIndex = 20;
-            this.DomeCheckBox.Text = "Dome";
+            this.DomeCheckBox.Text = "Has Dome";
             this.DomeCheckBox.UseVisualStyleBackColor = true;
             this.DomeCheckBox.CheckedChanged += new System.EventHandler(this.DomeCheckBox_CheckedChanged);
+            // 
+            // CalibrationListBox
+            // 
+            this.CalibrationListBox.FormattingEnabled = true;
+            this.CalibrationListBox.Items.AddRange(new object[] {
+            "None",
+            "Auto",
+            "Full"});
+            this.CalibrationListBox.Location = new System.Drawing.Point(184, 134);
+            this.CalibrationListBox.Name = "CalibrationListBox";
+            this.CalibrationListBox.Size = new System.Drawing.Size(62, 21);
+            this.CalibrationListBox.TabIndex = 24;
+            this.CalibrationListBox.SelectedIndexChanged += new System.EventHandler(this.CalibrationListBox_SelectedIndexChanged);
             // 
             // WatchWeatherCheckBox
             // 
             this.WatchWeatherCheckBox.AutoSize = true;
-            this.WatchWeatherCheckBox.Location = new System.Drawing.Point(29, 189);
+            this.WatchWeatherCheckBox.Location = new System.Drawing.Point(13, 208);
             this.WatchWeatherCheckBox.Name = "WatchWeatherCheckBox";
-            this.WatchWeatherCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.WatchWeatherCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.WatchWeatherCheckBox.Size = new System.Drawing.Size(102, 17);
             this.WatchWeatherCheckBox.TabIndex = 19;
             this.WatchWeatherCheckBox.Text = "Watch Weather";
@@ -324,8 +351,7 @@
             // label4
             // 
             this.label4.AutoSize = true;
-            this.label4.Enabled = false;
-            this.label4.ForeColor = System.Drawing.Color.Silver;
+            this.label4.ForeColor = System.Drawing.Color.White;
             this.label4.Location = new System.Drawing.Point(9, 25);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(150, 13);
@@ -334,8 +360,7 @@
             // 
             // MinGalaxySetting
             // 
-            this.MinGalaxySetting.Enabled = false;
-            this.MinGalaxySetting.ForeColor = System.Drawing.SystemColors.GrayText;
+            this.MinGalaxySetting.ForeColor = System.Drawing.SystemColors.WindowText;
             this.MinGalaxySetting.Location = new System.Drawing.Point(185, 23);
             this.MinGalaxySetting.Name = "MinGalaxySetting";
             this.MinGalaxySetting.Size = new System.Drawing.Size(61, 20);
@@ -380,9 +405,9 @@
             // AutoFocusCheckBox
             // 
             this.AutoFocusCheckBox.AutoSize = true;
-            this.AutoFocusCheckBox.Location = new System.Drawing.Point(150, 166);
+            this.AutoFocusCheckBox.Location = new System.Drawing.Point(169, 208);
             this.AutoFocusCheckBox.Name = "AutoFocusCheckBox";
-            this.AutoFocusCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.AutoFocusCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.AutoFocusCheckBox.Size = new System.Drawing.Size(77, 17);
             this.AutoFocusCheckBox.TabIndex = 14;
             this.AutoFocusCheckBox.Text = "AutoFocus";
@@ -392,9 +417,9 @@
             // OnTopCheckBox
             // 
             this.OnTopCheckBox.AutoSize = true;
-            this.OnTopCheckBox.Location = new System.Drawing.Point(33, 166);
+            this.OnTopCheckBox.Location = new System.Drawing.Point(12, 185);
             this.OnTopCheckBox.Name = "OnTopCheckBox";
-            this.OnTopCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.OnTopCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.OnTopCheckBox.Size = new System.Drawing.Size(98, 17);
             this.OnTopCheckBox.TabIndex = 13;
             this.OnTopCheckBox.Text = "Always On Top";
@@ -404,9 +429,9 @@
             // AutoRunCheckBox
             // 
             this.AutoRunCheckBox.AutoSize = true;
-            this.AutoRunCheckBox.Location = new System.Drawing.Point(159, 143);
+            this.AutoRunCheckBox.Location = new System.Drawing.Point(169, 185);
             this.AutoRunCheckBox.Name = "AutoRunCheckBox";
-            this.AutoRunCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.AutoRunCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.AutoRunCheckBox.Size = new System.Drawing.Size(68, 17);
             this.AutoRunCheckBox.TabIndex = 12;
             this.AutoRunCheckBox.Text = "AutoRun";
@@ -416,9 +441,9 @@
             // PostponeDetectionCheckBox
             // 
             this.PostponeDetectionCheckBox.AutoSize = true;
-            this.PostponeDetectionCheckBox.Location = new System.Drawing.Point(11, 143);
+            this.PostponeDetectionCheckBox.Location = new System.Drawing.Point(13, 162);
             this.PostponeDetectionCheckBox.Name = "PostponeDetectionCheckBox";
-            this.PostponeDetectionCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.PostponeDetectionCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.PostponeDetectionCheckBox.Size = new System.Drawing.Size(120, 17);
             this.PostponeDetectionCheckBox.TabIndex = 11;
             this.PostponeDetectionCheckBox.Text = "Postpone Detection";
@@ -440,12 +465,12 @@
             // 
             this.LogBox.BackColor = System.Drawing.Color.LightSeaGreen;
             this.LogBox.ForeColor = System.Drawing.Color.White;
-            this.LogBox.Location = new System.Drawing.Point(12, 361);
+            this.LogBox.Location = new System.Drawing.Point(12, 376);
             this.LogBox.Multiline = true;
             this.LogBox.Name = "LogBox";
             this.LogBox.ReadOnly = true;
             this.LogBox.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.LogBox.Size = new System.Drawing.Size(260, 245);
+            this.LogBox.Size = new System.Drawing.Size(260, 230);
             this.LogBox.TabIndex = 18;
             // 
             // SuspectsButton
@@ -520,8 +545,7 @@
             this.Controls.Add(this.groupBox2);
             this.ForeColor = System.Drawing.Color.Black;
             this.Name = "FormSuperScan";
-            this.Text = "SuperScan V 2.5";
-            this.Load += new System.EventHandler(this.SuperScanForm_Load);
+            this.Text = "SuperScan Loading...";
             ((System.ComponentModel.ISupportInitialize)(this.ExposureTimeSetting)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinAltitudeSetting)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.FilterNumberSetting)).EndInit();
@@ -572,6 +596,8 @@
         private System.Windows.Forms.Label SuspectCountLabel;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.CheckBox RefreshTargetsCheckBox;
+        private System.Windows.Forms.ComboBox CalibrationListBox;
+        private System.Windows.Forms.Label label5;
     }
 }
 

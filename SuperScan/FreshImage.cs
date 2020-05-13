@@ -60,10 +60,11 @@ namespace SuperScan
 
             //Clear any camera set up stuff that might be hanging around
             //  and there has been some on occasion
+            //Removed subframe on request for cameras with long download times
             ccdsoftCamera tsx_cc = new ccdsoftCamera()
             {
-                Delay = 0,
-                Subframe = 0
+                //Subframe = 0,
+                Delay = 0
             };
 
             LogEntry("Finding coordinates for " + freshImageName);
@@ -130,6 +131,9 @@ namespace SuperScan
         //  Set exposureTime, Light Frame, AutoDark, No Autosave, Asynchronous
         //  then TakeImage 
         //  Wait for completion status, then return
+        //
+        //  Removed subframe setting on request for cameras with long download times
+
         private void ShootGalaxy()
         {
             Configuration sscf = new Configuration();
@@ -142,11 +146,29 @@ namespace SuperScan
                 AutoSaveOn = 0,          //Autosave Off
                 FilterIndexZeroBased = Convert.ToInt32(sscf.Filter),
                 ExposureTime = Convert.ToDouble(sscf.Exposure),
-                Subframe = 0,
+                //Subframe = 0,
                 Frame = ccdsoftImageFrame.cdLight,
-                ImageReduction = ccdsoftImageReduction.cdAutoDark,
+                //ImageReduction = ccdsoftImageReduction.cdAutoDark,
                 Asynchronous = 1        //Asynchronous on
             };
+            switch (sscf.CalibrationType)
+            {
+                case "None":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdNone;
+                        break;
+                    }
+                case "Auto":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
+                        break;
+                    }
+                case "Full":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdBiasDarkFlat;
+                        break;
+                    }
+            }
             LogEntry("Imaging target for " + sscf.Exposure + " secs");
             tsx_cc.TakeImage();
             //Wait for completion

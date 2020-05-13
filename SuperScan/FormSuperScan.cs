@@ -48,6 +48,8 @@ namespace SuperScan
             DomeCheckBox.Checked = Convert.ToBoolean(ss_cfg.UsesDome);
             OnTopCheckBox.Checked = Convert.ToBoolean(ss_cfg.FormOnTop);
             RefreshTargetsCheckBox.Checked = Convert.ToBoolean(ss_cfg.RefreshTargets);
+            CalibrationListBox.SelectedItem = ss_cfg.CalibrationType;
+            MinGalaxySetting.Value = Convert.ToDecimal(ss_cfg.MinGalaxySize);
             try
             { this.Text = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString(); }
             catch
@@ -57,17 +59,13 @@ namespace SuperScan
             }
             this.Text = "SuperScan V" + this.Text;
 
-            gList = new GalaxyList();
-            GalaxyCount.Text = gList.GalaxyCount.ToString();
+            //gList = new GalaxyList();
+            //GalaxyCount.Text = gList.GalaxyCount.ToString();
 
             LogEventHandler("\r\n" + "********** Initiating SuperScan **********");
             LogEventHandler("Found " + GalaxyCount.Text + " galaxies available at this time.");
 
             return;
-        }
-
-        private void SuperScanForm_Load(object sender, EventArgs e)
-        {
         }
 
         private void StartScanButton_Click(object sender, EventArgs e)
@@ -641,8 +639,14 @@ namespace SuperScan
 
         private void MinGalaxySetting_ValueChanged(object sender, EventArgs e)
         {
-            //Attempt to change minimum galaxy size, which can't be done programmatically
-            MessageBox.Show("Minimum galaxy size must be changed in the SuperScan.dbq observing list query.");
+            //Attempt to change minimum galaxy size -- save changed value and rerun galaxy list
+            Configuration ss_cfg = new Configuration();
+            ss_cfg.MinGalaxySize = MinGalaxySetting.Value.ToString();
+            Color oldColor = MinGalaxySetting.BackColor;
+            MinGalaxySetting.BackColor = Color.Salmon;
+            gList = new GalaxyList();
+            GalaxyCount.Text = gList.GalaxyCount.ToString();
+            MinGalaxySetting.BackColor = oldColor;
             return;
         }
 
@@ -655,6 +659,14 @@ namespace SuperScan
             gList = new GalaxyList();
             GalaxyCount.Text = gList.GalaxyCount.ToString();
             return;
+        }
+
+        private void CalibrationListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Index 0 = No Cal
+            Configuration ss_cfg = new Configuration();
+            ss_cfg.CalibrationType = CalibrationListBox.SelectedItem.ToString();
+
         }
     }
 }

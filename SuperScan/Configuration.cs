@@ -90,7 +90,8 @@ namespace SuperScan
                     new XElement("WatchWeather", "False"),
                     new XElement("UsesDome", "False"),
                     new XElement("FormOnTop", "False"),
-                    new XElement("RefreshTargets","True"));
+                    new XElement("RefreshTargets","True"),
+                    new XElement("CalibrationType", "1"));
 
                 cDefaultX.Save(ssdir + "\\" + SuperScanConfigurationFilename);
             }
@@ -238,14 +239,23 @@ namespace SuperScan
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                return (sscfgXf.Element("MinGalaxySize").Value);
+                if (sscfgXf.Element("MinimumGalaxySize") == null)
+                {
+                    sscfgXf.Add(new XElement("MinimumGalaxySize", "0"));
+                    sscfgXf.Save(sscfgfilename);
+                    return ("0");
+                }
+                else
+                {
+                    return (sscfgXf.Element("MinimumGalaxySize").Value);
+                }
             }
             set
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                XElement sscfgXel = sscfgXf.Element("MinGalaxySize");
-                sscfgXel.ReplaceWith(new XElement("MinGalaxySize", value));
+                XElement sscfgXel = sscfgXf.Element("MinimumGalaxySize");
+                sscfgXel.ReplaceWith(new XElement("MinimumGalaxySize", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
             }
@@ -481,7 +491,7 @@ namespace SuperScan
                 {
                     sscfgXf.Add(new XElement("RefreshTargets", "True"));
                     sscfgXf.Save(sscfgfilename);
-                    return ("False");
+                    return ("True");
                 }
                 else
                 {
@@ -494,6 +504,34 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 XElement sscfgXel = sscfgXf.Element("RefreshTargets");
                 sscfgXel.ReplaceWith(new XElement("RefreshTargets", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
+        public string CalibrationType
+        {
+           get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("CalibrationType") == null)
+                {
+                    sscfgXf.Add(new XElement("CalibrationType", "None"));
+                    sscfgXf.Save(sscfgfilename);
+                    return ("None");
+                }
+                else
+                {
+                    return (sscfgXf.Element("CalibrationType").Value);
+                }
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("CalibrationType");
+                sscfgXel.ReplaceWith(new XElement("CalibrationType", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
             }

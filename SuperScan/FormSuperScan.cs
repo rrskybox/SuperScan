@@ -50,6 +50,8 @@ namespace SuperScan
             RefreshTargetsCheckBox.Checked = Convert.ToBoolean(ss_cfg.RefreshTargets);
             CalibrationListBox.SelectedItem = ss_cfg.CalibrationType;
             MinGalaxySetting.Value = Convert.ToDecimal(ss_cfg.MinGalaxySize);
+            CCDTemperatureSetting.Value = Convert.ToDecimal(ss_cfg.CCDTemp);
+
             try
             { this.Text = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString(); }
             catch

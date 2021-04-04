@@ -30,7 +30,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
-using TheSkyXLib;
+using TheSky64Lib;
 using AstroImage;
 
 namespace SuperScan

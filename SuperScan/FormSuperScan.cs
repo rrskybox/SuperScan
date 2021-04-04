@@ -17,7 +17,7 @@ using System.Deployment.Application;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using TheSkyXLib;
+using TheSky64Lib;
 using WeatherWatch;
 
 namespace SuperScan

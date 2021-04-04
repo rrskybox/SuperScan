@@ -1,5 +1,5 @@
 ﻿using System;
-using TheSkyXLib;
+using TheSky64Lib;
 
 namespace SuperScan
 {

@@ -20,7 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-using TheSkyXLib;
+using TheSky64Lib;
 
 namespace SuperScan
 {

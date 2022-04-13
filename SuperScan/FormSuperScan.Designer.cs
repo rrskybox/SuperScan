@@ -354,12 +354,13 @@
             this.label4.ForeColor = System.Drawing.Color.White;
             this.label4.Location = new System.Drawing.Point(9, 25);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(150, 13);
+            this.label4.Size = new System.Drawing.Size(146, 13);
             this.label4.TabIndex = 18;
-            this.label4.Text = "Minimum Galaxy Size (arc sec)";
+            this.label4.Text = "Minimum Galaxy Size (arcmin)";
             // 
             // MinGalaxySetting
             // 
+            this.MinGalaxySetting.DecimalPlaces = 1;
             this.MinGalaxySetting.ForeColor = System.Drawing.SystemColors.WindowText;
             this.MinGalaxySetting.Location = new System.Drawing.Point(185, 23);
             this.MinGalaxySetting.Name = "MinGalaxySetting";

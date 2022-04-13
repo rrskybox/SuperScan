@@ -165,6 +165,9 @@ namespace SuperScan
                     }
                 case "Full":
                     {
+                        Reduction calLib = new Reduction();
+                        string binning = Binning.GetBinning();
+                        calLib.SetReductionGroup(tsx_cc.FilterIndexZeroBased, tsx_cc.ExposureTime, (int)tsx_cc.TemperatureSetPoint, binning);
                         tsx_cc.ImageReduction = ccdsoftImageReduction.cdBiasDarkFlat;
                         break;
                     }

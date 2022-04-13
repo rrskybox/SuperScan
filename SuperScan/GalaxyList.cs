@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Xml.Linq;
+using System.Reflection;
 using TheSky64Lib;
 
 
@@ -56,6 +57,22 @@ namespace SuperScan
             //if targets are to be refreshed, then run a new observing list query and save the results in the gXgalaxies XML list
             if (Convert.ToBoolean(ss_cfg.RefreshTargets))
             {
+                //Load query file if it isn't stored already
+                if (!File.Exists(ss_cfg.QueryPath))
+                {
+                    //Install the dbq file
+                    ////Collect the file contents to be written
+                    Assembly dgassembly = Assembly.GetExecutingAssembly();
+                    Stream dgstream = dgassembly.GetManifestResourceStream("SuperScan.SuperScanQuery.dbq");
+                    Byte[] dgbytes = new Byte[dgstream.Length];
+                    FileStream dbqgfile = File.Create(ss_cfg.QueryPath);
+                    int dgreadout = dgstream.Read(dgbytes, 0, (int)dgstream.Length);
+                    dbqgfile.Close();
+                    //write to destination file
+                    File.WriteAllBytes(ss_cfg.QueryPath, dgbytes);
+                    dgstream.Close();
+
+                }
                 ///Create object information and datawizard objects
                 sky6DataWizard tsx_dw = new sky6DataWizard();
                 ///Set query path 

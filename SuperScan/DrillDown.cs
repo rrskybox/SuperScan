@@ -32,6 +32,7 @@ using System.Linq;
 using System.Threading;
 using TheSky64Lib;
 using AstroImage;
+using AstroMath;
 
 namespace SuperScan
 {
@@ -344,8 +345,8 @@ namespace SuperScan
             proc.StartInfo.FileName = blinkerPath;
             proc.StartInfo.Arguments =
                 TargetName + "," +
-                MathHelpers.HoursToRad(tgtRA).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
-                MathHelpers.DegToRad(tgtDec).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
+                AstroMath.Transform.HoursToRadians(tgtRA).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
+                AstroMath.Transform.DegreesToRadians(tgtDec).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
                 zoom.ToString() + "," +
                 firstFile + "," +
                 secondFile;

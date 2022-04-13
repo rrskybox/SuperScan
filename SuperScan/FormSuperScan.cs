@@ -87,7 +87,7 @@ namespace SuperScan
         private void SuspectsButton_Click(object sender, EventArgs e)
         {
             LogEventHandler("\r\n" + "**********Checking Suspect List **********" + "\r\n");
-            SuspectReportForm ss_sfm = new SuspectReportForm();
+            FormSuspectReport ss_sfm = new FormSuspectReport();
             ss_sfm.ShowDialog();
             return;
         }
@@ -136,7 +136,7 @@ namespace SuperScan
             Configuration ss_cfg = new Configuration();
             if (AutoRunCheckBox.Checked)
             {
-                AutoRunForm ss_asf = new AutoRunForm();
+                FormAutoRun ss_asf = new FormAutoRun();
                 ss_asf.ShowDialog();
                 ss_cfg.AutoStart = "True";
                 {

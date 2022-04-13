@@ -23,7 +23,6 @@ namespace SuperScan
     {
         //Private data
         string SuperScanFolderName = "SuperScan";
-        string SuperScanQueryFolder = "Software Bisque\\TheSkyX Professional Edition\\Database Queries";
 
         string SuperScanImageBankFoldername = "Image Bank";
         string SuperScanGalaxyListFilename = "GalaxyList.xml";
@@ -50,7 +49,6 @@ namespace SuperScan
 
             ssdir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + SuperScanFolderName;
 
-            InstallDBQ();
 
             if (!Directory.Exists(ssdir + "\\" + SuperScanFolderName))
             {
@@ -66,7 +64,7 @@ namespace SuperScan
                     new XElement("ImageBankFoldername", (ssdir + "\\" + SuperScanImageBankFoldername)),
                     new XElement("FreshImagePath", (ssdir + "\\" + SuperScanFreshImageFilename)),
                     new XElement("DifferenceImagePath", (ssdir + "\\" + SuperScanDifferenceImageFilename)),
-                    new XElement("SuperScanQueryPath", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + "Software Bisque\\TheSkyX Professional Edition\\Database Queries\\" + SuperScanQueryFilename),
+                    new XElement("SuperScanQueryPath", Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + "SuperScan\\" + SuperScanQueryFilename),
                     new XElement("LogFoldername", (ssdir + "\\" + SuperScanLogFoldername)),
                     new XElement("FollowUpFoldername", (ssdir + "\\" + SuperScanFollowUpFoldername)),
                     new XElement("SuspectsFilePath", (ssdir + "\\" + SuperScanSuspectsFilename)),
@@ -90,26 +88,24 @@ namespace SuperScan
                     new XElement("WatchWeather", "False"),
                     new XElement("UsesDome", "False"),
                     new XElement("FormOnTop", "False"),
-                    new XElement("RefreshTargets","True"),
+                    new XElement("RefreshTargets", "True"),
                     new XElement("CalibrationType", "1"));
 
                 cDefaultX.Save(ssdir + "\\" + SuperScanConfigurationFilename);
             }
-
             if (!Directory.Exists(ssdir + "\\" + SuperScanImageBankFoldername))
             {
                 Directory.CreateDirectory(ssdir + "\\" + SuperScanImageBankFoldername);
             }
-
             if (!Directory.Exists(ssdir + "\\" + SuperScanLogFoldername))
             {
                 Directory.CreateDirectory(ssdir + "\\" + SuperScanLogFoldername);
-
             }
             if (!Directory.Exists(ssdir + "\\" + SuperScanFollowUpFoldername))
             {
                 Directory.CreateDirectory(ssdir + "\\" + SuperScanFollowUpFoldername);
             }
+            InstallDBQ();
             return;
         }
 
@@ -511,7 +507,7 @@ namespace SuperScan
 
         public string CalibrationType
         {
-           get
+            get
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
@@ -819,7 +815,10 @@ namespace SuperScan
             //Installs the dbq file in the proper destination folder if it is not installed already.
             //
             //  Generate the install path from the defaults.            
-            string DBQInstallPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + SuperScanQueryFolder + "\\" + SuperScanQueryFilename;
+            //string DBQInstallPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + SuperScanQueryFolder + "\\" + SuperScanQueryFilename;
+            string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+            XElement sscfgXf = XElement.Load(sscfgfilename);
+            string DBQInstallPath = sscfgXf.Element("SuperScanQueryPath").Value.ToString();
             if (!File.Exists(DBQInstallPath))
             {
                 Assembly dassembly = Assembly.GetExecutingAssembly();

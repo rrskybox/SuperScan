@@ -40,12 +40,12 @@ namespace SuperScan
         public Configuration()
         {
             //Create the SuperScan folder path for the base folder.
-            //Check to see if the TSX query file has been installed in its Software Bisque directory.  If not, install it.
             //Check to see if it exists.  If not, create the folder
             //Check to see if configuration file exists.  If not create it with defaults
             //Check to see if the Image Bank folder exists.  If not create it.
             //Check to see if the Log folder exists.  If not, create it.
             //Check to see if the FollowUp folder exists.  If not, create it.
+            //Check to see if the TSX query file has been installed in the SuperScan directory.  If not, install it.
 
             ssdir = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\" + SuperScanFolderName;
 

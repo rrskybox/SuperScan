@@ -219,7 +219,13 @@ namespace SuperScan
             tsx_dif.Open();
             //Prepare TSX to close the image window when closing the image
             tsx_dif.DetachOnClose = 0;
-            //Look for stars using Sextractor
+
+            //double pixSize = Convert.ToDouble(tsx_dif.FITSKeyword("XPIXSZ"));
+            //double focLen = Convert.ToDouble(tsx_dif.FITSKeyword("FOCALLEN"));
+
+            //tsx_dif.ScaleInArcsecondsPerPixel = (pixSize * 206.265) / focLen;
+
+            ////Look for stars using Sextractor
             //  If fails, close the object and image
             try
             {
@@ -397,6 +403,12 @@ namespace SuperScan
                 tsx_img.Path = wcsfilepath;
                 tsx_img.Open();
                 tsx_img.DetachOnClose = 0;
+
+                double pixSize = Convert.ToDouble(tsx_img.FITSKeyword("XPIXSZ"));
+                double focLen = Convert.ToDouble(tsx_img.FITSKeyword("FOCALLEN"));
+
+                tsx_img.ScaleInArcsecondsPerPixel = (pixSize*206.265)/focLen;
+
                 try
                 {
                     tsx_img.InsertWCS(true);
@@ -482,6 +494,12 @@ namespace SuperScan
                 tsx_img.Path = wcsfilepath;
                 tsx_img.Open();
                 tsx_img.DetachOnClose = 0;
+
+                double pixSize = Convert.ToDouble(tsx_img.FITSKeyword("XPIXSZ"));
+                double focLen = Convert.ToDouble(tsx_img.FITSKeyword("FOCALLEN"));
+
+                tsx_img.ScaleInArcsecondsPerPixel = (pixSize * 206.265) / focLen;
+
                 try
                 {
                     tsx_img.InsertWCS(true);

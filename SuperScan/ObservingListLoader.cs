@@ -93,7 +93,7 @@ namespace SuperScan
             olXML += XdecDocType + "\r\n";
             //Write new root element declaration
             olXML += XdecStartRoot + "\r\n";
-            //Read in remaining TheSkyXDataHeader declarations through the close declaration
+            //Read in remaining TheSky64DataHeader declarations through the close declaration
             //  line by line, up to, but not including, the last conforming line
             string throwaway;
             for (int i = 1; i < lastXMLline; i++) throwaway = obsfile.ReadLine();
@@ -129,7 +129,7 @@ namespace SuperScan
 
         public void XMLtoTSX()
         {
-            //Translates an TSXObservingList (version 1.0) XML document to an TheSkyXDatabase (version 1.00) sort of XML document
+            //Translates an TSXObservingList (version 1.0) XML document to an TheSky64Database (version 1.00) sort of XML document
             //This procedure recreates the TSX Observing List file without using the builtin XML parsing functions, i.e. brute force
             //  such that porting to other OS environments is easier, but does place some constraints on files that can be converted.
             //

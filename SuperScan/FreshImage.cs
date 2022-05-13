@@ -146,9 +146,7 @@ namespace SuperScan
                 AutoSaveOn = 0,          //Autosave Off
                 FilterIndexZeroBased = Convert.ToInt32(sscf.Filter),
                 ExposureTime = Convert.ToDouble(sscf.Exposure),
-                //Subframe = 0,
                 Frame = ccdsoftImageFrame.cdLight,
-                //ImageReduction = ccdsoftImageReduction.cdAutoDark,
                 Asynchronous = 1        //Asynchronous on
             };
             switch (sscf.CalibrationType)

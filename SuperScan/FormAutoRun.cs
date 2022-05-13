@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
+using System.IO;
 
 namespace SuperScan
 {
@@ -85,15 +86,31 @@ namespace SuperScan
         private void OKButton_Click(object sender, EventArgs e)
         {
             //Upon clicking the OK button,
-            //Save configured times and close form
             Configuration ss_cfg = new Configuration();
-            ss_cfg.StageSystemTime = StagingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
-            ss_cfg.StartUpTime = StartingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
-            ss_cfg.ShutDownTime = ShutdownDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            //Verify selected choices
+            if (StagingDateTimePicker.Checked && !File.Exists(ss_cfg.StageSystemPath))
+            {
+                MessageBox.Show("Staging program is not installed.  Reselect or uncheck.");
+                return;
+            }
+            if (StartingDateTimePicker.Checked && !File.Exists(ss_cfg.StartUpPath))
+            {
+                MessageBox.Show("Startup program is not installed.  Reselect or uncheck.");
+                return;
+            }
+            if (ShutdownDateTimePicker.Checked && !File.Exists(ss_cfg.ShutDownPath))
+            {
+                MessageBox.Show("Shutdown program is not installed.  Reselect or uncheck.");
+                return;
+            }
             //Store program switches
             ss_cfg.StageSystemOn = StagingDateTimePicker.Checked.ToString();
             ss_cfg.StartUpOn = StartingDateTimePicker.Checked.ToString();
             ss_cfg.ShutDownOn = ShutdownDateTimePicker.Checked.ToString();
+            //Save configured times and close form
+            ss_cfg.StageSystemTime = StagingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            ss_cfg.StartUpTime = StartingDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
+            ss_cfg.ShutDownTime = ShutdownDateTimePicker.Value.ToString("yyyy/MM/dd HH:mm:ss");
             Close();
             return;
         }

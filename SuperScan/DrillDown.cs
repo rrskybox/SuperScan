@@ -85,14 +85,18 @@ namespace SuperScan
             //Take a fresh image at 600 seconds
             //That will be placed in the 
             Configuration sscfg = new Configuration();
-            ccdsoftImage tsx_im = new ccdsoftImage();
-            ccdsoftCamera tsx_cc = new ccdsoftCamera();
-            tsx_im.Path = FollowUpPath + "\\" + gName + ".fit";
-            tsx_cc.AutoSaveOn = 0;          //Autosave Off
-            //No filter change
-            tsx_cc.ExposureTime = expTime;
-            tsx_cc.Frame = ccdsoftImageFrame.cdLight;
-            tsx_cc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
+            ccdsoftImage tsx_im = new ccdsoftImage()
+            {
+                Path = FollowUpPath + "\\" + gName + ".fit"
+            };
+            ccdsoftCamera tsx_cc = new ccdsoftCamera()
+            {
+                //Note: No filter change
+                AutoSaveOn = 0,    //Autosave Off
+                ExposureTime = expTime,
+                Frame = ccdsoftImageFrame.cdLight,
+                Asynchronous = 1     //Asynchronous off
+            };
             switch (sscfg.CalibrationType)
             {
                 case "None":
@@ -111,8 +115,6 @@ namespace SuperScan
                         break;
                     }
             }
-            tsx_cc.Asynchronous = 0;        //Asynchronous on
-
             tsx_cc.TakeImage();
             //Wait for completion
             while (tsx_cc.State != ccdsoftCameraState.cdStateNone)
@@ -137,13 +139,6 @@ namespace SuperScan
             TargetImageDir = ImageBankPath + "\\" + TargetName;
             //Show suspect in astroimage form, if PlateSolve2 is installed
             // if not, then an exception will be thrown
-
-            //
-            //test code
-            //fileName = "C:\\Users\\Rick McAlister\\Documents\\SuperScan\\Image Bank\\NGC 1023\\NGC 1023_2019-10-31-2138.fit";
-            //fileName = "C:\\Users\\Rick McAlister\\Documents\\SuperScan\\Image Bank\\NGC 1023\\CurrentImage.fit";
-            //
-
             TargetFits = new FitsFile(followUpfileName, true);
             double pixSize = 1;
             if (TargetFits.FocalLength != 0) pixSize = (206.265 / TargetFits.FocalLength) * TargetFits.XpixSz;

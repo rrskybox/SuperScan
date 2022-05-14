@@ -60,9 +60,10 @@ namespace SuperScan
                 this.Text = " in Debug";
             }
             this.Text = "SuperScan V" + this.Text;
+            this.Show();
 
-            //gList = new GalaxyList();
-            //GalaxyCount.Text = gList.GalaxyCount.ToString();
+            gList = new GalaxyList();
+            GalaxyCount.Text = gList.GalaxyCount.ToString();
 
             LogEventHandler("\r\n" + "********** Initiating SuperScan **********");
             LogEventHandler("Found " + GalaxyCount.Text + " galaxies available at this time.");

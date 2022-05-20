@@ -89,6 +89,24 @@ namespace SuperScan
             return;
         }
 
+        public void SetCLSSettings()
+        {
+            //Sets reduction and scale for image linking, CLS or T-Point
+            AutomatedImageLinkSettings tsxa = new AutomatedImageLinkSettings() { };
+            double clsScale = tsxa.imageScale;
+            ImageLink tsxl = new ImageLink()
+            {
+                scale = clsScale,
+                unknownScale = false
+            };
+
+            ccdsoftCamera tsxc = new ccdsoftCamera()
+            {
+                ImageReduction = ccdsoftImageReduction.cdAutoDark 
+            };
+            return;
+        }
+
         public void ReliableRADecSlew(double RA, double Dec, string name, bool hasDome)
         {
             //
@@ -114,6 +132,8 @@ namespace SuperScan
             //Tries to perform CLS without running into dome tracking race condition
             //
             ReliableRADecSlew(RA, Dec, name, hasDome);
+            //Change the camera reduction to none
+            SetCLSSettings();
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
             int clsStatus = 123;
             //If dome, Turn off tracking
@@ -141,7 +161,6 @@ namespace SuperScan
             }
             return clsStatus;
         }
-
 
         private bool IsDomeTrackingUnderway()
         {
@@ -189,5 +208,6 @@ namespace SuperScan
             while (IsDomeTrackingUnderway()) { System.Threading.Thread.Sleep(1000); }
             return;
         }
+
     }
 }

@@ -30,7 +30,7 @@ namespace SuperScan
         public double SuspectRA { get; set; }
         public double SuspectDec { get; set; }
         public string GalaxyName { get; set; }
-        public int ImageZoom { get; set; } = 4;
+        public int ImageZoom { get; set; } = 16;
         public int BlinkZoom { get; set; } = 8;
         public Suspect CurrentSuspect { get; set; }
         public DrillDown CurrentDrillDown { get; set; }
@@ -146,7 +146,8 @@ namespace SuperScan
                 //Set the FOV size to  the galaxy size
                 tsx_sc.FieldOfView = galaxis / 60;
                 //Set the center of view to the suspect//s RA/Dec and light up the target icon
-                //tsx_sc.Find(suspect.SuspectRA.ToString() + ", " + suspect.SuspectDec.ToString());
+                tsx_sc.Find(CurrentSuspect.SuspectRA.ToString() + ", " + CurrentSuspect.SuspectDec.ToString());
+
                 tsx_sc.RightAscension = CurrentSuspect.SuspectRA;
                 tsx_sc.Declination = CurrentSuspect.SuspectDec;
                 //Check TNS for supernova reports for 60 arc seconds around this location for the last 10 days
@@ -182,6 +183,9 @@ namespace SuperScan
 
         private void BlinkButton_Click(object sender, EventArgs e)
         {
+            MessageBox.Show("Under renovation");
+            return; 
+
             UseWaitCursor = true;
             FormCrunchingNotice cForm = new FormCrunchingNotice();
             cForm.Show();
@@ -189,18 +193,25 @@ namespace SuperScan
             BlinkButton.BackColor = Color.LightSalmon;
             if (BlinkList == null)
                 BlinkList = CurrentDrillDown.GetBlinkImages(BlinkZoom);
-            ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
-            ImagePictureBox.Image = BlinkList[0];
-            this.Show(); System.Windows.Forms.Application.DoEvents();
-            System.Windows.Forms.Application.DoEvents();
-            System.Threading.Thread.Sleep(2000);
-            ImagePictureBox.Image = BlinkList[1];
-            this.Show(); System.Windows.Forms.Application.DoEvents();
-            System.Windows.Forms.Application.DoEvents();
-            System.Threading.Thread.Sleep(2000);
-            ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-            ImagePictureBox.Image = CurrentFollowUpImage;
-            this.Show(); System.Windows.Forms.Application.DoEvents();
+            if (BlinkList == null)
+            {
+                NotesTextBox.AppendText("No images banked to blink");
+            }
+            else
+            {
+                ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                ImagePictureBox.Image = BlinkList[0];
+                this.Show();
+                System.Windows.Forms.Application.DoEvents();
+                System.Threading.Thread.Sleep(2000);
+                ImagePictureBox.Image = BlinkList[1];
+                this.Show();
+                System.Windows.Forms.Application.DoEvents();
+                System.Threading.Thread.Sleep(2000);
+                ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                ImagePictureBox.Image = CurrentFollowUpImage;
+            }
+            this.Show();
             System.Windows.Forms.Application.DoEvents();
             BlinkButton.BackColor = Color.LightGreen;
             UseWaitCursor = false;

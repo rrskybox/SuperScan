@@ -53,11 +53,18 @@ namespace SuperScan
 
         public string FollowUpPath { get; set; }
         public string ImageBankPath { get; set; }
-
         public string TargetName { get; set; }
-        public double TargetRAhrs { get; set; }
-        public double TargetDecdeg { get; set; }
+        public double TargetRAHrs { get; set; }
+        public double TargetDecDeg { get; set; }
+        public double GalaxyRAHrs { get; set; }
+        public double GalaxyDecDeg { get; set; }
+        public double GalaxyX { get; set; }
+        public double GalaxyY { get; set; }
+        public double TargetX { get; set; }
+        public double TargetY { get; set; }
+        public double ImagePA { get; set; }
         public string TargetImageDir { get; set; }
+
         public AstroImage.FitsFile TargetFits;
 
         public string FitsFilePath { get; set; }
@@ -133,38 +140,61 @@ namespace SuperScan
             //Test code for PlateSolve2 Wrapper
             //CancellationToken cToken;
             TargetName = galaxyName;
-            TargetRAhrs = suspectRAhrs;
-            TargetDecdeg = suspectDecdeg;
+            TargetRAHrs = suspectRAhrs;
+            TargetDecDeg = suspectDecdeg;
+
+            //Get coordinates for galaxyName
+            sky6StarChart tsxc = new sky6StarChart();
+            sky6ObjectInformation tsxo = new sky6ObjectInformation();
+            tsxc.Find(galaxyName);
+            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+            GalaxyRAHrs = tsxo.ObjInfoPropOut;
+            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
+            GalaxyDecDeg = tsxo.ObjInfoPropOut;
+
             string followUpfileName = FollowUpPath + "\\" + TargetName + ".fit";
             TargetImageDir = ImageBankPath + "\\" + TargetName;
             //Show suspect in astroimage form, if PlateSolve2 is installed
             // if not, then an exception will be thrown
             TargetFits = new FitsFile(followUpfileName, true);
             double pixSize = 1;
-            if (TargetFits.FocalLength != 0) pixSize = (206.265 / TargetFits.FocalLength) * TargetFits.XpixSz;
+            if (TargetFits.FocalLength != 0)
+                pixSize = (206.265 / TargetFits.FocalLength) * TargetFits.XpixSz;
             //
             ccdsoftImage tsxim = new ccdsoftImage();
             tsxim.Path = FollowUpPath + "\\" + galaxyName + ".fit";
             tsxim.Open();
-            //Try to image link.  If not successful, probably too few stars
-            //  if so, just return out of this;
+            tsxim.ScaleInArcsecondsPerPixel = pixSize; //Must be set
             ImageLink tsxil = new ImageLink();
             tsxil.pathToFITS = tsxim.Path;
-            try { tsxil.execute(); }
+            //try { tsxil.execute(); }
+            //Try to image link with an InsertWCS -- need to get PA.
+            //If not successful, probably too few stars
+            //  if so, just return out of this;
+            int wcsresult;
+            try { wcsresult = tsxim.InsertWCS(true); }
             catch (Exception ex)
             {
                 return ("Image Link Error: " + ex.Message);
             }
             //Show pic on scrren
             tsxim.Visible = 0;
-
+            //Save changed file
+            tsxim.Save();
             ImageLinkResults tsxilr = new ImageLinkResults();
             int rlt = tsxilr.succeeded;
             string rltText = tsxilr.errorText;
 
+            ImagePA = tsxilr.imagePositionAngle;
+            int txyResult = tsxim.RADecToXY(TargetRAHrs, TargetDecDeg);
+            TargetX = tsxim.RADecToXYResultX();
+            TargetY = tsxim.RADecToXYResultY();
+            int gxyResult = tsxim.RADecToXY(GalaxyRAHrs, GalaxyDecDeg);
+            GalaxyX = tsxim.RADecToXYResultX();
+            GalaxyY = tsxim.RADecToXYResultY();
+
             try
             {
-                //tsxim.InsertWCS(true);
                 tsxim.ShowInventory();
             }
             catch (Exception ex)
@@ -175,9 +205,10 @@ namespace SuperScan
 
             //Look for a light source within 10 pixels of the target RA/Dec
             //The developer is picking an arbitrary 10 pixel square box as "near"
-            int iLS = FindClosestLightSource(tsxim, TargetRAhrs, TargetDecdeg, 10);
+            int iLS = FindClosestLightSource(tsxim, TargetRAHrs, TargetDecDeg, 10);
             if (iLS == -1)
             {
+                tsxim.Close();
                 return ("No light source found at suspect location\r\n  **Aborting check**");
             }
 
@@ -266,8 +297,8 @@ namespace SuperScan
             //Set the center of view to the suspect//s RA/Dec and light up the target icon
             //
             //Recenter the star chart on the RA/Dec coordinates
-            tsxsc.RightAscension = TargetRAhrs;
-            tsxsc.Declination = TargetDecdeg;
+            tsxsc.RightAscension = TargetRAHrs;
+            tsxsc.Declination = TargetDecDeg;
             int Xtcen = tsxsc.WidthInPixels / 2;
             int Ytcen = tsxsc.HeightInPixels / 2;
             //find the star at the center of the chart
@@ -276,9 +307,7 @@ namespace SuperScan
             string starName = tsxoi.ObjInfoPropOut;
             //Open astrodisplay form of follow up image
 
-            tsxim = null;
-            tsxoi = null;
-            tsxsc = null;
+            tsxim.Close();
             //Report on computed apparant magnitude
             return ("Nearest star: " + starName + "\r\n" +
                                                    "Adjusted apparent magnitude = " +
@@ -316,41 +345,30 @@ namespace SuperScan
             return (-1);  //Error return
         }
 
-        public Image GetFollowUpImage(int zoom) => AstroImage.AstroDisplay.FitsToTargetImage(TargetFits, TargetRAhrs, TargetDecdeg, zoom);
+        public Image GetFollowUpImage(int zoom)
+        {
+            AstroDisplay ad = new AstroDisplay(TargetFits);
+            Image fImage = ad.FitsToTargetImage(TargetRAHrs, TargetDecDeg, zoom);
+            //Point ngcTarget = TargetFits.RADECtoImageXY(GalaxyRAHours , GalaxyDecDegrees);
+            //Point target =TargetFits.RADECtoImageXY(TargetRAhrs, TargetDecdeg);
+            Point target = new Point((int)TargetX, (int)TargetY);
+            Point ngc = new Point((int)GalaxyX, (int)GalaxyY);
+            fImage = ad.AddCrossHair(target, 80, 6);
+            fImage = ad.AddCrossHair(ngc, 120, 12);
+            return fImage;
+        }
 
         public Image[] GetBlinkImages(int zoom)
         {
             string imageDir = ImageBankPath + "\\" + TargetName;
             DirectoryInfo dinfo = new DirectoryInfo(imageDir);
             var allFiles = dinfo.GetFiles("NGC*.fit").OrderByDescending(p => p.CreationTime).ToArray();
+            if (allFiles.Count() == 0)
+                return null;
             string[] imageFiles = { allFiles[0].FullName, allFiles[1].FullName };
-            return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAhrs, TargetDecdeg, zoom);
+            //return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAhrs, TargetDecdeg, zoom);
+            return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAHrs, TargetDecDeg, zoom);
         }
 
-        public void ReBlinker(string targetName, double tgtRA, double tgtDec, int zoom, string firstFile, string secondFile)
-        {
-            //Creates a new process to run the AstroDisplay independently
-            string toolName = "Blinker.appref-ms";
-            string ttdir = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + "\\Microsoft\\Windows\\Start Menu\\Programs\\TSXToolkit\\TSXToolkit";
-            //string blinkerPath = Path.Combine(ttdir, toolName);
-
-            string blinkerPath = @"C:\Users\Rick McAlister\OneDrive\CS Projects\Blinker\Blinker\bin\Debug\Blinker.exe";
-            //string blinkerPath = @"C:\Users\Rick McAlister\AppData\Local\Apps\2.0\CEVNCHMT.VDQ\0JZ09JAL.1TN\blin..tion_429a632034a792cd_0001.0000_0ac1f94652a855a2\Blinker.exe";
-            Process proc = new System.Diagnostics.Process();
-            proc.StartInfo.FileName = blinkerPath;
-            proc.StartInfo.Arguments =
-                TargetName + "," +
-                AstroMath.Transform.HoursToRadians(tgtRA).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
-                AstroMath.Transform.DegreesToRadians(tgtDec).ToString("0.00000", CultureInfo.InvariantCulture) + "," +
-                zoom.ToString() + "," +
-                firstFile + "," +
-                secondFile;
-            proc.Start();
-
-            while (!proc.HasExited) { Thread.Sleep(1000); }
-            proc.Dispose();
-            return;
-        }
     }
-
 }

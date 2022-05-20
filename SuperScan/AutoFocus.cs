@@ -51,11 +51,13 @@ namespace SuperScan
                     tsxt.SlewToAzAlt(tAz, tAlt, "AtFocus2ReadyPosition");
                     //dctl.DomeTrackingOn();
                 }
+                Configuration cfg = new Configuration();
 
                 //reset last temp
                 afLastTemp = currentTemp;
                 int syncSave = tsxc.Asynchronous;
                 tsxc.Asynchronous = 0;
+                tsxc.FilterIndexZeroBased = Convert.ToInt32(cfg.Filter);
                 try
                 {
                     int focStat = tsxc.AtFocus2();

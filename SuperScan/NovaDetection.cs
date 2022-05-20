@@ -360,10 +360,10 @@ namespace SuperScan
         }
 
         private int TransformX(double X, double Y, double angleR)
-        //Computes X coordinate of a rotation on X,Y through a rotation of angle degrees
-        //X in pixels, Y in pixels, angle in radians
-        //x// = x cos deltaPA - y sin deltaPA
         {
+            //Computes X coordinate of a rotation on X,Y through a rotation of angle degrees
+            //X in pixels, Y in pixels, angle in radians
+            //x// = x cos deltaPA - y sin deltaPA
             // double angleR = Math.PI * angleD / 180.0;
             // angleR = Math.PI * -90.001 / 180.0;
             double dX = (X * Math.Cos(angleR)) - (Y * Math.Sin(angleR));
@@ -371,10 +371,10 @@ namespace SuperScan
         }
 
         private int TransformY(double X, double Y, double angleR)
-        //Computes Y coordinate of a rotation on X,Y through a rotation of angle degrees
-        //X in pixels, Y in pixels, angle in radians
-        //y// = y cos deltaPA + x sin deltaPA
         {
+            //Computes Y coordinate of a rotation on X,Y through a rotation of angle degrees
+            //X in pixels, Y in pixels, angle in radians
+            //y// = y cos deltaPA + x sin deltaPA
             //double angleR = Math.PI * angleD / 180.0;
             //angleR = Math.PI * -90.001 / 180.0;
             double dY = (Y * Math.Cos(angleR)) + (X * Math.Sin(angleR));
@@ -384,9 +384,9 @@ namespace SuperScan
         //Classes for converting XY to RADec and RADec to XY (using Image Link and TSX)
 
         private class RADecToXY
-        //Class to get the J2000 RA,Dec location of a specific pixel x,y in an image
-        //tRA is RA location in hours, tDec is Dec location in degrees
         {
+            //Class to get the J2000 RA,Dec location of a specific pixel x,y in an image
+            //tRA is RA location in hours, tDec is Dec location in degrees
             private bool plateSolveResult;
             private int targetX;
             private int targetY;
@@ -406,8 +406,7 @@ namespace SuperScan
 
                 double pixSize = Convert.ToDouble(tsx_img.FITSKeyword("XPIXSZ"));
                 double focLen = Convert.ToDouble(tsx_img.FITSKeyword("FOCALLEN"));
-
-                tsx_img.ScaleInArcsecondsPerPixel = (pixSize*206.265)/focLen;
+                tsx_img.ScaleInArcsecondsPerPixel = (pixSize * 206.265) / focLen;
 
                 try
                 {
@@ -474,10 +473,10 @@ namespace SuperScan
         }
 
         private class XYToRADec
-        //Class to get the specific pixel x,y based on a J2000 RA,Dec location of a in a Plate Solved image
-        //Input tRA will be RA location in hours, tDec will be Dec location in degrees
-        //Output properties X and Y are in pixels
         {
+            //Class to get the specific pixel x,y based on a J2000 RA,Dec location of a in a Plate Solved image
+            //Input tRA will be RA location in hours, tDec will be Dec location in degrees
+            //Output properties X and Y are in pixels
             private bool plateSolve;
             private double targetRA;
             private double targetDec;
@@ -497,7 +496,6 @@ namespace SuperScan
 
                 double pixSize = Convert.ToDouble(tsx_img.FITSKeyword("XPIXSZ"));
                 double focLen = Convert.ToDouble(tsx_img.FITSKeyword("FOCALLEN"));
-
                 tsx_img.ScaleInArcsecondsPerPixel = (pixSize * 206.265) / focLen;
 
                 try
@@ -557,10 +555,9 @@ namespace SuperScan
             }
         }
 
-        //Method to link to SuperScan main form for logging progress.
         private void LogEntry(string upd)
-        //Method for projecting log entry to the SuperScan Main Form
         {
+            //Method for projecting log entry to the SuperScan Main Form
             LogUpdate(upd);
             return;
         }

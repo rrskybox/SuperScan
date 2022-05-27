@@ -199,8 +199,8 @@ namespace SuperScan
                 //  This is going to take 10 minutes for the shot and dark, plus another dark
                 //  will have to be taken for the regular scan upon resumption.
                 LogEntry("Potential transient identified.  Taking follow up image.");
-                DrillDown ss_dd = new DrillDown(DateTime.Now);
-                ss_dd.Shoot(gname, DRILLDOWN_EXPOSURE);
+                DrillDown ss_dd = new DrillDown(gname,DateTime.Now);
+                ss_dd.ShootFollowUpImage(gname, DRILLDOWN_EXPOSURE);
                 LogEntry("Follow up image acquired and stored.");
                 return true;
             }

@@ -77,9 +77,9 @@
             this.ImagePictureBox.Location = new System.Drawing.Point(15, 180);
             this.ImagePictureBox.Name = "ImagePictureBox";
             this.ImagePictureBox.Size = new System.Drawing.Size(393, 329);
-            this.ImagePictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.ImagePictureBox.TabIndex = 2;
             this.ImagePictureBox.TabStop = false;
+            this.ImagePictureBox.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.MouseWheel_Handler);
             // 
             // BlinkButton
             // 
@@ -142,7 +142,7 @@
             this.label2.TabIndex = 8;
             this.label2.Text = "Notes:";
             // 
-            // SuspectReportForm
+            // FormSuspectReport
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -158,7 +158,7 @@
             this.Controls.Add(this.CloseButton);
             this.Controls.Add(this.SuspectListbox);
             this.Cursor = System.Windows.Forms.Cursors.Default;
-            this.Name = "SuspectReportForm";
+            this.Name = "FormSuspectReport";
             this.Text = "SuperScan Suspects";
             ((System.ComponentModel.ISupportInitialize)(this.ImagePictureBox)).EndInit();
             this.ResumeLayout(false);

@@ -30,12 +30,16 @@ namespace SuperScan
         public double SuspectRA { get; set; }
         public double SuspectDec { get; set; }
         public string GalaxyName { get; set; }
-        public int ImageZoom { get; set; } = 16;
-        public int BlinkZoom { get; set; } = 8;
+        public int ImageZoom { get; set; } = 2;
+        public int BlinkZoom { get; set; } = 4;
         public Suspect CurrentSuspect { get; set; }
-        public DrillDown CurrentDrillDown { get; set; }
-        public Image CurrentFollowUpImage { get; set; }
-        public Image[] BlinkList { get; set; }
+        public DrillDown SuspectDrillDown { get; set; }
+        public Image SuspectFollowUpImage { get; set; }
+        public Image CurrentSuspectImage { get; set; }
+        public Image LastSuspectImage { get; set; }
+        public List<Image> BlinkList { get; set; }
+
+        private int zoomDistance;
 
         public FormSuspectReport()
         {
@@ -112,13 +116,12 @@ namespace SuperScan
             Show();
             FormCrunchingNotice cForm = new FormCrunchingNotice();
             cForm.Show();
+            BlinkList = new List<Image>();
             BlinkButton.BackColor = Color.LightSalmon;
             //pull the selected suspect entry from the suspect list box
             string susitem;
             try { susitem = SuspectListbox.Items[SuspectListbox.SelectedIndex].ToString(); }
             catch (Exception ex) { return; }
-            //Clear the blink list
-            BlinkList = null;
             //Parse the selected entry for relavent info and create a suspect object to work with
             int galLen = susitem.IndexOf("\t");
             string galname = susitem.Substring(0, galLen - 1);
@@ -132,9 +135,10 @@ namespace SuperScan
             bool susLoad = CurrentSuspect.Load(galname, galdate);
             if (susLoad)
             {
-                CurrentDrillDown = new DrillDown(CurrentSuspect.Event);
+                SuspectDrillDown = new DrillDown(galname, CurrentSuspect.Event);
 
-                CurrentDrillDown.Display(galname, CurrentSuspect.SuspectRA, CurrentSuspect.SuspectDec);
+                SuspectDrillDown.LoadFollowUpImage(CurrentSuspect.SuspectRA, CurrentSuspect.SuspectDec);
+                SuspectDrillDown.VerifySuspect();
 
                 sky6StarChart tsx_sc = new sky6StarChart();
                 sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
@@ -169,9 +173,11 @@ namespace SuperScan
                 Show();
                 System.Windows.Forms.Application.DoEvents();
                 //Show followup Image in picture box
-                CurrentFollowUpImage = CurrentDrillDown.GetFollowUpImage(ImageZoom);
+                SuspectFollowUpImage = SuspectDrillDown.GetFollowUpImage();
                 ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                ImagePictureBox.Image = CurrentFollowUpImage;
+                Size subSize = new Size(ImagePictureBox.Size.Width * ImageZoom, ImagePictureBox.Size.Height * ImageZoom);
+                ImagePictureBox.Image = AstroImage.AstroPic.ResizeImage(SuspectFollowUpImage, subSize);
+                BlinkList.Clear();
                 BlinkButton.BackColor = Color.LightGreen;
                 ClearButton.BackColor = Color.LightGreen;
                 UseWaitCursor = false;
@@ -183,33 +189,48 @@ namespace SuperScan
 
         private void BlinkButton_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Under renovation");
-            return; 
-
             UseWaitCursor = true;
             FormCrunchingNotice cForm = new FormCrunchingNotice();
             cForm.Show();
             this.Show(); System.Windows.Forms.Application.DoEvents();
             BlinkButton.BackColor = Color.LightSalmon;
-            if (BlinkList == null)
-                BlinkList = CurrentDrillDown.GetBlinkImages(BlinkZoom);
-            if (BlinkList == null)
+            if (BlinkList.Count == 0)
             {
-                NotesTextBox.AppendText("No images banked to blink");
+                //No Blink list, so make one
+                //Get names of two most recent images of suspect
+                //Convert each to an image and store in BlinkList
+                Size subSize = new Size(ImagePictureBox.Size.Width * BlinkZoom, ImagePictureBox.Size.Height * BlinkZoom);
+                if (SuspectDrillDown.CurrentImageFilePath != null)
+                {
+                    Image csi = SuspectDrillDown.GetCurrentSampleImage(BlinkZoom);
+                    BlinkList.Add(AstroImage.AstroPic.ResizeImage(csi, subSize));
+                }
+                if (SuspectDrillDown.LastImageFilePath != null)
+                {
+                    Image psi = SuspectDrillDown.GetPriorSampleImage(BlinkZoom);
+                    BlinkList.Add(AstroImage.AstroPic.ResizeImage(psi, subSize));
+                }
+            }
+            if (BlinkList.Count < 2)
+            {
+                NotesTextBox.AppendText("Insufficient images to blink");
             }
             else
             {
-                ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
+                Image imageSave = ImagePictureBox.Image;
+                ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
+                //ImagePictureBox.SizeMode = PictureBoxSizeMode.Zoom;
                 ImagePictureBox.Image = BlinkList[0];
                 this.Show();
                 System.Windows.Forms.Application.DoEvents();
                 System.Threading.Thread.Sleep(2000);
+
                 ImagePictureBox.Image = BlinkList[1];
                 this.Show();
                 System.Windows.Forms.Application.DoEvents();
                 System.Threading.Thread.Sleep(2000);
-                ImagePictureBox.SizeMode = PictureBoxSizeMode.CenterImage;
-                ImagePictureBox.Image = CurrentFollowUpImage;
+
+                ImagePictureBox.Image = imageSave;
             }
             this.Show();
             System.Windows.Forms.Application.DoEvents();
@@ -227,5 +248,14 @@ namespace SuperScan
             ListSuspects();
             return;
         }
+        private void MouseWheel_Handler(object sender, MouseEventArgs e)
+        {
+            zoomDistance += e.Delta / 3;
+            //Size currentSize = new Size(ImagePictureBox.Size.Width, ImagePictureBox.Size.Height);
+            Size subSize = new Size(ImagePictureBox.Size.Width + zoomDistance, ImagePictureBox.Size.Height + zoomDistance);
+            ImagePictureBox.Image = AstroImage.AstroPic.ResizeImage(SuspectFollowUpImage, subSize);
+            return;
+        }
+
     }
 }

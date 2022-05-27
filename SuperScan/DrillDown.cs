@@ -30,6 +30,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading;
+using System.Collections.Generic;
 using TheSky64Lib;
 using AstroImage;
 using AstroMath;
@@ -51,15 +52,13 @@ namespace SuperScan
             cdInventoryEllipticity
         };
 
-        public string FollowUpPath { get; set; }
-        public string ImageBankPath { get; set; }
+        private ccdsoftImage tsxim { get; set; }
+        public string FollowUpImageFilePath { get; set; }
+        public string CurrentImageFilePath { get; set; }
+        public string LastImageFilePath { get; set; }
         public string TargetName { get; set; }
         public double TargetRAHrs { get; set; }
         public double TargetDecDeg { get; set; }
-        public double GalaxyRAHrs { get; set; }
-        public double GalaxyDecDeg { get; set; }
-        public double GalaxyX { get; set; }
-        public double GalaxyY { get; set; }
         public double TargetX { get; set; }
         public double TargetY { get; set; }
         public double ImagePA { get; set; }
@@ -69,33 +68,31 @@ namespace SuperScan
 
         public string FitsFilePath { get; set; }
 
-        public DrillDown(DateTime edate)
+        public DrillDown(string galaxyName, DateTime edate)
         {
+            TargetName = galaxyName;
             Configuration ss_cfg = new Configuration();
-            string followUpDirPath = ss_cfg.FollowUpFolder;
-            FollowUpPath = followUpDirPath + "\\" + edate.ToString("MM-dd-yyyy");
-            if (!System.IO.Directory.Exists(FollowUpPath))
-            {
-                System.IO.Directory.CreateDirectory(FollowUpPath);
-            }
-            ImageBankPath = ss_cfg.ImageBankFolder;
-            if (!System.IO.Directory.Exists(ImageBankPath))
-            {
-                System.IO.Directory.CreateDirectory(ImageBankPath);
-            }
+            string followUpDirPath = ss_cfg.FollowUpFolder + "\\" + edate.ToString("MM-dd-yyyy");
+            if (!System.IO.Directory.Exists(followUpDirPath))
+                System.IO.Directory.CreateDirectory(followUpDirPath);
+            FollowUpImageFilePath = followUpDirPath + "\\" + TargetName + ".fit";
 
+            TargetImageDir = ss_cfg.ImageBankFolder + "\\" + TargetName;
+            if (!System.IO.Directory.Exists(TargetImageDir))
+                System.IO.Directory.CreateDirectory(TargetImageDir);
+            (CurrentImageFilePath, LastImageFilePath) = GetTwoMostRecentImages();
+
+            tsxim = new ccdsoftImage();
             return;
         }
 
-        public void Shoot(string gName, double expTime)
+        public void ShootFollowUpImage(string gName, double expTime)
         {
             //Take a fresh image at 600 seconds
             //That will be placed in the 
             Configuration sscfg = new Configuration();
-            ccdsoftImage tsx_im = new ccdsoftImage()
-            {
-                Path = FollowUpPath + "\\" + gName + ".fit"
-            };
+
+            tsxim.Path = FollowUpImageFilePath;
             ccdsoftCamera tsx_cc = new ccdsoftCamera()
             {
                 //Note: No filter change
@@ -129,50 +126,30 @@ namespace SuperScan
                 System.Threading.Thread.Sleep(1000);
                 System.Windows.Forms.Application.DoEvents();
             }
-            tsx_im.AttachToActiveImager();
-            tsx_im.Save();
+            tsxim.AttachToActiveImager();
+            tsxim.Save();
         }
 
-        public string Display(string galaxyName, double suspectRAhrs, double suspectDecdeg)
+        public string LoadFollowUpImage(double suspectRAhrs, double suspectDecdeg)
         {
-            const int sampleSize = 20;
-
-            //Test code for PlateSolve2 Wrapper
-            //CancellationToken cToken;
-            TargetName = galaxyName;
             TargetRAHrs = suspectRAhrs;
             TargetDecDeg = suspectDecdeg;
 
-            //Get coordinates for galaxyName
-            sky6StarChart tsxc = new sky6StarChart();
-            sky6ObjectInformation tsxo = new sky6ObjectInformation();
-            tsxc.Find(galaxyName);
-            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
-            GalaxyRAHrs = tsxo.ObjInfoPropOut;
-            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
-            GalaxyDecDeg = tsxo.ObjInfoPropOut;
-
-            string followUpfileName = FollowUpPath + "\\" + TargetName + ".fit";
-            TargetImageDir = ImageBankPath + "\\" + TargetName;
             //Show suspect in astroimage form, if PlateSolve2 is installed
             // if not, then an exception will be thrown
-            TargetFits = new FitsFile(followUpfileName, true);
+            TargetFits = new FitsFile(FollowUpImageFilePath, true);
             double pixSize = 1;
             if (TargetFits.FocalLength != 0)
                 pixSize = (206.265 / TargetFits.FocalLength) * TargetFits.XpixSz;
             //
-            ccdsoftImage tsxim = new ccdsoftImage();
-            tsxim.Path = FollowUpPath + "\\" + galaxyName + ".fit";
+            tsxim.Path = FollowUpImageFilePath;
             tsxim.Open();
             tsxim.ScaleInArcsecondsPerPixel = pixSize; //Must be set
-            ImageLink tsxil = new ImageLink();
-            tsxil.pathToFITS = tsxim.Path;
-            //try { tsxil.execute(); }
             //Try to image link with an InsertWCS -- need to get PA.
             //If not successful, probably too few stars
             //  if so, just return out of this;
             int wcsresult;
-            try { wcsresult = tsxim.InsertWCS(true); }
+            try { wcsresult = tsxim.InsertWCS(false); }
             catch (Exception ex)
             {
                 return ("Image Link Error: " + ex.Message);
@@ -184,15 +161,17 @@ namespace SuperScan
             ImageLinkResults tsxilr = new ImageLinkResults();
             int rlt = tsxilr.succeeded;
             string rltText = tsxilr.errorText;
-
             ImagePA = tsxilr.imagePositionAngle;
             int txyResult = tsxim.RADecToXY(TargetRAHrs, TargetDecDeg);
             TargetX = tsxim.RADecToXYResultX();
             TargetY = tsxim.RADecToXYResultY();
-            int gxyResult = tsxim.RADecToXY(GalaxyRAHrs, GalaxyDecDeg);
-            GalaxyX = tsxim.RADecToXYResultX();
-            GalaxyY = tsxim.RADecToXYResultY();
+            return null;
+        }
 
+        public string VerifySuspect()
+        {
+            //Assumes that a WCS has been run on current image
+            const int sampleSize = 20;
             try
             {
                 tsxim.ShowInventory();
@@ -203,19 +182,39 @@ namespace SuperScan
                 return (evx);
             }
 
-            //Look for a light source within 10 pixels of the target RA/Dec
-            //The developer is picking an arbitrary 10 pixel square box as "near"
-            int iLS = FindClosestLightSource(tsxim, TargetRAHrs, TargetDecDeg, 10);
-            if (iLS == -1)
-            {
-                tsxim.Close();
-                return ("No light source found at suspect location\r\n  **Aborting check**");
-            }
-
             //Success -- light source at target location.  Get magnitude and X,Y coordinates for all light sources
             var rMagArr = tsxim.InventoryArray((int)ccdsoftInventoryIndex.cdInventoryMagnitude);
             var rXArr = tsxim.InventoryArray((int)ccdsoftInventoryIndex.cdInventoryX);
             var rYArr = tsxim.InventoryArray((int)ccdsoftInventoryIndex.cdInventoryY);
+
+            //Look for a light source within 10 pixels of the target RA/Dec
+            //The developer is picking an arbitrary 10 pixel square box as "near"
+            const int pDistance = 10;
+            //Search for a "near" light source to the location SRA, SDec and returns it//s index
+            //if not, then -1 is returned
+
+            tsxim.RADecToXY(TargetRAHrs, TargetDecDeg);
+            double tLocX = tsxim.RADecToXYResultX();
+            double tLocY = tsxim.RADecToXYResultY();
+
+            double tLhighX = tLocX + pDistance;
+            double tLlowX = tLocX - pDistance;
+            double tLhighY = tLocY + pDistance;
+            double tLlowY = tLocY - pDistance;
+
+            int iLS = rXArr.Length;
+            for (int iR = 0; iR < rXArr.Length; iR++)
+            {
+                if ((rXArr[iR] < tLhighX)
+                    && (rXArr[iR] > tLlowX)
+                    && (rYArr[iR] < tLhighY)
+                    && (rYArr[iR] > tLlowY))
+                {
+                    iLS = iR;
+                }
+            }
+            if (iLS == rXArr.Length)
+                return ("No light source found at suspect location\r\n  **Aborting check**");
 
             double rMag;
             string cName;
@@ -315,60 +314,51 @@ namespace SuperScan
                                                    meanDevTgtAdjMag.ToString());
         }
 
-        private int FindClosestLightSource(ccdsoftImage tsxim, double sRA, double sDec, int pDistance)
-        {
-            //Searches for a "near" light source to the location SRA, SDec and returns it//s index
-            //if not, then -1 is returned
-
-            tsxim.RADecToXY(sRA, sDec);
-            double tLocX = tsxim.RADecToXYResultX();
-            double tLocY = tsxim.RADecToXYResultY();
-
-            double tLhighX = tLocX + pDistance;
-            double tLlowX = tLocX - pDistance;
-            double tLhighY = tLocY + pDistance;
-            double tLlowY = tLocY - pDistance;
-
-            var rXArr = tsxim.InventoryArray((int)ccdsoftInventoryIndex.cdInventoryX);
-            var rYArr = tsxim.InventoryArray((int)ccdsoftInventoryIndex.cdInventoryY);
-            for (int iR = 0; iR < rXArr.Length; iR++)
-            {
-                if ((rXArr[iR] < tLhighX)
-                    && (rXArr[iR] > tLlowX)
-                    && (rYArr[iR] < tLhighY)
-                    && (rYArr[iR] > tLlowY))
-                {
-                    return (iR);
-
-                }
-            }
-            return (-1);  //Error return
-        }
-
-        public Image GetFollowUpImage(int zoom)
+        public Image GetFollowUpImage()
         {
             AstroDisplay ad = new AstroDisplay(TargetFits);
-            Image fImage = ad.FitsToTargetImage(TargetRAHrs, TargetDecDeg, zoom);
-            //Point ngcTarget = TargetFits.RADECtoImageXY(GalaxyRAHours , GalaxyDecDegrees);
-            //Point target =TargetFits.RADECtoImageXY(TargetRAhrs, TargetDecdeg);
             Point target = new Point((int)TargetX, (int)TargetY);
-            Point ngc = new Point((int)GalaxyX, (int)GalaxyY);
-            fImage = ad.AddCrossHair(target, 80, 6);
-            fImage = ad.AddCrossHair(ngc, 120, 12);
-            return fImage;
+            ad.AddCrossHair(target, 80, 6);
+            return ad.PixImage;
         }
 
-        public Image[] GetBlinkImages(int zoom)
+        public Image GetCurrentSampleImage(int zoom)
         {
-            string imageDir = ImageBankPath + "\\" + TargetName;
-            DirectoryInfo dinfo = new DirectoryInfo(imageDir);
+            FitsFile targetFits;
+            targetFits = new FitsFile(CurrentImageFilePath, true);
+            AstroDisplay ad = new AstroDisplay(targetFits);
+            Point target = new Point((int)TargetX, (int)TargetY);
+            ad.AddCrossHair(target, 80, 6);
+            Size subSize = new Size(ad.PixImage.Width / zoom, ad.PixImage.Height / zoom);
+            return ad.Zoom(zoom);
+        }
+
+        public Image GetPriorSampleImage(int zoom)
+        {
+            FitsFile targetFits;
+            targetFits = new FitsFile(LastImageFilePath, true);
+            AstroDisplay ad = new AstroDisplay(targetFits);
+            Point target = new Point((int)TargetX, (int)TargetY);
+            ad.AddCrossHair(target, 80, 6);
+            Size subSize = new Size(ad.PixImage.Width / zoom, ad.PixImage.Height / zoom);
+            return ad.Zoom(zoom);
+        }
+
+
+        public (string, string) GetTwoMostRecentImages()
+        {
+            //string imageDir = ImageBankPath + "\\" + TargetName;
+            DirectoryInfo dinfo = new DirectoryInfo(TargetImageDir);
             var allFiles = dinfo.GetFiles("NGC*.fit").OrderByDescending(p => p.CreationTime).ToArray();
             if (allFiles.Count() == 0)
-                return null;
-            string[] imageFiles = { allFiles[0].FullName, allFiles[1].FullName };
-            //return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAhrs, TargetDecdeg, zoom);
-            return AstroImage.AstroDisplay.FitsFilesToTargetImages(imageFiles, TargetRAHrs, TargetDecDeg, zoom);
+                return (null, null);
+            else if (allFiles.Count() == 1)
+                return (allFiles[0].FullName, null);
+            else
+                return (allFiles[0].FullName, allFiles[1].FullName);
         }
+
+
 
     }
 }

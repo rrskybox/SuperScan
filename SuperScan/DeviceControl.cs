@@ -92,18 +92,13 @@ namespace SuperScan
         public void SetCLSSettings()
         {
             //Sets reduction and scale for image linking, CLS or T-Point
-            AutomatedImageLinkSettings tsxa = new AutomatedImageLinkSettings() { };
+            AutomatedImageLinkSettings tsxa = new AutomatedImageLinkSettings();
             double clsScale = tsxa.imageScale;
-            ImageLink tsxl = new ImageLink()
-            {
-                scale = clsScale,
-                unknownScale = false
-            };
-
-            ccdsoftCamera tsxc = new ccdsoftCamera()
-            {
-                ImageReduction = ccdsoftImageReduction.cdAutoDark 
-            };
+            ImageLink tsxl = new ImageLink();
+            tsxl.scale = clsScale;
+            tsxl.unknownScale = false;
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
             return;
         }
 
@@ -131,9 +126,12 @@ namespace SuperScan
         {
             //Tries to perform CLS without running into dome tracking race condition
             //
+            ImageLink tsxil = new ImageLink();
+            //Locate target using a standard slew first to avoid "Dome Command In Progress" error from TSX
             ReliableRADecSlew(RA, Dec, name, hasDome);
-            //Change the camera reduction to none
+            //Hard set the Image Link settings as the Automated Image Link Settings are not being propogated
             SetCLSSettings();
+            //Now do a CLS
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
             int clsStatus = 123;
             //If dome, Turn off tracking

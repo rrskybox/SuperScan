@@ -453,20 +453,24 @@ namespace SuperScan
         public double Altitude(string gname)
         {
             //Look up the target by galaxy name and get the Altitude (in arc secs)
-            Configuration ss_cfg = new Configuration();
-            XElement gxgalaxies = XElement.Load(ss_cfg.GalaxyListPath);
-
-
-            var xgals = from grec in gxgalaxies.Elements("Galaxy") select grec;
-            foreach (var grec in xgals)
-            {
-                string checkname = grec.Element("Name").Value.ToString();
-                if (checkname == gname)
-                {
-                    return (System.Convert.ToDouble(grec.Element("Altitude").Value.ToString()));
-                };
-            }
-            return 0;
+            //Configuration ss_cfg = new Configuration();
+            //XElement gxgalaxies = XElement.Load(ss_cfg.GalaxyListPath);
+            //var xgals = from grec in gxgalaxies.Elements("Galaxy") select grec;
+            //foreach (var grec in xgals)
+            //{
+            //    string checkname = grec.Element("Name").Value.ToString();
+            //    if (checkname == gname)
+            //    {
+            //        return (System.Convert.ToDouble(grec.Element("Altitude").Value.ToString()));
+            //    };
+            //}
+            //return 0;
+            sky6StarChart tsxs = new sky6StarChart();
+            sky6ObjectInformation tsxo = new sky6ObjectInformation();
+            tsxs.Find(gname);
+            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+            double alt = tsxo.ObjInfoPropOut;
+            return alt;
         }
     }
 }

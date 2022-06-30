@@ -60,7 +60,24 @@ namespace SuperScan
                 tsxc.FilterIndexZeroBased = Convert.ToInt32(cfg.Filter);
                 try
                 {
+                    //AtFocus2 (maybe also 3) seems to have a problem as of Build 13339
+                    //AtFocus2 will run successfully, but then set a position that is significantly different
+                    //then the derived focus.  This seems to happen only on the first run (from launch) of
+                    //AtFocus2. 
+                    //So, to deal with this possibility, we will determine if the change in focus position is less than +-8%
+                    //which is slightly the scan range of the atfocus vcurve, normally.  If a the new focus position is too large or small,
+                    //then focus is set to the original position and atfocus is tried again.
+                    int startPos = tsxc.focPosition;
                     int focStat = tsxc.AtFocus2();
+                    int endPos = tsxc.focPosition;
+                    if (Math.Abs(endPos-startPos)/startPos > .08)
+                    {
+                        if (endPos - startPos > 0)
+                            tsxc.focMoveIn(endPos - startPos);
+                        else
+                            tsxc.focMoveOut(startPos - endPos);
+                        focStat = tsxc.AtFocus2();
+                    }
                 }
                 catch (Exception e)
                 {

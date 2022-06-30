@@ -468,7 +468,7 @@ namespace SuperScan
             sky6StarChart tsxs = new sky6StarChart();
             sky6ObjectInformation tsxo = new sky6ObjectInformation();
             tsxs.Find(gname);
-            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+            tsxo.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_ALT);
             double alt = tsxo.ObjInfoPropOut;
             return alt;
         }

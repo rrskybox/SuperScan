@@ -129,8 +129,12 @@ namespace SuperScan
             ImageLink tsxil = new ImageLink();
             //Locate target using a standard slew first to avoid "Dome Command In Progress" error from TSX
             ReliableRADecSlew(RA, Dec, name, hasDome);
+
             //Hard set the Image Link settings as the Automated Image Link Settings are not being propogated
-            SetCLSSettings();
+            // except this doesn't work because you can't read the binning on the automated image link settings
+            // *and* the automated image link setting for image scale is *before* binning.
+            //SetCLSSettings();
+
             //Now do a CLS
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
             int clsStatus = 123;

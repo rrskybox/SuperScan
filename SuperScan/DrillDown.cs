@@ -101,7 +101,7 @@ namespace SuperScan
                 Frame = ccdsoftImageFrame.cdLight,
                 Asynchronous = 1     //Asynchronous off
             };
-            switch (sscfg.CalibrationType)
+            switch (sscfg.ImageReductionType)
             {
                 case "None":
                     {

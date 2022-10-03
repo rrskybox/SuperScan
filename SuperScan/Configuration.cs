@@ -221,7 +221,7 @@ namespace SuperScan
             }
         }
 
-        public string MinAltitude
+         public string MinAltitude
         {
             get
             {
@@ -516,7 +516,7 @@ namespace SuperScan
             }
         }
 
-        public string CalibrationType
+        public string ImageReductionType
         {
             get
             {
@@ -539,6 +539,34 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 XElement sscfgXel = sscfgXf.Element("CalibrationType");
                 sscfgXel.ReplaceWith(new XElement("CalibrationType", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
+        public string CLSReductionType
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("CLSReductionType") == null)
+                {
+                    sscfgXf.Add(new XElement("CLSReductionType", "None"));
+                    sscfgXf.Save(sscfgfilename);
+                    return ("None");
+                }
+                else
+                {
+                    return (sscfgXf.Element("CLSReductionType").Value);
+                }
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("CLSReductionType");
+                sscfgXel.ReplaceWith(new XElement("CLSReductionType", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
             }

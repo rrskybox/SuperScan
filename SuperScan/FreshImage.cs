@@ -61,11 +61,7 @@ namespace SuperScan
             //Clear any camera set up stuff that might be hanging around
             //  and there has been some on occasion
             //Removed subframe on request for cameras with long download times
-            ccdsoftCamera tsx_cc = new ccdsoftCamera()
-            {
-                //Subframe = 0,
-                Delay = 0
-            };
+            ccdsoftCamera tsx_cc = new ccdsoftCamera();
 
             LogEntry("Finding coordinates for " + freshImageName);
             tsx_sc.Find(freshImageName);
@@ -100,18 +96,7 @@ namespace SuperScan
             //Wait for any Error 123//s to clear
 
             LogEntry("Precision slew (CLS) to target");
-            //Now try the CLS, but if an Error 123 is thrown, keep trying
-            //  every five seconds until the dome slew catches up.
-            //int clsStatus = 123;
-            //while (clsStatus == 123)
-            //{
-            //    try { clsStatus = tsx_cl.exec(); }
-            //    catch (Exception ex)
-            //    {
-            //        clsStatus = ex.HResult - 1000;
-            //        LogEntry("CLS Error: " + ex.Message);
-            //    };
-            //}
+
             DeviceControl dctl = new DeviceControl();
             int clsStatus = dctl.ReliableClosedLoopSlew(tRA, tDec, freshImageName, hasDome);
             LogEntry("Precision Slew Complete:  ");
@@ -149,7 +134,7 @@ namespace SuperScan
                 Frame = ccdsoftImageFrame.cdLight,
                 Asynchronous = 1        //Asynchronous on
             };
-            switch (sscf.CalibrationType)
+            switch (sscf.ImageReductionType)
             {
                 case "None":
                     {

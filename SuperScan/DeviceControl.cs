@@ -92,13 +92,31 @@ namespace SuperScan
         public void SetCLSSettings()
         {
             //Sets reduction and scale for image linking, CLS or T-Point
-            AutomatedImageLinkSettings tsxa = new AutomatedImageLinkSettings();
-            double clsScale = tsxa.imageScale;
-            ImageLink tsxl = new ImageLink();
-            tsxl.scale = clsScale;
-            tsxl.unknownScale = false;
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            tsxc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
+            ccdsoftCamera tsx_cc = new ccdsoftCamera();
+            AutomatedImageLinkSettings ails = new AutomatedImageLinkSettings();
+            Configuration sscf = new Configuration();
+            //Full reduction is not an option because the automated image link settings binning cannot be read
+            switch (sscf.CLSReductionType)
+            {
+                case "None":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdNone;
+                        break;
+                    }
+                case "Auto":
+                    {
+                        tsx_cc.ImageReduction = ccdsoftImageReduction.cdAutoDark;
+                        break;
+                    }
+                //case "Full":
+                //    {
+                //        Reduction calLib = new Reduction();
+                //        string binning = Binning.GetBinning();
+                //        calLib.SetReductionGroup(tsx_cc.FilterIndexZeroBased, ails.exposureTimeAILS , (int)tsx_cc.TemperatureSetPoint, binning);
+                //        tsx_cc.ImageReduction = ccdsoftImageReduction.cdBiasDarkFlat;
+                //        break;
+                //    }
+            }
             return;
         }
 
@@ -130,10 +148,7 @@ namespace SuperScan
             //Locate target using a standard slew first to avoid "Dome Command In Progress" error from TSX
             ReliableRADecSlew(RA, Dec, name, hasDome);
 
-            //Hard set the Image Link settings as the Automated Image Link Settings are not being propogated
-            // except this doesn't work because you can't read the binning on the automated image link settings
-            // *and* the automated image link setting for image scale is *before* binning.
-            //SetCLSSettings();
+            SetCLSSettings();
 
             //Now do a CLS
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();

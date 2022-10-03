@@ -19,6 +19,9 @@ using System.Linq;
 using System.Windows.Forms;
 using TheSky64Lib;
 using WeatherWatch;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+
 
 namespace SuperScan
 {
@@ -48,9 +51,10 @@ namespace SuperScan
             DomeCheckBox.Checked = Convert.ToBoolean(ss_cfg.UsesDome);
             OnTopCheckBox.Checked = Convert.ToBoolean(ss_cfg.FormOnTop);
             RefreshTargetsCheckBox.Checked = Convert.ToBoolean(ss_cfg.RefreshTargets);
-            CalibrationListBox.SelectedItem = ss_cfg.CalibrationType;
+            ImageReductionBox.SelectedItem = ss_cfg.ImageReductionType;
             MinGalaxySetting.Value = Convert.ToDecimal(ss_cfg.MinGalaxySize);
             CCDTemperatureSetting.Value = Convert.ToDecimal(ss_cfg.CCDTemp);
+            CLSReductionBox.SelectedItem = ss_cfg.CLSReductionType;
 
             try
             { this.Text = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString(); }
@@ -238,7 +242,6 @@ namespace SuperScan
             }
 
             //Open up the configuration parameteters, update with current form inputs
-            string ts = ExposureTimeSetting.Value.ToString();
             ss_cfg.Exposure = ExposureTimeSetting.Value.ToString();
             ss_cfg.MinAltitude = MinAltitudeSetting.Value.ToString();
             ss_cfg.Filter = FilterNumberSetting.Value.ToString();
@@ -427,53 +430,49 @@ namespace SuperScan
                 return;
             }
             //Determine if all or just one target is to be tested
-            DialogResult testDR = MessageBox.Show("Test All?", "Detection Scope", MessageBoxButtons.YesNo);
-            if (testDR == DialogResult.No)
-            {
-                scanAll = false;
-                FormEnterGalaxyNumber ngd = new FormEnterGalaxyNumber();
-                ngd.ShowDialog(this);
-                singleTargetName = "NGC " + ngd.NGCnumberTextBox.Text;
-                ngd.Dispose();
-                if (singleTargetName == "NGC") return;
-            }
-            foreach (string galdir in imageBankDirs)
-            {
-                System.IO.DirectoryInfo sys_imd = new System.IO.DirectoryInfo(galdir);
-                if (!scanAll && sys_imd.Name == singleTargetName)
+            FormChooseGalaxyTarget ngd = new FormChooseGalaxyTarget();
+            ngd.ShowDialog(this);
+            var selectedTargetList = ngd.TargetNameList.SelectedItems;
+            ngd.Dispose();
+            //Convert selectedTargetList to list of targets
+            foreach (string pickName in selectedTargetList)
+                foreach (string galdir in imageBankDirs)
                 {
-                    string targetName = sys_imd.Name;
-                    LogEventHandler("Running " + targetName);
-                    System.IO.DirectoryInfo sys_gal = new System.IO.DirectoryInfo(galdir);
-                    if (sys_gal.GetFiles("NGC*.fit").Length >= 2)
+                    System.IO.DirectoryInfo sys_imd = new System.IO.DirectoryInfo(galdir);
+                    if (sys_imd.Name == pickName)
                     {
-                        curFilePath = FindCurrentFile(galdir);
-                        refFilePath = FindReferenceFile(galdir);
+                        string targetName = sys_imd.Name;
+                        LogEventHandler("Running " + targetName);
+                        System.IO.DirectoryInfo sys_gal = new System.IO.DirectoryInfo(galdir);
+                        if (sys_gal.GetFiles("NGC*.fit").Length >= 2)
+                        {
+                            curFilePath = FindCurrentFile(galdir);
+                            refFilePath = FindReferenceFile(galdir);
 
-                        CurrentGalaxyName.Text = targetName;
-                        sky6StarChart tsx_sc = new sky6StarChart();
-                        sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
-                        tsx_sc.Find(targetName);
-                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
-                        double gRA = Convert.ToDouble(tsx_oi.ObjInfoPropOut);
-                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
-                        double gDec = Convert.ToDouble(tsx_oi.ObjInfoPropOut);
-                        tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAJ_AXIS_MINS);
-                        double gMaxArcMin = Convert.ToDouble(tsx_oi.ObjInfoPropOut);
-                        CurrentGalaxySizeArcmin.Text = gMaxArcMin.ToString();
-                        int subFrameSize = Convert.ToInt32(60 * gMaxArcMin);
+                            CurrentGalaxyName.Text = targetName;
+                            sky6StarChart tsx_sc = new sky6StarChart();
+                            sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
+                            tsx_sc.Find(targetName);
+                            tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+                            double gRA = Convert.ToDouble(tsx_oi.ObjInfoPropOut);
+                            tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
+                            double gDec = Convert.ToDouble(tsx_oi.ObjInfoPropOut);
+                            tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAJ_AXIS_MINS);
+                            double gMaxArcMin = Convert.ToDouble(tsx_oi.ObjInfoPropOut);
+                            CurrentGalaxySizeArcmin.Text = gMaxArcMin.ToString();
+                            int subFrameSize = Convert.ToInt32(60 * gMaxArcMin);
 
-                        NovaDetection ss_ndo = new NovaDetection();
-                        ss_ndo.LogUpdate += LogEventHandler;
-                        ss_ndo.Detect(targetName, subFrameSize, gRA, gDec, curFilePath, refFilePath, galdir);
+                            NovaDetection ss_ndo = new NovaDetection();
+                            ss_ndo.LogUpdate += LogEventHandler;
+                            ss_ndo.Detect(targetName, subFrameSize, gRA, gDec, curFilePath, refFilePath, galdir);
+                        }
+                        else
+                        {
+                            LogEventHandler("Insufficient Images");
+                        }
                     }
-                    else
-                    {
-                        LogEventHandler("Insufficient Images");
-                    }
+                    GalaxyCount.Text = (Convert.ToInt16(GalaxyCount.Text) - 1).ToString();
                 }
-                GalaxyCount.Text = (Convert.ToInt16(GalaxyCount.Text) - 1).ToString();
-            }
             LogEventHandler("ReScan Done");
             return;
         }
@@ -675,9 +674,18 @@ namespace SuperScan
         {
             //Index 0 = No Cal
             Configuration ss_cfg = new Configuration();
-            ss_cfg.CalibrationType = CalibrationListBox.SelectedItem.ToString();
+            ss_cfg.ImageReductionType = ImageReductionBox.SelectedItem.ToString();
+            return;
+        }
 
+        private void CLSReductionBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            //Index 0 = No Cal
+            Configuration ss_cfg = new Configuration();
+            ss_cfg.CLSReductionType = CLSReductionBox.SelectedItem.ToString();
+            return;
         }
     }
 }
+
 

@@ -18,7 +18,6 @@ namespace SuperScan
 {
     class NovaDetection
     {
-        private double DRILLDOWN_EXPOSURE = 600.00;
 
         enum ccdsoftInventoryIndex
         {
@@ -200,7 +199,8 @@ namespace SuperScan
                 //  will have to be taken for the regular scan upon resumption.
                 LogEntry("Potential transient identified.  Taking follow up image.");
                 DrillDown ss_dd = new DrillDown(gname,DateTime.Now);
-                ss_dd.ShootFollowUpImage(gname, DRILLDOWN_EXPOSURE);
+
+                ss_dd.ShootFollowUpImage(gname);
                 LogEntry("Follow up image acquired and stored.");
                 return true;
             }

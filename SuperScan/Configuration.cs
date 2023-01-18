@@ -68,6 +68,7 @@ namespace SuperScan
                     new XElement("FollowUpFoldername", (ssdir + "\\" + SuperScanFollowUpFoldername)),
                     new XElement("SuspectsFilePath", (ssdir + "\\" + SuperScanSuspectsFilename)),
                     new XElement("Exposure", "180"),
+                    new XElement("FollowUpExposure", "600"),
                     new XElement("MinimumAltitude", "30"),
                     new XElement("MinimumGalaxySize", "5"),
                     new XElement("Filter", "3"),
@@ -221,7 +222,35 @@ namespace SuperScan
             }
         }
 
-         public string MinAltitude
+        public string FollowUpExposure
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("FollowUpExposure") != null)
+                    return sscfgXf.Element("FollowUpExposure").Value;
+                else
+                {
+                    FollowUpExposure = "600";
+                    return "600";
+                }
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("FollowUpExposure");
+                if (sscfgXf.Element("FollowUpExposure") != null)
+                    sscfgXel.ReplaceWith(new XElement("FollowUpExposure", value));
+                else 
+                    sscfgXf.Add(new XElement("FollowUpExposure", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
+        public string MinAltitude
         {
             get
             {

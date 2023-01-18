@@ -86,11 +86,11 @@ namespace SuperScan
             return;
         }
 
-        public void ShootFollowUpImage(string gName, double expTime)
+        public void ShootFollowUpImage(string gName)
         {
-            //Take a fresh image at 600 seconds
-            //That will be placed in the 
+            //Take a fresh image at configured seconds
             Configuration sscfg = new Configuration();
+            double expTime = Convert.ToDouble(sscfg.FollowUpExposure);
 
             tsxim.Path = FollowUpImageFilePath;
             ccdsoftCamera tsx_cc = new ccdsoftCamera()

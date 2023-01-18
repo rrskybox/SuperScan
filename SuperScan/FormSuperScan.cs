@@ -42,6 +42,7 @@ namespace SuperScan
 
             //Populate the form configuration parameters with the configuration entries.
             ExposureTimeSetting.Value = Convert.ToDecimal(ss_cfg.Exposure);
+            FollowUpExposureTime.Value = Convert.ToDecimal(ss_cfg.FollowUpExposure);
             MinAltitudeSetting.Value = Convert.ToDecimal(ss_cfg.MinAltitude);
             FilterNumberSetting.Value = Convert.ToDecimal(ss_cfg.Filter);
             PostponeDetectionCheckBox.Checked = Convert.ToBoolean(ss_cfg.Postpone);
@@ -683,6 +684,13 @@ namespace SuperScan
             //Index 0 = No Cal
             Configuration ss_cfg = new Configuration();
             ss_cfg.CLSReductionType = CLSReductionBox.SelectedItem.ToString();
+            return;
+        }
+
+        private void FollowUpExposureTime_ValueChanged(object sender, EventArgs e)
+        {
+            Configuration ss_cfg = new Configuration();
+            ss_cfg.FollowUpExposure = FollowUpExposureTime.Value.ToString();
             return;
         }
     }

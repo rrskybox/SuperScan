@@ -68,10 +68,10 @@ namespace SuperScan
             this.Show();
 
             //Start up notice as to problems
-            string problemText = "As of Build 13339, automated image link settings (CLS and T-Point) must be set for 1x1 binning.  TS is not correctly propogating " +
-                "automated image link settings to Image Link and code cannot read the automated image link binning setting in order to do it for TS.  SuperScan alternates " +
-                "Image Linking between image plate solves and CLS's.  So, they must have the same binning until the propogation issue is fixed or COM AILS supports reading binning.";
-            MessageBox.Show(problemText);
+           // string problemText = "As of Build 13339, automated image link settings (CLS and T-Point) must be set for 1x1 binning.  TS is not correctly propogating " +
+           //     "automated image link settings to Image Link and code cannot read the automated image link binning setting in order to do it for TS.  SuperScan alternates " +
+           //     "Image Linking between image plate solves and CLS's.  So, they must have the same binning until the propogation issue is fixed or COM AILS supports reading binning.";
+            //MessageBox.Show(problemText);
 
             gList = new GalaxyList();
             GalaxyCount.Text = gList.GalaxyCount.ToString();

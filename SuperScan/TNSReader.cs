@@ -35,7 +35,7 @@ namespace SuperScan
         const string decQ = "decl";
         const string radiusQ = "radius";
 
-        const string url_tns_search = "http://wis-tns.weizmann.ac.il/search?";
+        const string url_tns_search = "http://wis-tns.org/search?";
         private NameValueCollection queryURL { get; set; }
         private XElement queryXResult { get; set; }
 

@@ -24,16 +24,18 @@
 /// error deviation for the target object.
 /// 
 using System;
-using System.Diagnostics;
 using System.Drawing;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Threading;
-using System.Collections.Generic;
-using TheSky64Lib;
 using AstroImage;
-using AstroMath;
+
+#if ISTSX32
+using TheSkyXLib;
+#endif
+#if ISTSX64
+using TheSky64Lib;
+#endif
+
 
 namespace SuperScan
 {

@@ -6,7 +6,7 @@ using System.Linq;
 //Class for reading Standard weather files
 namespace WeatherWatch
 {
-    public class WeatherFileReader
+    public class WeatherReader
     {
         #region Enumerations
         public enum WeaData
@@ -98,16 +98,64 @@ namespace WeatherWatch
 
         #endregion
 
-        private string weatherFilePath;
+        private string weatherDataFilePath;
         private List<string> weaList;
+        private List<string> LastValidReading = new List<string>() //Initialized with bogus data
+        {   "2023-04-15",
+            "03:13:33.33",
+            "F",
+            "M",
+            "13.7",
+            "60.1",
+            "60.1",
+            "0.0",
+            "10",
+            "0.0",
+            "0",
+            "0",
+            "0",
+            "00003",
+            "045031.13441",
+            "1",
+            "1",
+            "1",
+            "1",
+            "0",
+            "0"
+        };
 
-        public WeatherFileReader()
+        public WeatherReader()
         {
-            weatherFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\CloudWatcher\\AAG_CCDAP4.dat";
+            weatherDataFilePath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + "\\CloudWatcher\\AAG_CCDAP4.dat";
             weaList = ReadWeatherDataIn();
             return;
         }
 
+        public WeatherReader(string weatherFilePath)
+        {
+            weatherDataFilePath = weatherFilePath;
+            weaList = ReadWeatherDataIn();
+            return;
+        }
+
+        public bool IsWeatherValid()
+        {
+            weaList = ReadWeatherDataIn();
+            if (weaList.Count == 0)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+
+        public void WeatherUpdate()
+        {
+            weaList = ReadWeatherDataIn();
+            return;
+        }
 
         public string WeatherDataListing()
         {
@@ -146,16 +194,19 @@ namespace WeatherWatch
             //Read the weather data line from the weather data file and returns as a list of strings
             string wfdata = "";
             try
-            { wfdata = File.ReadAllText(weatherFilePath); }
+            { wfdata = File.ReadAllText(weatherDataFilePath); }
             catch
             {
-
+                //The only known reason for an error is if the file can't be read -- i.e. access collision
+                //So return the last valid reading
+                return LastValidReading;
             }
             List<string> wfd = wfdata.Split(new char[0], StringSplitOptions.RemoveEmptyEntries).ToList();
             for (int i = 0; i < wfd.Count; i++)
             {
                 if (wfd[i] == "") { wfd[i] = "0"; }
             }
+            LastValidReading = wfd;
             return (wfd);
         }
 
@@ -165,6 +216,23 @@ namespace WeatherWatch
             return (weaList[(int)wDataField]);
         }
 
+        public bool IsWeatherSafe()
+        {
+            //Check the weather station, if enabled
+            //  if safe (no worries is true) then return true, otherwise false
+            // in weather station isn't enabled, then return true.
+
+            WeatherUpdate();
+            if (AlertFlag == WeatherReader.WeaAlert.Alert)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+
+        }
         #region Weather Data Properties
 
         public DateTime ReportDate
@@ -235,12 +303,12 @@ namespace WeatherWatch
 
         public WeaRainFlag RainFlag
         {
-            get { return ((WeaRainFlag)Convert.ToInt16(WeatherData(WeaData.RainFlag))); }
+            get { return ((WeaRainFlag)Convert.ToInt32(WeatherData(WeaData.RainFlag))); }
         }
 
         public WeaWetFlag WetFlag
         {
-            get { return ((WeaWetFlag)Convert.ToInt16(WeatherData(WeaData.WetFlag))); }
+            get { return ((WeaWetFlag)Convert.ToInt32(WeatherData(WeaData.WetFlag))); }
         }
 
         public TimeSpan ElapsedSeconds
@@ -265,35 +333,39 @@ namespace WeatherWatch
 
         public WeaCloudiness Cloudiness
         {
-            get { return (WeaCloudiness)Convert.ToInt16(WeatherData(WeaData.Cloudiness)); }
+            get { return (WeaCloudiness)Convert.ToInt32(WeatherData(WeaData.Cloudiness)); }
         }
 
         public WeaWindiness Windiness
         {
-            get { return (WeaWindiness)Convert.ToInt16(WeatherData(WeaData.Windiness)); }
+            get { return (WeaWindiness)Convert.ToInt32(WeatherData(WeaData.Windiness)); }
         }
 
         public WeaRaininess Raininess
         {
             get
             {
-                return (WeaRaininess)Convert.ToInt16(WeatherData(WeaData.Raininess));
+                return (WeaRaininess)Convert.ToInt32(WeatherData(WeaData.Raininess));
             }
         }
 
         public WeaDarkness Darkness
         {
-            get { return (WeaDarkness)Convert.ToInt16(WeatherData(WeaData.Darkness)); }
+            get { return (WeaDarkness)Convert.ToInt32(WeatherData(WeaData.Darkness)); }
         }
 
         public WeaRoofFlag RoofCloseFlag
         {
-            get { return ((WeaRoofFlag)Convert.ToInt16(WeatherData(WeaData.RoofCloseFlag))); }
+            get { return ((WeaRoofFlag)Convert.ToInt32(WeatherData(WeaData.RoofCloseFlag))); }
         }
+
         public WeaAlert AlertFlag
         {
-            get { return ((WeaAlert)Convert.ToInt16(WeatherData(WeaData.AlertFlag))); }
+            get { return ((WeaAlert)Convert.ToInt32(WeatherData(WeaData.AlertFlag))); }
         }
         #endregion
     }
+
 }
+
+

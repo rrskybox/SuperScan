@@ -17,10 +17,14 @@ using System.Deployment.Application;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
-using TheSky64Lib;
 using WeatherWatch;
-using System.Collections.Generic;
-using System.Collections.Specialized;
+
+#if ISTSX32
+using TheSkyXLib;
+#endif
+#if ISTSX64
+using TheSky64Lib;
+#endif
 
 
 namespace SuperScan
@@ -592,10 +596,10 @@ namespace SuperScan
         {
             //Returns true if no weather alert, false if it is unsafe
 
-            WeatherFileReader wmon = new WeatherFileReader();
+            WeatherReader wmon = new WeatherReader();
             //if no weather file or other problem, return false
             if (wmon == null) return false;
-            if (wmon.AlertFlag == WeatherFileReader.WeaAlert.Alert) return false;
+            if (wmon.AlertFlag == WeatherReader.WeaAlert.Alert) return false;
             else return true;
         }
 

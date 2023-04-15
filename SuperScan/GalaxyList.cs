@@ -17,8 +17,12 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using System.Reflection;
+#if ISTSX32
+using TheSkyXLib;
+#endif
+#if ISTSX64
 using TheSky64Lib;
-
+#endif
 
 namespace SuperScan
 {
@@ -139,7 +143,7 @@ namespace SuperScan
                     XElement oListX = oLoad.TSXtoXML();
                     //The XML doc may or may not have all the galaxy information that we need, so use the Find function to go through the
                     //targets and capture all the information
-                    TheSky64Lib.sky6StarChart tsxsc = new sky6StarChart();
+                    sky6StarChart tsxsc = new sky6StarChart();
                     sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
 
                     foreach (XElement galaxyXList in oListX.Elements("target"))

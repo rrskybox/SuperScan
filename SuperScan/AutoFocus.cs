@@ -1,5 +1,10 @@
 ﻿using System;
+#if ISTSX32
+using TheSkyXLib;
+#endif
+#if ISTSX64
 using TheSky64Lib;
+#endif
 
 namespace SuperScan
 {

@@ -62,6 +62,9 @@ namespace SuperScan
         const int TgtMinAxiscolEnd = 116;
         const int tgtMinAxiscolLen = TgtMinAxiscolEnd - TgtMinAxiscolBeg + 1;
 
+        const int SimpleTargetStart = 0;
+        const int SimpleTargetLength = 15;
+
         private string TSXObsList;
 
         public ObservingListLoader(string olist)
@@ -77,14 +80,15 @@ namespace SuperScan
 
         public XElement TSXtoXML()
         {
-            //Converst observinglist .txt file to an observing list .xml file  that conforms to XML standard
+            //Converst observinglist.txt file or  to an observing list .xml file  that conforms to XML standard
             //
             //Obsfilename has no extension
             //
             string obsline;
             const int lastXMLline = 33;
+            char[] spc = new char[] { ' ' };
 
-           //Open the output file for writing text, overwriting if the file exists
+            //Open the output file for writing text, overwriting if the file exists
             StreamReader obsfile = File.OpenText(TSXObsList + ".txt");
 
             //Write first line:  XML declaration
@@ -95,29 +99,36 @@ namespace SuperScan
             olXML += XdecStartRoot + "\r\n";
             //Read in remaining TheSky64DataHeader declarations through the close declaration
             //  line by line, up to, but not including, the last conforming line
-            string throwaway;
-            for (int i = 1; i < lastXMLline; i++) throwaway = obsfile.ReadLine();
-
-
+            string nextLine = nextLine = obsfile.ReadLine();
+            while (nextLine.IndexOfAny(new char[] { '<', '>', ';' }) >= 0)
+                nextLine = obsfile.ReadLine();
             //The remainder of the stream should be a set of single lines of text containing the observation list data
             //  (Tip:  Note, however, that the only information required for reading the file back into TSX is the name, type and one digit of RA)
             //Convert each line to an xml element by bracketing it by the name "target"
-            obsline = obsfile.ReadLine();
-            char[] spc = new char[] { ' ' };
-            while (obsline != null)
+            while (nextLine != null)
             {
-                olXML += XdecStartTarget + "\r\n";
-                olXML += XdecStartTgtCref + (obsline.Substring(TgtCRefcolBeg - 1, tgtcrefcolLen)).TrimEnd(spc) + XdecEndTgtCref + "\r\n";
-                olXML += XdecStartTgtName + (obsline.Substring(TgtNamecolBeg - 1, tgtNamecolLen)).TrimEnd(spc) + XdecEndTgtName + "\r\n";
-                olXML += XdecStartTgtType + (obsline.Substring(TgtTypecolBeg - 1, tgtTypecolLen)).TrimEnd(spc) + XdecEndTgtType + "\r\n";
-                olXML += XdecStartTgtRA + (obsline.Substring(TgtRAcolBeg - 1, tgtRAcolLen)).TrimEnd(spc) + XdecEndTgtRA + "\r\n";
-                olXML += XdecStartTgtDec + (obsline.Substring(TgtDeccolBeg - 1, tgtDeccolLen)).TrimEnd(spc) + XdecEndTgtDec + "\r\n";
-                olXML += XdecStartTgtMag + (obsline.Substring(TgtMagcolBeg - 1, tgtMagcolLen)).TrimEnd(spc) + XdecEndTgtMag + "\r\n";
-                olXML += XdecStartTgtMajAxis + (obsline.Substring(TgtMajAxiscolBeg - 1, tgtMajAxiscolLen)).TrimEnd(spc) + XdecEndTgtMajAxis + "\r\n";
-                olXML += XdecStartTgtMinAxis + (obsline.Substring(TgtMinAxiscolBeg - 1, tgtMinAxiscolLen)).TrimEnd(spc) + XdecEndTgtMinAxis + "\r\n";
-                olXML += XdecEndTarget + "\r\n";
-                obsline = obsfile.ReadLine();
+                if (nextLine.Length > 30)
+                {
+                    olXML += XdecStartTarget + "\r\n";
+                    olXML += XdecStartTgtCref + (nextLine.Substring(TgtCRefcolBeg - 1, tgtcrefcolLen)).TrimEnd(spc) + XdecEndTgtCref + "\r\n";
+                    olXML += XdecStartTgtName + (nextLine.Substring(TgtNamecolBeg - 1, tgtNamecolLen)).TrimEnd(spc) + XdecEndTgtName + "\r\n";
+                    olXML += XdecStartTgtType + (nextLine.Substring(TgtTypecolBeg - 1, tgtTypecolLen)).TrimEnd(spc) + XdecEndTgtType + "\r\n";
+                    olXML += XdecStartTgtRA + (nextLine.Substring(TgtRAcolBeg - 1, tgtRAcolLen)).TrimEnd(spc) + XdecEndTgtRA + "\r\n";
+                    olXML += XdecStartTgtDec + (nextLine.Substring(TgtDeccolBeg - 1, tgtDeccolLen)).TrimEnd(spc) + XdecEndTgtDec + "\r\n";
+                    olXML += XdecStartTgtMag + (nextLine.Substring(TgtMagcolBeg - 1, tgtMagcolLen)).TrimEnd(spc) + XdecEndTgtMag + "\r\n";
+                    olXML += XdecStartTgtMajAxis + (nextLine.Substring(TgtMajAxiscolBeg - 1, tgtMajAxiscolLen)).TrimEnd(spc) + XdecEndTgtMajAxis + "\r\n";
+                    olXML += XdecStartTgtMinAxis + (nextLine.Substring(TgtMinAxiscolBeg - 1, tgtMinAxiscolLen)).TrimEnd(spc) + XdecEndTgtMinAxis + "\r\n";
+                    olXML += XdecEndTarget + "\r\n";
+                }
+                else  //single line file case e.g. "NCG 4995"
+                {
+                    olXML += XdecStartTarget + "\r\n";
+                    olXML += XdecStartTgtName + nextLine.TrimEnd(spc).TrimStart(spc) + XdecEndTgtName + "\r\n";
+                    olXML += XdecEndTarget + "\r\n";
+                }
+                nextLine = obsfile.ReadLine();
             }
+
             //All done with the data lines, now wrap it up with the XML closing declaration
             olXML += XdecEndRoot + "\r\n";
             //Save the text string as a new file with the same file name but the .xml extension

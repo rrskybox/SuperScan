@@ -115,8 +115,10 @@ namespace SuperScan
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                if (sscfgXf.Element("ObservingListPath") == null) return (ssdir + "\\" + SuperScanObservingListFilename);
-                else return (sscfgXf.Element("ObservingListPath").Value);
+                if (sscfgXf.Element("ObservingListPath") == null) 
+                    return (ssdir + "\\" + SuperScanObservingListFilename);
+                else 
+                    return (sscfgXf.Element("ObservingListPath").Value);
             }
         }
 
@@ -126,8 +128,10 @@ namespace SuperScan
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                if (sscfgXf.Element("GalaxyListPath") == null) return (ssdir + "\\" + SuperScanGalaxyListFilename);
-                else return (sscfgXf.Element("GalaxyListPath").Value);
+                if (sscfgXf.Element("GalaxyListPath") == null) 
+                    return (ssdir + "\\" + SuperScanGalaxyListFilename);
+                else 
+                    return (sscfgXf.Element("GalaxyListPath").Value);
             }
         }
 

@@ -14,10 +14,12 @@
 /// ------------------------------------------------------------------------
 using System;
 using System.Deployment.Application;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 using WeatherWatch;
+using System.IO;
 
 #if ISTSX32
 using TheSkyXLib;
@@ -72,9 +74,9 @@ namespace SuperScan
             this.Show();
 
             //Start up notice as to problems
-           // string problemText = "As of Build 13339, automated image link settings (CLS and T-Point) must be set for 1x1 binning.  TS is not correctly propogating " +
-           //     "automated image link settings to Image Link and code cannot read the automated image link binning setting in order to do it for TS.  SuperScan alternates " +
-           //     "Image Linking between image plate solves and CLS's.  So, they must have the same binning until the propogation issue is fixed or COM AILS supports reading binning.";
+            // string problemText = "As of Build 13339, automated image link settings (CLS and T-Point) must be set for 1x1 binning.  TS is not correctly propogating " +
+            //     "automated image link settings to Image Link and code cannot read the automated image link binning setting in order to do it for TS.  SuperScan alternates " +
+            //     "Image Linking between image plate solves and CLS's.  So, they must have the same binning until the propogation issue is fixed or COM AILS supports reading binning.";
             //MessageBox.Show(problemText);
 
             gList = new GalaxyList();
@@ -667,12 +669,45 @@ namespace SuperScan
         private void RefreshTargetsCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             Configuration ss_cfg = new Configuration();
-            if (RefreshTargetsCheckBox.Checked) ss_cfg.RefreshTargets = "True";
-            else ss_cfg.RefreshTargets = "False";
-            Cursor.Current = Cursors.WaitCursor;
-            gList = new GalaxyList();
-            GalaxyCount.Text = gList.GalaxyCount.ToString();
-            return;
+            if (RefreshTargetsCheckBox.Checked)
+            {
+                ss_cfg.RefreshTargets = "True";
+                LogEventHandler("Refresh galaxy list selected -- now using observing list query");
+                Cursor.Current = Cursors.WaitCursor;
+                gList = new GalaxyList();
+                GalaxyCount.Text = gList.GalaxyCount.ToString();
+                LogEventHandler("Queried target set has " + GalaxyCount.Text + " targets.");
+                return;
+            }
+            else
+            {
+                //Verify that there is content in the static target file
+                LogEventHandler("Refresh galaxy list deselected -- now using fixed list, if populated.");
+                List<string> targetSet = new List<string>();
+                try { targetSet = File.ReadAllLines(ss_cfg.ObservingListPath).ToList(); }
+                catch
+                {
+                    ss_cfg.RefreshTargets = "True";
+                    LogEventHandler("Fixed target set file is missing. Make sure that SuperScanObservingList.txt exists and contains targets.");
+                    RefreshTargetsCheckBox.Checked = true;
+                    return;
+                }
+                if (targetSet.Count < 1)
+                {
+                    ss_cfg.RefreshTargets = "True";
+                    LogEventHandler("Fixed target set file is empty. Make sure that SuperScanObservingList.txt contains targets.");
+                    RefreshTargetsCheckBox.Checked = true;
+                    return;
+                }
+                else
+                {
+                    ss_cfg.RefreshTargets = "False";
+                    gList = new GalaxyList();
+                    GalaxyCount.Text = gList.GalaxyCount.ToString();
+                    LogEventHandler("Fixed target set has " + GalaxyCount.Text + " targets.");
+                    return;
+                }
+            }
         }
 
         private void CalibrationListBox_SelectedIndexChanged(object sender, EventArgs e)

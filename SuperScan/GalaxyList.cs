@@ -61,7 +61,7 @@ namespace SuperScan
             //if targets are to be refreshed, then run a new observing list query and save the results in the gXgalaxies XML list
             if (Convert.ToBoolean(ss_cfg.RefreshTargets))
             {
-                //Load query file if it isn't stored already
+                //Install query file if it isn't stored already
                 if (!File.Exists(ss_cfg.QueryPath))
                 {
                     //Install the dbq file
@@ -86,11 +86,9 @@ namespace SuperScan
 
                 sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
                 tsx_oi = tsx_dw.RunQuery;
-                ///
-                ///tsx_oi is an array (tsx_oi.Count) of object information indexed by the tsx_oi.Index property
-                ///
-                ///For each object information in the list, get the name, perform a "Find" and look for the catalog ID.  If there is one, print it.
 
+                //tsx_oi is an array (tsx_oi.Count)of object information indexed by the tsx_oi.Index property
+                //For each object information in the list, get the name, perform a "Find" and look for the catalog ID.If there is one, print it.
                 for (int i = 0; i <= (tsx_oi.Count - 1); i++)
                 {
                     tsx_oi.Index = i;
@@ -129,13 +127,12 @@ namespace SuperScan
                     //check for galaxy size, if less than the configured minimum, then discard
                     if (Convert.ToDouble(gMajorAxis) >= Convert.ToDouble(ss_cfg.MinGalaxySize)) gXgalaxies.Add(gXrec);
                 }
-
                 gXgalaxies.Save(ss_cfg.GalaxyListPath);
                 return;
             }
             else
             {
-                //List is not to be refreshed.  Look for the "SuperScanObservingList" in the SuperScan directory.
+                //List is not to be refreshed -- i.e. static list.  Look for the "SuperScanObservingList" in the SuperScan directory.
                 //   if one, then parse it into an XML tree
                 if (File.Exists(ss_cfg.ObservingListPath))
                 {

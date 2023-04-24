@@ -22,7 +22,7 @@ namespace SuperScan
         public Logger()
         {
             Configuration ss_cfg = new Configuration();
-            string logfilename = DateTime.Now.ToString("yyyy_MM_dd") + ".txt";
+            string logfilename = DateTime.Now.ToString("yyyy_MM_dd") + ".log";
             logfilepath = ss_cfg.LogFolder + "\\" + logfilename;
 
             return;

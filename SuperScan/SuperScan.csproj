@@ -27,7 +27,7 @@
     <ProductName>SuperScan</ProductName>
     <PublisherName>TSXToolKit</PublisherName>
     <SuiteName>TSXToolKit</SuiteName>
-    <ApplicationRevision>203</ApplicationRevision>
+    <ApplicationRevision>205</ApplicationRevision>
     <ApplicationVersion>3.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>

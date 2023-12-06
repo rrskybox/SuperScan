@@ -21,12 +21,8 @@ using System.Windows.Forms;
 using WeatherWatch;
 using System.IO;
 
-#if ISTSX32
-using TheSkyXLib;
-#endif
-#if ISTSX64
 using TheSky64Lib;
-#endif
+
 
 
 namespace SuperScan
@@ -219,10 +215,9 @@ namespace SuperScan
 
             // Scan Running...
             // Connect telescope mount and camera, and dome, if any
-            DeviceControl ss_hwp = new DeviceControl();
-            if (ss_hwp.TelescopeStartUp()) LogEventHandler("Initializing Mount");
+            if (DeviceControl.TelescopeStartUp()) LogEventHandler("Initializing Mount");
             else LogEventHandler("Mount initialization failed");
-            if (ss_hwp.CameraStartUp()) LogEventHandler("Initializing Camera");
+            if (DeviceControl.CameraStartUp()) LogEventHandler("Initializing Camera");
             else LogEventHandler("Camera initialization failed");
             if (Convert.ToBoolean(ss_cfg.UsesDome))
             {
@@ -237,7 +232,7 @@ namespace SuperScan
             //  and all galaxies that have transited during that time.  Then all galaxies on the list which are east
             //  will be scanned.  Lastly, the scan will return to the west to pick up any galaxies that transited
             //  during the scan on the east side.  Get it?
-            ss_hwp.TelescopePrePosition("West");
+            DeviceControl.TelescopePrePosition("West");
             //Let's do an autofocus to start out.  Set the temperature to -100 to fake out the temperature test
             //  and force an autofocus.
             if (AutoFocusCheckBox.Checked)
@@ -259,7 +254,7 @@ namespace SuperScan
             ss_cfg.WatchWeather = WatchWeatherCheckBox.Checked.ToString();
             LogEventHandler("Starting Scan");
             LogEventHandler("Bringing camera to temperature");
-            ss_hwp.SetCameraTemperature(Convert.ToDouble(CCDTemperatureSetting.Value));
+            DeviceControl.SetCameraTemperature(Convert.ToDouble(CCDTemperatureSetting.Value));
 
             int gTriedCount = 0;
             int gSuccessfulCount = 0;
@@ -282,11 +277,11 @@ namespace SuperScan
                     {
                         LogEventHandler("Waiting on unsafe weather conditions...");
                         LogEventHandler("Parking telescope");
-                        if (ss_hwp.TelescopeShutDown()) LogEventHandler("Mount parked");
+                        if (DeviceControl.TelescopeShutDown()) LogEventHandler("Mount parked");
                         else LogEventHandler("Mount park failed");
 
                         LogEventHandler("Closing Dome");
-                        if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.CloseDome(DOME_HOME_AZ);
+                        if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.CloseDome();
                         do
                         {
                             System.Threading.Thread.Sleep(10000);  //ten second wait loop
@@ -299,15 +294,15 @@ namespace SuperScan
                         {
                             LogEventHandler("Weather conditions safe");
                             LogEventHandler("Opening Dome");
-                            if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.OpenDome(DOME_HOME_AZ);
+                            if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.OpenDome();
                             LogEventHandler("Unparking telescope");
-                            if (ss_hwp.TelescopeStartUp()) LogEventHandler("Mount unparked");
+                            if (DeviceControl.TelescopeStartUp()) LogEventHandler("Mount unparked");
 
                             //Wait for 30 seconds for everything to settle
                             LogEventHandler("Waiting for dome to settle");
                             System.Threading.Thread.Sleep(30000);
                             //Recouple dome
-                            if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.IsDomeCoupled = true;
+                            if (Convert.ToBoolean(ss_cfg.UsesDome)) DeviceControl.IsDomeCoupled = true;
                         }
                     }
                 } //Check for autofocus selection.  If so then run the autofocus check.
@@ -409,7 +404,7 @@ namespace SuperScan
             LogEventHandler("SuperScan successfully surveyed " + gSuccessfulCount + " out of " + gTriedCount + " galaxies.");
 
             //Park the telescope so it doesn't drift too low
-            ss_hwp.TelescopeShutDown();
+            DeviceControl.TelescopeShutDown();
             LogEventHandler("AutoRun Running Shut Down Program **********" + "\r\n");
             Launcher.RunShutDown();
             StartScanButton.BackColor = scanbuttoncolorsave;
@@ -420,8 +415,6 @@ namespace SuperScan
         {
             string curFilePath = "";
             string refFilePath = "";
-            string singleTargetName = "";
-            bool scanAll = true;
 
             //Open up the configuration parameteters, update with current form inputs
             Configuration ss_cfg = new Configuration();

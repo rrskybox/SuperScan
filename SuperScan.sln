@@ -1,13 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29424.173
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperScan", "SuperScan\SuperScan.csproj", "{74930BCE-8057-4769-A937-48762ECC01F4}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AstroMath", "..\AstroMath\AstroMath\AstroMath.csproj", "{B9B7B4D6-58F8-4D34-8F40-3747462C960A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AstroImage", "..\AstroImage\AstroImage\AstroImage.csproj", "{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,22 +21,6 @@ Global
 		{74930BCE-8057-4769-A937-48762ECC01F4}.Release|Any CPU.Build.0 = Debug|Any CPU
 		{74930BCE-8057-4769-A937-48762ECC01F4}.Release|x64.ActiveCfg = Release|x64
 		{74930BCE-8057-4769-A937-48762ECC01F4}.Release|x64.Build.0 = Release|x64
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Debug|x64.Build.0 = Debug|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Release|x64.ActiveCfg = Release|Any CPU
-		{B9B7B4D6-58F8-4D34-8F40-3747462C960A}.Release|x64.Build.0 = Release|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Debug|x64.Build.0 = Debug|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Release|x64.ActiveCfg = Release|Any CPU
-		{61A45250-D8A3-4D1B-B627-E86F1CD2A81C}.Release|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

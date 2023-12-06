@@ -20,12 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Windows.Forms;
-#if ISTSX32
-using TheSkyXLib;
-#endif
-#if ISTSX64
 using TheSky64Lib;
-#endif
 
 namespace SuperScan
 {

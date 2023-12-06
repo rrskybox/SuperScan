@@ -13,12 +13,9 @@
 /// ------------------------------------------------------------------------
 
 using System;
-#if ISTSX32
-using TheSkyXLib;
-#endif
-#if ISTSX64
+
 using TheSky64Lib;
-#endif
+
 
 namespace SuperScan
 {
@@ -78,14 +75,9 @@ namespace SuperScan
             double tDec = tsx_obj.ObjInfoPropOut; ;
             //Make sure that the mount commands are synchronous
             tsx_mt.Asynchronous = 0;
-            //LogEntry("Initial slew to target");
-            ////Slew the mount and dome should follow before completion...
-            // try { tsx_mt.SlewToRaDec(tRA, tDec, freshImageName); }
-            //catch (Exception ex) { LogEntry("Slew error: " + ex.Message); }
 
+            ////Slew the mount and dome should follow before completion...
             //Test to see if a dome tracking operation is underway.
-            // If so, doing a IsGotoComplete will throw an Error 212.
-            //  Ignore it a wait a few seconds for stuff to clear
 
             //If using dome, toggle dome coupling:  this appears to clear most Error 123 problems
             Configuration ss_cfg = new Configuration();
@@ -98,12 +90,9 @@ namespace SuperScan
                 tsx_dm.IsCoupled = 1;
             }
 
-            //Wait for any Error 123//s to clear
-
             LogEntry("Precision slew (CLS) to target");
-
-            DeviceControl dctl = new DeviceControl();
-            int clsStatus = dctl.ReliableClosedLoopSlew(tRA, tDec, freshImageName, hasDome);
+            Configuration cfg = new Configuration();
+            int clsStatus = DeviceControl.ReliableClosedLoopSlew(tRA, tDec, freshImageName, hasDome, cfg.CLSReductionType );
             LogEntry("Precision Slew Complete:  ");
             if (clsStatus == 0)
             {

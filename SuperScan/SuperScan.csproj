@@ -27,7 +27,7 @@
     <ProductName>SuperScan</ProductName>
     <PublisherName>TSXToolKit</PublisherName>
     <SuiteName>TSXToolKit</SuiteName>
-    <ApplicationRevision>205</ApplicationRevision>
+    <ApplicationRevision>206</ApplicationRevision>
     <ApplicationVersion>3.3.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -94,6 +94,14 @@
     <IntermediateOutputPath>C:\Users\rick-\AppData\Local\Temp\vs2F20.tmp\x64\Release\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="AstroImage, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\AstroImage\AstroImage\bin\Release\AstroImage.dll</HintPath>
+    </Reference>
+    <Reference Include="AstroMath, Version=1.1.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\AstroMath\AstroMath\bin\Release\AstroMath.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
@@ -115,6 +123,8 @@
   <ItemGroup>
     <Compile Include="AutoFocus.cs" />
     <Compile Include="Binning.cs" />
+    <Compile Include="DeviceControl.cs" />
+    <Compile Include="DomeControl.cs" />
     <Compile Include="Filters.cs" />
     <Compile Include="FormAutoRun.cs">
       <SubType>Form</SubType>
@@ -123,7 +133,6 @@
       <DependentUpon>FormAutoRun.cs</DependentUpon>
     </Compile>
     <Compile Include="CullImages.cs" />
-    <Compile Include="DomeControl.cs" />
     <Compile Include="DrillDown.cs" />
     <Compile Include="FormCrunchingNotice.cs">
       <SubType>Form</SubType>
@@ -165,7 +174,6 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Suspect.cs" />
-    <Compile Include="DeviceControl.cs" />
     <Compile Include="TNSReader.cs" />
     <Compile Include="Utility.cs" />
     <Compile Include="WeatherFileReader.cs" />
@@ -234,16 +242,6 @@
   </ItemGroup>
   <ItemGroup>
     <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\AstroImage\AstroImage\AstroImage.csproj">
-      <Project>{61a45250-d8a3-4d1b-b627-e86f1cd2a81c}</Project>
-      <Name>AstroImage</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\AstroMath\AstroMath\AstroMath.csproj">
-      <Project>{b9b7b4d6-58f8-4d34-8f40-3747462c960a}</Project>
-      <Name>AstroMath</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="TheSky64Lib">

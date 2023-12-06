@@ -17,12 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Xml.Linq;
 using System.Reflection;
-#if ISTSX32
-using TheSkyXLib;
-#endif
-#if ISTSX64
 using TheSky64Lib;
-#endif
 
 namespace SuperScan
 {

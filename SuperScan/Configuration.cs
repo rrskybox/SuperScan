@@ -35,6 +35,9 @@ namespace SuperScan
         string SuperScanSuspectsFilename = "suspects.xml";
         string SuperScanObservingListFilename = "SuperScanObservingList.txt";
 
+        const string DomeHomeAzX = "DomeHomeAz";
+
+
         string ssdir;
 
         public Configuration()
@@ -89,7 +92,8 @@ namespace SuperScan
                     new XElement("UsesDome", "False"),
                     new XElement("FormOnTop", "False"),
                     new XElement("RefreshTargets", "True"),
-                    new XElement("CalibrationType", "1"));
+                    new XElement("CalibrationType", "1"),
+                    new XElement(DomeHomeAzX, "220"));
 
                 cDefaultX.Save(ssdir + "\\" + SuperScanConfigurationFilename);
             }
@@ -115,9 +119,9 @@ namespace SuperScan
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                if (sscfgXf.Element("ObservingListPath") == null) 
+                if (sscfgXf.Element("ObservingListPath") == null)
                     return (ssdir + "\\" + SuperScanObservingListFilename);
-                else 
+                else
                     return (sscfgXf.Element("ObservingListPath").Value);
             }
         }
@@ -128,9 +132,9 @@ namespace SuperScan
             {
                 string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
                 XElement sscfgXf = XElement.Load(sscfgfilename);
-                if (sscfgXf.Element("GalaxyListPath") == null) 
+                if (sscfgXf.Element("GalaxyListPath") == null)
                     return (ssdir + "\\" + SuperScanGalaxyListFilename);
-                else 
+                else
                     return (sscfgXf.Element("GalaxyListPath").Value);
             }
         }
@@ -247,7 +251,7 @@ namespace SuperScan
                 XElement sscfgXel = sscfgXf.Element("FollowUpExposure");
                 if (sscfgXf.Element("FollowUpExposure") != null)
                     sscfgXel.ReplaceWith(new XElement("FollowUpExposure", value));
-                else 
+                else
                     sscfgXf.Add(new XElement("FollowUpExposure", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
@@ -881,6 +885,35 @@ namespace SuperScan
                 return;
             }
         }
+
+        public string DomeHomeAz
+        //{
+        //    get { return GetConfig(DomeHomeAzX, "0"); }
+        //    set { SetConfig(DomeHomeAzX, value); }
+        //}
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                if (sscfgXf.Element("DomeHomeAzX") == null)
+                {
+                    sscfgXf.Add(new XElement("DomeHomeAzX", "220"));
+                    sscfgXf.Save(sscfgfilename);
+                }
+                return (sscfgXf.Element("DomeHomeAzX").Value.ToString());
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("DomeHomeAzX");
+                sscfgXel.ReplaceWith(new XElement("DomeHomeAzX", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
 
         private string InstallDBQ()
         {

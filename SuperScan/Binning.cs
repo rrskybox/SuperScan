@@ -3,12 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-#if ISTSX32
-using TheSkyXLib;
-#endif
-#if ISTSX64
+
 using TheSky64Lib;
-#endif
+
 
 namespace SuperScan
 {

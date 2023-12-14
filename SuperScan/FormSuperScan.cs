@@ -266,142 +266,141 @@ namespace SuperScan
             //  2. Check the focus (1 degree diff), if enabled
             //  3. Take an image and detect, if enabled
             //
-            while (gList.GalaxyCount > 0)
+            while (!Launcher.IsSessionElapsed() && gList.GalaxyCount > 0)
             {
                 //Check weather conditions, if enabled
                 //  if unsafe then spin until it is safe or endingtime occurs.
-                if (WatchWeatherCheckBox.Checked)
+                if (!Launcher.IsSessionElapsed() && WatchWeatherCheckBox.Checked)
                 {
                     LogEventHandler("Checking Weather");
                     if (!IsWeatherSafe())
                     {
                         LogEventHandler("Waiting on unsafe weather conditions...");
                         LogEventHandler("Parking telescope");
-                        if (DeviceControl.TelescopeShutDown()) LogEventHandler("Mount parked");
-                        else LogEventHandler("Mount park failed");
-
-                        LogEventHandler("Closing Dome");
-                        if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.CloseDome();
-                        do
+                        if (DeviceControl.TelescopeShutDown())
+                            LogEventHandler("Mount parked");
+                        else
+                            LogEventHandler("Mount park failed");
+                        if (Convert.ToBoolean(ss_cfg.UsesDome))
                         {
-                            System.Threading.Thread.Sleep(10000);  //ten second wait loop
-                            if (Convert.ToBoolean(Launcher.CheckEnd()))
-                            { break; };
-                        } while (!IsWeatherSafe());
-                        if (Convert.ToBoolean(Launcher.CheckEnd()))
-                        { break; };
-                        if (IsWeatherSafe())
-                        {
-                            LogEventHandler("Weather conditions safe");
-                            LogEventHandler("Opening Dome");
-                            if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.OpenDome();
-                            LogEventHandler("Unparking telescope");
-                            if (DeviceControl.TelescopeStartUp()) LogEventHandler("Mount unparked");
+                            LogEventHandler("Closing Dome");
+                            DomeControl.CloseDome();
+                            while (!Launcher.IsSessionElapsed() && !IsWeatherSafe())
+                                System.Threading.Thread.Sleep(10000);  //ten second wait loop
+                            if (!Launcher.IsSessionElapsed() && IsWeatherSafe())
+                            {
+                                LogEventHandler("Weather conditions safe");
+                                LogEventHandler("Opening Dome");
+                                if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.OpenDome();
+                                LogEventHandler("Unparking telescope");
+                                if (DeviceControl.TelescopeStartUp()) LogEventHandler("Mount unparked");
 
-                            //Wait for 30 seconds for everything to settle
-                            LogEventHandler("Waiting for dome to settle");
-                            System.Threading.Thread.Sleep(30000);
-                            //Recouple dome
-                            if (Convert.ToBoolean(ss_cfg.UsesDome)) DeviceControl.IsDomeCoupled = true;
+                                //Wait for 30 seconds for everything to settle
+                                LogEventHandler("Waiting for dome to settle");
+                                System.Threading.Thread.Sleep(30000);
+                                //Recouple dome
+                                if (Convert.ToBoolean(ss_cfg.UsesDome)) DeviceControl.IsDomeCoupled = true;
+                            }
                         }
                     }
-                } //Check for autofocus selection.  If so then run the autofocus check.
-                if (AutoFocusCheckBox.Checked)
-                {
-                    //One stop shopping
-                    LogEventHandler("Checking Focus");
-                    string focStat = AutoFocus.Check();
-                    LogEventHandler(focStat);
-                }
-
-                //Get the next galaxy.  display its name and size.
-                string targetName = gList.Next;
-                CurrentGalaxyName.Text = targetName;
-                CurrentGalaxySizeArcmin.Text = gList.MaxAxis(targetName).ToString();
-                Show();
-
-                LogEventHandler("Queueing up next galaxy: " + targetName);
-
-                //Check altitude.  If too low then pass on this one.
-                if (gList.Altitude(targetName) < gList.MinAltitude)
-                {
-                    LogEventHandler(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
-                }
-                else
-                {
-                    //Take fresh image
-                    FreshImage fso = new FreshImage();
-                    fso.LogUpdate += LogEventHandler;
-                    //Seek location of next galaxy
-                    //Ignor return value
-                    fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
-                    if (fso.ImagePath == "")
+                    else  //Weather, if checked, is safe
                     {
-                        LogEventHandler(targetName + ": " + " Image capture failed -- probably CLS failure.");
-                        LogEventHandler("");
-                    }
-                    else
-                    {
-                        LogEventHandler(targetName + " Image capture complete.");
-                        LogEventHandler(targetName + " Looking in Image Bank for most recent image.");
-                        //Save Image
-                        ImageBank sio = new ImageBank(targetName);
-                        LogEventHandler(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
-                        sio.AddImage(ss_cfg.FreshImagePath);
-                        //Increment the galaxy count for reporting purposes
-                        gSuccessfulCount++;
-                        //check for a reference image
-                        //  if so then move on to detecting any prospects
-                        //  if not, then just log the situation and move on
-                        if (sio.MostRecentImagePath != "")
+                        //Check for autofocus selection.  If so then run the autofocus check.
+                        if (!Launcher.IsSessionElapsed() && AutoFocusCheckBox.Checked)
                         {
-                            int subFrameSize = Convert.ToInt32(60 * gList.MaxAxis(targetName));
-                            LogEventHandler("Detecting supernova prospects.");
-                            //Check to see if detection is to be run or not
-                            //  if so, open a detection object with the log handler property set up
-                            //   if not, just move on
-                            if (!PostponeDetectionCheckBox.Checked)
+                            //One stop shopping
+                            LogEventHandler("Checking Focus");
+                            string focStat = AutoFocus.Check();
+                            LogEventHandler(focStat);
+                        }
+                        //Check one more time on session elapsed, if all good then proceed to survey a galaxy
+
+                        if (!Launcher.IsSessionElapsed())
+                        {
+                            //Get the next galaxy.  display its name and size.
+                            string targetName = gList.Next;
+                            CurrentGalaxyName.Text = targetName;
+                            CurrentGalaxySizeArcmin.Text = gList.MaxAxis(targetName).ToString();
+                            Show();
+
+                            LogEventHandler("Queueing up next galaxy: " + targetName);
+
+                            //Check altitude.  If too low then pass on this one.
+                            if (gList.Altitude(targetName) < gList.MinAltitude)
                             {
-                                NovaDetection ss_ndo = new NovaDetection();
-                                ss_ndo.LogUpdate += LogEventHandler;
-                                if (ss_ndo.Detect(targetName,
-                                    subFrameSize, gList.RA(targetName),
-                                    gList.Dec(targetName),
-                                    fso.ImagePath,
-                                    sio.MostRecentImagePath,
-                                    sio.WorkingImageFolder))
-                                {
-                                    SuspectCountLabel.Text = (Convert.ToInt32(SuspectCountLabel.Text) + 1).ToString();
-                                }
+                                LogEventHandler(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
                             }
                             else
                             {
-                                LogEventHandler("Supernova detecton postponed per request.");
+                                //Take fresh image
+                                FreshImage fso = new FreshImage();
+                                fso.LogUpdate += LogEventHandler;
+                                //Seek location of next galaxy
+                                //Ignor return value
+                                fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
+                                if (fso.ImagePath == "")
+                                {
+                                    LogEventHandler(targetName + ": " + " Image capture failed -- probably CLS failure.");
+                                    LogEventHandler("");
+                                }
+                                else
+                                {
+                                    LogEventHandler(targetName + " Image capture complete.");
+                                    LogEventHandler(targetName + " Looking in Image Bank for most recent image.");
+                                    //Save Image
+                                    ImageBank sio = new ImageBank(targetName);
+                                    LogEventHandler(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
+                                    sio.AddImage(ss_cfg.FreshImagePath);
+                                    //Increment the galaxy count for reporting purposes
+                                    gSuccessfulCount++;
+                                    //check for a reference image
+                                    //  if so then move on to detecting any prospects
+                                    //  if not, then just log the situation and move on
+                                    if (sio.MostRecentImagePath != "")
+                                    {
+                                        int subFrameSize = Convert.ToInt32(60 * gList.MaxAxis(targetName));
+                                        LogEventHandler("Detecting supernova prospects.");
+                                        //Check to see if detection is to be run or not
+                                        //  if so, open a detection object with the log handler property set up
+                                        //   if not, just move on
+                                        if (!PostponeDetectionCheckBox.Checked)
+                                        {
+                                            NovaDetection ss_ndo = new NovaDetection();
+                                            ss_ndo.LogUpdate += LogEventHandler;
+                                            if (ss_ndo.Detect(targetName,
+                                                subFrameSize, gList.RA(targetName),
+                                                gList.Dec(targetName),
+                                                fso.ImagePath,
+                                                sio.MostRecentImagePath,
+                                                sio.WorkingImageFolder))
+                                            {
+                                                SuspectCountLabel.Text = (Convert.ToInt32(SuspectCountLabel.Text) + 1).ToString();
+                                            }
+                                        }
+                                        else
+                                            LogEventHandler("Supernova detecton postponed per request.");
+                                    }
+                                    else
+                                        LogEventHandler("No banked image for comparison.");
+                                }
                             }
+                            //Update tries counter
+                            gTriedCount++;
+                            //Clear galaxy from list and decrement galaxies left to image
+                            gList.Remove(targetName);
+                            GalaxyCount.Text = gList.GalaxyCount.ToString();
+                            Show();
                         }
-                        else
-                        {
-                            LogEventHandler("No banked image for comparison.");
-                        }
+                        //Check for time to shut down
+                        LogEventHandler("Checking for ending time");
+                        if (Convert.ToBoolean(Launcher.IsSessionElapsed()))
+                            LogEventHandler("Session elapsed.");
                     }
-                }
-                //Update tries counter
-                gTriedCount++;
-                //Clear galaxy from list and decrement galaxies left to image
-                gList.Remove(targetName);
-                GalaxyCount.Text = gList.GalaxyCount.ToString();
-                Show();
-                //Check for time to shut down
-                LogEventHandler("Checking for ending time");
-                if (Convert.ToBoolean(Launcher.CheckEnd()))
-                {
-                    LogEventHandler("Scan is past end time.  Shutting down.");
-                    break;
                 }
             }
 
             LogEventHandler("Session Completed");
-            LogEventHandler("SuperScan successfully surveyed " + gSuccessfulCount + " out of " + gTriedCount + " galaxies.");
+            LogEventHandler("SuperScan surveyed " + gSuccessfulCount + " out of " + gTriedCount + " galaxies.");
 
             //Park the telescope so it doesn't drift too low
             DeviceControl.TelescopeShutDown();

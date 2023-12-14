@@ -52,12 +52,14 @@ namespace SuperScan
             if (side == "East")
             {
                 tsxm.SlewToAzAlt(90.0, 80.0, "");
-                while (tsxm.IsSlewComplete == 0) System.Threading.Thread.Sleep(1000);
+                while (tsxm.IsSlewComplete == 0)
+                    System.Threading.Thread.Sleep(1000);
             }
             else
             {
                 tsxm.SlewToAzAlt(270.0, 80.0, "");
-                while (tsxm.IsSlewComplete == 0) System.Threading.Thread.Sleep(1000);
+                while (tsxm.IsSlewComplete == 0) 
+                    System.Threading.Thread.Sleep(1000);
             }
             return;
         }
@@ -66,13 +68,15 @@ namespace SuperScan
         //Method for connecting and parking and disconnecting the TSX mount
         {
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            if (tsxm.IsConnected == 0) { tsxm.Connect(); }
+            if (tsxm.IsConnected == 0)
+                tsxm.Connect();
             try
             {
                 tsxm.Park();
                 tsxm.Disconnect();
             }
-            catch { return false; }
+            catch 
+            { return false; }
             return true;
         }
 
@@ -80,8 +84,10 @@ namespace SuperScan
         {
             //Method for connecting and initializing the TSX camera
             ccdsoftCamera tsxc = new ccdsoftCamera();
-            try { tsxc.Connect(); }
-            catch { return false; }
+            try
+            { tsxc.Connect(); }
+            catch
+            { return false; }
             return true;
         }
 
@@ -115,7 +121,7 @@ namespace SuperScan
         public static void SetCameraTemperature(double settemp)
         {
             //Method for setting TSX camera temp
-            const int temperatureSettlingRange = 1;
+            const int temperatureSettlingRange = 5; //in percent
             ccdsoftCamera tsxc = new ccdsoftCamera();
             tsxc.TemperatureSetPoint = settemp;
             tsxc.RegulateTemperature = 1;

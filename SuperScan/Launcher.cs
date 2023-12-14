@@ -63,9 +63,9 @@ namespace SuperScan
             }
         }
 
-        public static bool CheckEnd()
+        public static bool IsSessionElapsed()
         {
-            // CheckEnd gets the configured end time and returns true
+            // IsSessionElapsed gets the configured end time and returns true
             //   if the datetime exceeds the end time
             Configuration ss_cfg = new Configuration();
             if (Convert.ToBoolean(ss_cfg.ShutDownOn))

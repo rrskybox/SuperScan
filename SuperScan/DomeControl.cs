@@ -111,7 +111,7 @@ namespace SuperScan
             bool mountedState = DeviceControl.IsMountConnected();
             bool domeState = DeviceControl.IsDomeConnected();
             //Disconnect the mount
-            DeviceControl.ConnectMount();
+            DeviceControl.DisconnectMount();
             //Connect dome and decouple the dome from the mount position, if it fails, reset the connection states
             if (!DeviceControl.IsDomeConnected())
             {

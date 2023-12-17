@@ -95,7 +95,7 @@ namespace SuperScan
         private void ReScanButton_Click(object sender, EventArgs e)
         {
             LogEventHandler("\r\n" + "********** ReScan Selected **********" + "\r\n");
-            ReScan();
+            RefreshScanList();
             return;
         }
 
@@ -286,7 +286,11 @@ namespace SuperScan
                             LogEventHandler("Closing Dome");
                             DomeControl.CloseDome();
                             while (!Launcher.IsSessionElapsed() && !IsWeatherSafe())
+                            {
                                 System.Threading.Thread.Sleep(10000);  //ten second wait loop
+                                Show();
+                                System.Windows.Forms.Application.DoEvents();
+                            }
                             if (!Launcher.IsSessionElapsed() && IsWeatherSafe())
                             {
                                 LogEventHandler("Weather conditions safe");
@@ -325,11 +329,12 @@ namespace SuperScan
 
                             LogEventHandler("Queueing up next galaxy: " + targetName);
 
-                            //Check altitude.  If too low then pass on this one.
+                            //If altitude too low then pass on this one.
                             if (gList.Altitude(targetName) < gList.MinAltitude)
-                            {
                                 LogEventHandler(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
-                            }
+                            //If the target was imaged within the last 12 hours then pass on this one.
+                            else if (IsSurveyedCurrentSession(targetName))
+                                LogEventHandler(targetName + " previously surveyed this session");
                             else
                             {
                                 //Take fresh image
@@ -391,10 +396,15 @@ namespace SuperScan
                             GalaxyCount.Text = gList.GalaxyCount.ToString();
                             Show();
                         }
-                        //Check for time to shut down
+                        //Check for time to shut down, then...
+                        //if we aren't out of time, check to see if we're out of galaxies
+                        //  if so, refresh the list and continue
+                        //  otherwise time to end
                         LogEventHandler("Checking for ending time");
                         if (Convert.ToBoolean(Launcher.IsSessionElapsed()))
                             LogEventHandler("Session elapsed.");
+                        else if (gList.GalaxyCount == 0)
+                            RefreshTargetsNow();
                     }
                 }
             }
@@ -410,7 +420,7 @@ namespace SuperScan
             return;
         }
 
-        private void ReScan()
+        private void RefreshScanList()
         {
             string curFilePath = "";
             string refFilePath = "";
@@ -498,6 +508,7 @@ namespace SuperScan
 
         private string FindCurrentFile(string dname)
         {
+            //Returns most current image file of target dname
             DateTime latestDate = new DateTime(0);
             string latestFile = null;
             System.IO.DirectoryInfo sys_ibd = new System.IO.DirectoryInfo(dname);
@@ -510,6 +521,33 @@ namespace SuperScan
                 }
             }
             return latestFile;
+        }
+
+        private DateTime LatestImageTime(string dname)
+        {
+            //Returns most current image file of target dname
+            Configuration ss_cfg = new Configuration();
+            string ibdir = ss_cfg.ImageBankFolder;
+            DateTime latestDate = new DateTime(0);
+            if (!Directory.Exists(ibdir + "\\" + dname))
+                Directory.CreateDirectory(ibdir + "\\" + dname);
+            System.IO.DirectoryInfo sys_ibd = new System.IO.DirectoryInfo(ibdir + "\\" + dname);
+            var galImages = sys_ibd.GetFiles("NGC*.fit");
+            for (int i = 0; i < galImages.Length; i++)
+            {
+                DateTime imageDate = GetDate(galImages.ElementAt(i).FullName);
+                if (imageDate > latestDate)
+                    latestDate = imageDate;
+            }
+            return latestDate;
+        }
+
+        private bool IsSurveyedCurrentSession(string targetName)
+        {
+            if ((LatestImageTime(targetName) + TimeSpan.FromHours(12)) < DateTime.Now)
+                return false;
+            else
+                return true;
         }
 
         private string FindReferenceFile(string dname)
@@ -663,12 +701,7 @@ namespace SuperScan
             Configuration ss_cfg = new Configuration();
             if (RefreshTargetsCheckBox.Checked)
             {
-                ss_cfg.RefreshTargets = "True";
-                LogEventHandler("Refresh galaxy list selected -- now using observing list query");
-                Cursor.Current = Cursors.WaitCursor;
-                gList = new GalaxyList();
-                GalaxyCount.Text = gList.GalaxyCount.ToString();
-                LogEventHandler("Queried target set has " + GalaxyCount.Text + " targets.");
+                RefreshTargetsNow();
                 return;
             }
             else
@@ -722,6 +755,18 @@ namespace SuperScan
         {
             Configuration ss_cfg = new Configuration();
             ss_cfg.FollowUpExposure = FollowUpExposureTime.Value.ToString();
+            return;
+        }
+
+        private void RefreshTargetsNow()
+        {
+            Configuration cfg = new Configuration();
+            cfg.RefreshTargets = "True";
+            LogEventHandler("Refresh galaxy list selected -- launching observing list query");
+            Cursor.Current = Cursors.WaitCursor;
+            gList = new GalaxyList();
+            GalaxyCount.Text = gList.GalaxyCount.ToString();
+            LogEventHandler("Queried target set has " + GalaxyCount.Text + " new targets.");
             return;
         }
     }

@@ -119,8 +119,11 @@ namespace SuperScan
                         new XElement("Altitude", gAltitude),
                         new XElement("HA", gHA),
                         new XElement("Side", gSide));
+                    //check if galaxy has already been imaged this session and 
                     //check for galaxy size, if less than the configured minimum, then discard
-                    if (Convert.ToDouble(gMajorAxis) >= Convert.ToDouble(ss_cfg.MinGalaxySize)) gXgalaxies.Add(gXrec);
+  
+                    if (Convert.ToDouble(gMajorAxis) >= Convert.ToDouble(ss_cfg.MinGalaxySize)) 
+                        gXgalaxies.Add(gXrec);
                 }
                 gXgalaxies.Save(ss_cfg.GalaxyListPath);
                 return;
@@ -317,6 +320,7 @@ namespace SuperScan
                         }
                     }
                 }
+
                 //By now, either we have a galaxy name or not.  Make sure the calling function checks for a null name.
                 return (nextName);
             }

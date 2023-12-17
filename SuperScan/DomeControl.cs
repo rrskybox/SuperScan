@@ -79,12 +79,13 @@ namespace SuperScan
             if (mountedState)
                 DeviceControl.ConnectMount();
             return true;
-  
+
         }
 
         public static bool ReliableGoToDomeAz(double az)
         {
             //Slews dome to azimuth while avoiding lockup if already there
+            //  Mount will be disconnect upon return
             Configuration cfg = new Configuration();
             //Disconnect the mount
             DeviceControl.DisconnectMount();
@@ -107,25 +108,20 @@ namespace SuperScan
         {
             //Method for closing the TSX dome
             //Save mount and dome connect states
+            //Note that if close dome fails, the mount is not reconnected nor the dome recoupled
+            //  in case it is chasing a target below horizon
             bool coupledState = DeviceControl.IsDomeCoupled;
             bool mountedState = DeviceControl.IsMountConnected();
             bool domeState = DeviceControl.IsDomeConnected();
             //Disconnect the mount
             DeviceControl.DisconnectMount();
+            //Decouple the dome
+            DeviceControl.IsDomeCoupled = false;
             //Connect dome and decouple the dome from the mount position, if it fails, reset the connection states
-            if (!DeviceControl.IsDomeConnected())
-            {
-                if (mountedState) DeviceControl.ConnectMount();
-                return false;
-            }
+            DeviceControl.ConnectDome();
             //Stop whatever the dome might have been doing, if it fails, reset the connection states
             if (!DeviceControl.AbortDome())
-            {
-                if (mountedState) DeviceControl.ConnectMount();
                 return false;
-            }
-            //Make sure dome decoupled
-            DeviceControl.IsDomeCoupled = false;
             //Goto home position using goto rather than home
             Configuration cfg = new Configuration();
             ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));

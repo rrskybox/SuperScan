@@ -391,7 +391,7 @@ namespace SuperScan
                 return true;
             else
                 return false;
-        }
+         }
 
         public static bool CloseDomeSlit()
         {
@@ -413,6 +413,30 @@ namespace SuperScan
         {
             sky6Dome tsxd = new sky6Dome();
             if (tsxd.IsCloseComplete == 1)
+                return true;
+            else
+                return false;
+        }
+
+        public static bool ParkDome()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            try
+            {
+                tsxd.Park();
+                System.Threading.Thread.Sleep(10);
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool IsParkComplete()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            if (tsxd.IsParkComplete == 1)
                 return true;
             else
                 return false;

@@ -47,6 +47,8 @@ namespace SuperScan
             bool coupledState = DeviceControl.IsDomeCoupled;
             bool mountedState = DeviceControl.IsMountConnected();
             bool domeState = DeviceControl.IsDomeConnected();
+            //Make sure dome decoupled
+            DeviceControl.IsDomeCoupled = false;
             //Disconnect the mount so the dome won't chase it
             DeviceControl.DisconnectMount();
             //Connect the dome, assuming it might be disconnected for some reason, if it fails, reset the connection states
@@ -61,8 +63,6 @@ namespace SuperScan
                 if (DeviceControl.IsMountConnected())
                     return false;
             }
-            //Make sure dome decoupled
-            DeviceControl.IsDomeCoupled = false;
             //Slew dome to home position
             ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
             //Open Slit
@@ -87,7 +87,7 @@ namespace SuperScan
             //Slews dome to azimuth while avoiding lockup if already there
             //  Mount will be disconnect upon return
             Configuration cfg = new Configuration();
-            //Disconnect the mount
+            //Make sure the mount is disconnected
             DeviceControl.DisconnectMount();
             //Abort any other dome operations
             DeviceControl.AbortDome();
@@ -129,9 +129,16 @@ namespace SuperScan
             InitiateCloseSlit();
             // Release task thread so TSX can start Close Slit -- Command in Progress exception otherwise
             System.Threading.Thread.Sleep(5000);
-            // Wait for close slit competion
-            while (!DeviceControl.IsCloseComplete())
-                System.Threading.Thread.Sleep(1000);
+            // Wait for close slit competion or receive timout -- meaning that the battery has failed, probably
+            try
+            {
+                while (!DeviceControl.IsCloseComplete())
+                    System.Threading.Thread.Sleep(1000);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
             //Reset device states
             if (domeState) DeviceControl.ConnectDome();
             if (coupledState) DeviceControl.IsDomeCoupled = true;
@@ -200,6 +207,11 @@ namespace SuperScan
                 }
             }
             return;
+        }
+
+        public static bool IsDomeClosed()
+        {
+            return DeviceControl.IsCloseComplete();
         }
 
     }

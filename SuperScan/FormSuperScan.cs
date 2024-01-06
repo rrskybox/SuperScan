@@ -284,7 +284,10 @@ namespace SuperScan
                         if (Convert.ToBoolean(ss_cfg.UsesDome))
                         {
                             LogEventHandler("Closing Dome");
-                            DomeControl.CloseDome();
+                            if (DomeControl.CloseDome())
+                                LogEventHandler("Dome Closed");
+                            else
+                                LogEventHandler("Dome Close Failed");
                             while (!Launcher.IsSessionElapsed() && !IsWeatherSafe())
                             {
                                 System.Threading.Thread.Sleep(10000);  //ten second wait loop

@@ -35,6 +35,7 @@ namespace SuperScan
             catch { return false; }
             //If a connection is set, then make sure the dome is coupled to the telescope slews
             DeviceControl.IsDomeCoupled = true;
+            DeviceControl.UnparkDome();
             return true;
         }
 
@@ -42,9 +43,7 @@ namespace SuperScan
         {
             //Method for opening the TSX dome
             //Method to open dome
-            Configuration cfg = new Configuration();
             //Save mount and dome connect states
-            bool coupledState = DeviceControl.IsDomeCoupled;
             bool mountedState = DeviceControl.IsMountConnected();
             bool domeState = DeviceControl.IsDomeConnected();
             //Make sure dome decoupled
@@ -64,22 +63,90 @@ namespace SuperScan
                     return false;
             }
             //Slew dome to home position
-            ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
+            //ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
+            //Park Dome, if not already parked
+            System.Threading.Thread.Sleep(1000);
+            DeviceControl.FindDomeHome();
+            System.Threading.Thread.Sleep(1000);
+            while (!DeviceControl.IsFindDomeHomeComplete())
+                System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(1000);
+            DeviceControl.ParkDome();
+            while (!DeviceControl.IsParkComplete())
+                System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(1000);
             //Open Slit
-            InitiateOpenSlit();
-            System.Threading.Thread.Sleep(10);  //Workaround for race condition in TSX
+            DeviceControl.OpenDomeSlit();
+            //Give a wait to get goint
+            System.Threading.Thread.Sleep(5000);
             while (!DeviceControl.IsOpenComplete())
-            { System.Threading.Thread.Sleep(1000); } //one second wait loop
+                System.Threading.Thread.Sleep(1000); //one second wait loop
+            //Unpark the dome so it can chase the mount
+            DeviceControl.UnparkDome();
+            while (!DeviceControl.IsUnparkComplete())
+                System.Threading.Thread.Sleep(1000);
+            //Enable mount chasing
             DeviceControl.IsDomeCoupled = true;
+
             //Reset device states
             if (domeState)
                 DeviceControl.ConnectDome();
-            if (coupledState)
-                DeviceControl.IsDomeCoupled = true;
             if (mountedState)
                 DeviceControl.ConnectMount();
             return true;
 
+        }
+
+        public static bool CloseDome()
+        {
+            //Method for closing the TSX dome
+            //Save mount and dome connect states
+            //Note that if close dome fails, the mount is not reconnected nor the dome recoupled
+            //  in case it is chasing a target below horizon
+            bool mountedState = DeviceControl.IsMountConnected();
+            bool domeState = DeviceControl.IsDomeConnected();
+            //Disconnect the mount
+            DeviceControl.DisconnectMount();
+            //Decouple the dome
+            DeviceControl.IsDomeCoupled = false;
+            //Connect dome and decouple the dome from the mount position, if it fails, reset the connection states
+            DeviceControl.ConnectDome();
+            //Stop whatever the dome might have been doing, if it fails, reset the connection states
+            if (!DeviceControl.AbortDome())
+                return false;
+            //Goto home position using goto rather than home
+            //Configuration cfg = new Configuration();
+            //ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
+            System.Threading.Thread.Sleep(1000);
+            DeviceControl.FindDomeHome();
+            System.Threading.Thread.Sleep(1000);
+            while (!DeviceControl.IsFindDomeHomeComplete())
+                System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(1000);
+            DeviceControl.ParkDome();
+            while (!DeviceControl.IsParkComplete())
+                System.Threading.Thread.Sleep(1000);
+            System.Threading.Thread.Sleep(1000);
+            //Close slit
+            DeviceControl.CloseDomeSlit();
+            // Release task thread so TSX can start Close Slit -- Command in Progress exception otherwise
+            System.Threading.Thread.Sleep(5000);
+            // Wait for close slit competion or receive timout -- meaning that the battery has failed, probably
+            try
+            {
+                while (!DeviceControl.IsCloseComplete())
+                    System.Threading.Thread.Sleep(1000);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            //Reset device states
+            if (domeState) 
+                DeviceControl.ConnectDome();
+            if (mountedState)
+                DeviceControl.ConnectMount();
+            return true;
         }
 
         public static bool ReliableGoToDomeAz(double az)
@@ -96,124 +163,13 @@ namespace SuperScan
             double currentAz = Convert.ToDouble(cfg.DomeHomeAz);
             if (currentAz - az > 1)
             {
-                InitiateDomeGoTo(az);
+                DeviceControl.GoToDomeAzm(az);
                 System.Threading.Thread.Sleep(5000);
                 while (!DeviceControl.IsGoToAzmComplete())
                     System.Threading.Thread.Sleep(1000);
             }
             return true;
         }
-
-        public static bool CloseDome()
-        {
-            //Method for closing the TSX dome
-            //Save mount and dome connect states
-            //Note that if close dome fails, the mount is not reconnected nor the dome recoupled
-            //  in case it is chasing a target below horizon
-            bool coupledState = DeviceControl.IsDomeCoupled;
-            bool mountedState = DeviceControl.IsMountConnected();
-            bool domeState = DeviceControl.IsDomeConnected();
-            //Disconnect the mount
-            DeviceControl.DisconnectMount();
-            //Decouple the dome
-            DeviceControl.IsDomeCoupled = false;
-            //Connect dome and decouple the dome from the mount position, if it fails, reset the connection states
-            DeviceControl.ConnectDome();
-            //Stop whatever the dome might have been doing, if it fails, reset the connection states
-            if (!DeviceControl.AbortDome())
-                return false;
-            //Goto home position using goto rather than home
-            Configuration cfg = new Configuration();
-            ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
-            //Close slit
-            InitiateCloseSlit();
-            // Release task thread so TSX can start Close Slit -- Command in Progress exception otherwise
-            System.Threading.Thread.Sleep(5000);
-            // Wait for close slit competion or receive timout -- meaning that the battery has failed, probably
-            try
-            {
-                while (!DeviceControl.IsCloseComplete())
-                    System.Threading.Thread.Sleep(1000);
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
-            //Reset device states
-            if (domeState) DeviceControl.ConnectDome();
-            if (coupledState) DeviceControl.IsDomeCoupled = true;
-            if (mountedState) DeviceControl.ConnectMount();
-            return true;
-        }
-
-        private static void InitiateDomeGoTo(double az)
-        {
-            //Operation in progress == 0
-            int sleepOver = 1000;
-            bool failed = true;
-
-            while (failed)
-            {
-                try
-                {
-                    failed = !DeviceControl.GoToDomeAzm(az);
-                }
-                catch
-                {
-                    //Assume goto in progress error, wait until Goto is complete
-                    System.Threading.Thread.Sleep(sleepOver);
-                }
-            }
-            return;
-        }
-
-        private static void InitiateOpenSlit()
-        {
-            //Operation in progress == 0
-            int sleepOver = 1000;
-            bool failed = true;
-
-            while (failed)
-            {
-                try
-                {
-                    failed = !DeviceControl.OpenDomeSlit();
-                }
-                catch
-                {
-                    //Assume goto in progress error, wait until Goto is complete
-                    System.Threading.Thread.Sleep(sleepOver);
-                }
-            }
-            return;
-        }
-
-        private static void InitiateCloseSlit()
-        {
-            //Operation in progress == 0
-            int sleepOver = 1000;
-            bool failed = true;
-
-            while (failed)
-            {
-                try
-                {
-                    failed = !DeviceControl.CloseDomeSlit();
-                }
-                catch
-                {
-                    //Assume goto in progress error, wait until Goto is complete
-                    System.Threading.Thread.Sleep(sleepOver);
-                }
-            }
-            return;
-        }
-
-        public static bool IsDomeClosed()
-        {
-            return DeviceControl.IsCloseComplete();
-        }
-
     }
 }
 

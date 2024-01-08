@@ -141,7 +141,7 @@ namespace SuperScan
             sky6RASCOMTele tsxt = new sky6RASCOMTele();
             if (hasDome)
             {
-                while (IsDomeTrackingUnderway()) 
+                while (IsDomeTrackingUnderway())
                     System.Threading.Thread.Sleep(500);
                 int result = -1;
                 while (result != 0)
@@ -164,7 +164,7 @@ namespace SuperScan
             //  while waiting for the dome tracking to catch up.
             //Then decouple the dome and run the CLS which should
             //  be very close to the initial slew.
-            
+
             ccdsoftCamera tsxc = new ccdsoftCamera();
             ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
             switch (reductionType)
@@ -221,7 +221,7 @@ namespace SuperScan
             //else return false;
         }
 
-         public static void DomeCouplingOn()
+        public static void DomeCouplingOn()
         {
             //Uncouple dome tracking, then recouple dome tracking (synchronously)
 
@@ -320,12 +320,12 @@ namespace SuperScan
             get
             {
                 sky6Dome tsxd = new sky6Dome();
-                return Convert.ToBoolean(tsxd.isCoupledToMountTracking());
+                return Convert.ToBoolean(tsxd.IsCoupled);
             }
             set
             {
                 sky6Dome tsxd = new sky6Dome();
-                tsxd.setIsCoupledToMountTracking(Convert.ToInt32(true));
+                tsxd.IsCoupled = Convert.ToInt32(value);
                 return;
             }
         }
@@ -338,8 +338,8 @@ namespace SuperScan
                 tsxd.Abort();
                 System.Threading.Thread.Sleep(sleepover);
             }
-            catch 
-            { 
+            catch
+            {
                 return false;
             }
             //Wait for abort command to clear
@@ -404,6 +404,28 @@ namespace SuperScan
 
         }
 
+        public static bool IsFindDomeHomeComplete()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            return Convert.ToBoolean(tsxd.IsFindHomeComplete);
+        }
+
+        public static bool FindDomeHome()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            try
+            {
+                tsxd.FindHome();
+                System.Threading.Thread.Sleep(sleepover);
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
+
         public static bool IsCloseComplete()
         {
             sky6Dome tsxd = new sky6Dome();
@@ -429,7 +451,27 @@ namespace SuperScan
         {
             sky6Dome tsxd = new sky6Dome();
             return Convert.ToBoolean(tsxd.IsParkComplete);
+        }
 
+        public static bool UnparkDome()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            try
+            {
+                tsxd.Unpark();
+                System.Threading.Thread.Sleep(sleepover);
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
+        public static bool IsUnparkComplete()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            return Convert.ToBoolean(tsxd.IsUnparkComplete);
         }
 
     }

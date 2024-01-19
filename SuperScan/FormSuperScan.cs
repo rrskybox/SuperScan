@@ -32,8 +32,6 @@ namespace SuperScan
         private GalaxyList gList;
         private Logger ss_log = new Logger();
 
-        const int DOME_HOME_AZ = 220;
-
         public FormSuperScan()
         {
             //Initialize application form interfaces
@@ -69,39 +67,55 @@ namespace SuperScan
             this.Text = "SuperScan V" + this.Text;
             this.Show();
 
-            //Start up notice as to problems
-            // string problemText = "As of Build 13339, automated image link settings (CLS and T-Point) must be set for 1x1 binning.  TS is not correctly propogating " +
-            //     "automated image link settings to Image Link and code cannot read the automated image link binning setting in order to do it for TS.  SuperScan alternates " +
-            //     "Image Linking between image plate solves and CLS's.  So, they must have the same binning until the propogation issue is fixed or COM AILS supports reading binning.";
-            //MessageBox.Show(problemText);
-
+            //Subscribe to logging entry events from other classes/threads
+            ss_log.LogFileUpdate += PostLogEntry_Handler;
+            
             gList = new GalaxyList();
             GalaxyCount.Text = gList.GalaxyCount.ToString();
 
-            LogEventHandler("\r\n" + "********** Initiating SuperScan **********");
-            LogEventHandler("Found " + GalaxyCount.Text + " galaxies available at this time.");
+            SaveLogEntry("\r\n" + "********** Initiating SuperScan **********");
+            SaveLogEntry("Found " + GalaxyCount.Text + " galaxies available at this time.");
 
+            return;
+        }
 
+        private void SaveLogEntry(string logEntry)
+        {
+            //Calls on logger class to save the log entry, then bounces back through the event handler to post it to the screen
+            ss_log.PostLogEntry(logEntry); 
+        }
+
+        private void PostLogEntry_Handler(object sender, string logText)
+        {
+            //event from other classes/threads
+            PostLogEntry(logText);
+        }
+
+        private void PostLogEntry(string logline)
+        {
+            LogBox.AppendText(logline + "\r\n");
+            this.Show();
+            System.Windows.Forms.Application.DoEvents();
             return;
         }
 
         private void StartScanButton_Click(object sender, EventArgs e)
         {
-            LogEventHandler("\r\n" + "********** Full Scan Selected **********" + "\r\n");
+            SaveLogEntry("\r\n" + "********** Full Scan Selected **********" + "\r\n");
             StartScan();
             return;
         }
 
         private void ReScanButton_Click(object sender, EventArgs e)
         {
-            LogEventHandler("\r\n" + "********** ReScan Selected **********" + "\r\n");
+            SaveLogEntry("\r\n" + "********** ReScan Selected **********" + "\r\n");
             RefreshScanList();
             return;
         }
 
         private void SuspectsButton_Click(object sender, EventArgs e)
         {
-            LogEventHandler("\r\n" + "**********Checking Suspect List **********" + "\r\n");
+            SaveLogEntry("\r\n" + "**********Checking Suspect List **********" + "\r\n");
             FormSuspectReport ss_sfm = new FormSuspectReport();
             ss_sfm.ShowDialog();
             return;
@@ -109,13 +123,13 @@ namespace SuperScan
 
         private void AbortButton_Click(object sender, EventArgs e)
         {
-            LogEventHandler("\r\n" + "********** Aborted by User **********" + "\r\n");
+            SaveLogEntry("\r\n" + "********** Aborted by User **********" + "\r\n");
             Close();
         }
 
         private void CloseButton_Click(object sender, EventArgs e)
         {
-            LogEventHandler("\r\n" + "********** Closed by User **********" + "\r\n");
+            SaveLogEntry("\r\n" + "********** Closed by User **********" + "\r\n");
             Close();
         }
 
@@ -155,9 +169,9 @@ namespace SuperScan
                 ss_asf.ShowDialog();
                 ss_cfg.AutoStart = "True";
                 {
-                    if (Convert.ToBoolean(ss_cfg.StageSystemOn)) { LogEventHandler("Staging set for " + ss_cfg.StageSystemTime); }
-                    if (Convert.ToBoolean(ss_cfg.StartUpOn)) { LogEventHandler("Start up set for " + ss_cfg.StartUpTime); }
-                    if (Convert.ToBoolean(ss_cfg.ShutDownOn)) { LogEventHandler("Shut down set for " + ss_cfg.ShutDownTime); }
+                    if (Convert.ToBoolean(ss_cfg.StageSystemOn)) { SaveLogEntry("Staging set for " + ss_cfg.StageSystemTime); }
+                    if (Convert.ToBoolean(ss_cfg.StartUpOn)) { SaveLogEntry("Start up set for " + ss_cfg.StartUpTime); }
+                    if (Convert.ToBoolean(ss_cfg.ShutDownOn)) { SaveLogEntry("Shut down set for " + ss_cfg.ShutDownTime); }
                 }
             }
             else
@@ -179,7 +193,7 @@ namespace SuperScan
             //If AutoStart is enabled, then wait for 15 seconds for the user to disable, if desired
             //  Otherwise, initiate the scan
             {
-                LogEventHandler("\r\n" + "********** AutoRun Initiated **********" + "\r\n" + "Unless unchecked, AutoRun will begin in 15 seconds!\r\n");
+                SaveLogEntry("\r\n" + "********** AutoRun Initiated **********" + "\r\n" + "Unless unchecked, AutoRun will begin in 15 seconds!\r\n");
                 for (int i = 0; i < 60; i++)
                 {
                     Show();
@@ -187,7 +201,7 @@ namespace SuperScan
                     System.Threading.Thread.Sleep(250);
                     if (!AutoRunCheckBox.Checked)
                     {
-                        LogEventHandler("\r\n" + "********** AutoRun Suspended **********" + "\r\n");
+                        SaveLogEntry("\r\n" + "********** AutoRun Suspended **********" + "\r\n");
                         break;
                     }
                 }
@@ -195,13 +209,13 @@ namespace SuperScan
                 //   Otherwise, exit on out
                 if (AutoRunCheckBox.Checked)
                 {
-                    LogEventHandler("Awaiting System Staging Time at " + ss_cfg.StageSystemTime.ToString() + "\r\n");
+                    SaveLogEntry("Awaiting System Staging Time at " + ss_cfg.StageSystemTime.ToString() + "\r\n");
                     Launcher.WaitStage();
-                    LogEventHandler("Running System Staging Program **********" + "\r\n");
+                    SaveLogEntry("Running System Staging Program **********" + "\r\n");
                     Launcher.RunStageSystem();
-                    LogEventHandler("Awaiting Start Up Time at " + ss_cfg.StartUpTime.ToString() + "\r\n");
+                    SaveLogEntry("Awaiting Start Up Time at " + ss_cfg.StartUpTime.ToString() + "\r\n");
                     Launcher.WaitStart();
-                    LogEventHandler("Running Start Up Program **********" + "\r\n");
+                    SaveLogEntry("Running Start Up Program **********" + "\r\n");
                     Launcher.RunStartUp();
                 }
             }
@@ -210,19 +224,19 @@ namespace SuperScan
             GalaxyCount.Text = gList.GalaxyCount.ToString();
             SuspectCountLabel.Text = "0";
 
-            LogEventHandler("\r\n" + "********** Beginning SuperScan Run **********");
-            LogEventHandler("Found " + GalaxyCount.Text + " galaxies for this session");
+            SaveLogEntry("\r\n" + "********** Beginning SuperScan Run **********");
+            SaveLogEntry("Found " + GalaxyCount.Text + " galaxies for this session");
 
             // Scan Running...
             // Connect telescope mount and camera, and dome, if any
-            if (DeviceControl.TelescopeStartUp()) LogEventHandler("Initializing Mount");
-            else LogEventHandler("Mount initialization failed");
-            if (DeviceControl.CameraStartUp()) LogEventHandler("Initializing Camera");
-            else LogEventHandler("Camera initialization failed");
+            if (DeviceControl.TelescopeStartUp()) SaveLogEntry("Initializing Mount");
+            else SaveLogEntry("Mount initialization failed");
+            if (DeviceControl.CameraStartUp()) SaveLogEntry("Initializing Camera");
+            else SaveLogEntry("Camera initialization failed");
             if (Convert.ToBoolean(ss_cfg.UsesDome))
             {
-                if (DomeControl.DomeStartUp()) LogEventHandler("Initializing Dome");
-                else LogEventHandler("Dome initialization failed");
+                if (DomeControl.DomeStartUp()) SaveLogEntry("Initializing Dome");
+                else SaveLogEntry("Dome initialization failed");
             }
             ;
             Show();
@@ -238,9 +252,9 @@ namespace SuperScan
             if (AutoFocusCheckBox.Checked)
             {
                 AutoFocus.afLastTemp = -100;
-                LogEventHandler("Running Auto Focus");
+                SaveLogEntry("Running Auto Focus");
                 string focStat = AutoFocus.Check();
-                LogEventHandler(focStat);
+                SaveLogEntry(focStat);
             }
 
             //Open up the configuration parameteters, update with current form inputs
@@ -252,8 +266,8 @@ namespace SuperScan
             ss_cfg.AutoStart = AutoRunCheckBox.Checked.ToString();
             ss_cfg.AutoFocus = AutoFocusCheckBox.Checked.ToString();
             ss_cfg.WatchWeather = WatchWeatherCheckBox.Checked.ToString();
-            LogEventHandler("Starting Scan");
-            LogEventHandler("Bringing camera to temperature");
+            SaveLogEntry("Starting Scan");
+            SaveLogEntry("Bringing camera to temperature");
             DeviceControl.SetCameraTemperature(Convert.ToDouble(CCDTemperatureSetting.Value));
 
             int gTriedCount = 0;
@@ -272,22 +286,22 @@ namespace SuperScan
                 //  if unsafe then spin until it is safe or endingtime occurs.
                 if (!Launcher.IsSessionElapsed() && WatchWeatherCheckBox.Checked)
                 {
-                    LogEventHandler("Checking Weather");
+                    SaveLogEntry("Checking Weather");
                     if (!IsWeatherSafe())
                     {
-                        LogEventHandler("Waiting on unsafe weather conditions...");
-                        LogEventHandler("Parking telescope");
+                        SaveLogEntry("Waiting on unsafe weather conditions...");
+                        SaveLogEntry("Parking telescope");
                         if (DeviceControl.TelescopeShutDown())
-                            LogEventHandler("Mount parked");
+                            SaveLogEntry("Mount parked");
                         else
-                            LogEventHandler("Mount park failed");
+                            SaveLogEntry("Mount park failed");
                         if (Convert.ToBoolean(ss_cfg.UsesDome))
                         {
-                            LogEventHandler("Closing Dome");
+                            SaveLogEntry("Closing Dome");
                             if (DomeControl.CloseDome())
-                                LogEventHandler("Dome Closed");
+                                SaveLogEntry("Dome Closed");
                             else
-                                LogEventHandler("Dome Close Failed");
+                                SaveLogEntry("Dome Close Failed");
                             while (!Launcher.IsSessionElapsed() && !IsWeatherSafe())
                             {
                                 System.Threading.Thread.Sleep(10000);  //ten second wait loop
@@ -296,14 +310,14 @@ namespace SuperScan
                             }
                             if (!Launcher.IsSessionElapsed() && IsWeatherSafe())
                             {
-                                LogEventHandler("Weather conditions safe");
-                                LogEventHandler("Opening Dome");
+                                SaveLogEntry("Weather conditions safe");
+                                SaveLogEntry("Opening Dome");
                                 if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.OpenDome();
-                                LogEventHandler("Unparking telescope");
-                                if (DeviceControl.TelescopeStartUp()) LogEventHandler("Mount unparked");
+                                SaveLogEntry("Unparking telescope");
+                                if (DeviceControl.TelescopeStartUp()) SaveLogEntry("Mount unparked");
 
                                 //Wait for 30 seconds for everything to settle
-                                LogEventHandler("Waiting for dome to settle");
+                                SaveLogEntry("Waiting for dome to settle");
                                 System.Threading.Thread.Sleep(30000);
                                 //Recouple dome
                                 if (Convert.ToBoolean(ss_cfg.UsesDome)) DeviceControl.IsDomeCoupled = true;
@@ -316,9 +330,9 @@ namespace SuperScan
                         if (!Launcher.IsSessionElapsed() && AutoFocusCheckBox.Checked)
                         {
                             //One stop shopping
-                            LogEventHandler("Checking Focus");
+                            SaveLogEntry("Checking Focus");
                             string focStat = AutoFocus.Check();
-                            LogEventHandler(focStat);
+                            SaveLogEntry(focStat);
                         }
                         //Check one more time on session elapsed, if all good then proceed to survey a galaxy
 
@@ -330,34 +344,33 @@ namespace SuperScan
                             CurrentGalaxySizeArcmin.Text = gList.MaxAxis(targetName).ToString();
                             Show();
 
-                            LogEventHandler("Queueing up next galaxy: " + targetName);
+                            SaveLogEntry("Queueing up next galaxy: " + targetName);
 
                             //If altitude too low then pass on this one.
                             if (gList.Altitude(targetName) < gList.MinAltitude)
-                                LogEventHandler(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
+                                SaveLogEntry(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
                             //If the target was imaged within the last 12 hours then pass on this one.
                             else if (IsSurveyedCurrentSession(targetName))
-                                LogEventHandler(targetName + " previously surveyed this session");
+                                SaveLogEntry(targetName + " previously surveyed this session");
                             else
                             {
                                 //Take fresh image
                                 FreshImage fso = new FreshImage();
-                                fso.LogUpdate += LogEventHandler;
                                 //Seek location of next galaxy
                                 //Ignor return value
                                 fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
                                 if (fso.ImagePath == "")
                                 {
-                                    LogEventHandler(targetName + ": " + " Image capture failed -- probably CLS failure.");
-                                    LogEventHandler("");
+                                    SaveLogEntry(targetName + ": " + " Image capture failed -- probably CLS failure.");
+                                    SaveLogEntry("");
                                 }
                                 else
                                 {
-                                    LogEventHandler(targetName + " Image capture complete.");
-                                    LogEventHandler(targetName + " Looking in Image Bank for most recent image.");
+                                    SaveLogEntry(targetName + " Image capture complete.");
+                                    SaveLogEntry(targetName + " Looking in Image Bank for most recent image.");
                                     //Save Image
                                     ImageBank sio = new ImageBank(targetName);
-                                    LogEventHandler(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
+                                    SaveLogEntry(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
                                     sio.AddImage(ss_cfg.FreshImagePath);
                                     //Increment the galaxy count for reporting purposes
                                     gSuccessfulCount++;
@@ -367,14 +380,14 @@ namespace SuperScan
                                     if (sio.MostRecentImagePath != "")
                                     {
                                         int subFrameSize = Convert.ToInt32(60 * gList.MaxAxis(targetName));
-                                        LogEventHandler("Detecting supernova prospects.");
+                                        SaveLogEntry("Detecting supernova prospects.");
                                         //Check to see if detection is to be run or not
                                         //  if so, open a detection object with the log handler property set up
                                         //   if not, just move on
                                         if (!PostponeDetectionCheckBox.Checked)
                                         {
                                             NovaDetection ss_ndo = new NovaDetection();
-                                            ss_ndo.LogUpdate += LogEventHandler;
+                                            ss_ndo.LogUpdate += SaveLogEntry;
                                             if (ss_ndo.Detect(targetName,
                                                 subFrameSize, gList.RA(targetName),
                                                 gList.Dec(targetName),
@@ -386,10 +399,10 @@ namespace SuperScan
                                             }
                                         }
                                         else
-                                            LogEventHandler("Supernova detecton postponed per request.");
+                                            SaveLogEntry("Supernova detecton postponed per request.");
                                     }
                                     else
-                                        LogEventHandler("No banked image for comparison.");
+                                        SaveLogEntry("No banked image for comparison.");
                                 }
                             }
                             //Update tries counter
@@ -403,21 +416,21 @@ namespace SuperScan
                         //if we aren't out of time, check to see if we're out of galaxies
                         //  if so, refresh the list and continue
                         //  otherwise time to end
-                        LogEventHandler("Checking for ending time");
+                        SaveLogEntry("Checking for ending time");
                         if (Convert.ToBoolean(Launcher.IsSessionElapsed()))
-                            LogEventHandler("Session elapsed.");
+                            SaveLogEntry("Session elapsed.");
                         else if (gList.GalaxyCount == 0)
                             RefreshTargetsNow();
                     }
                 }
             }
 
-            LogEventHandler("Session Completed");
-            LogEventHandler("SuperScan surveyed " + gSuccessfulCount + " out of " + gTriedCount + " galaxies.");
+            SaveLogEntry("Session Completed");
+            SaveLogEntry("SuperScan surveyed " + gSuccessfulCount + " out of " + gTriedCount + " galaxies.");
 
             //Park the telescope so it doesn't drift too low
             DeviceControl.TelescopeShutDown();
-            LogEventHandler("AutoRun Running Shut Down Program **********" + "\r\n");
+            SaveLogEntry("AutoRun Running Shut Down Program **********" + "\r\n");
             Launcher.RunShutDown();
             StartScanButton.BackColor = scanbuttoncolorsave;
             return;
@@ -430,7 +443,7 @@ namespace SuperScan
 
             //Open up the configuration parameteters, update with current form inputs
             Configuration ss_cfg = new Configuration();
-            LogEventHandler("Starting ReScan");
+            SaveLogEntry("Starting ReScan");
 
             string ibdir = ss_cfg.ImageBankFolder;
             string[] imageBankDirs = System.IO.Directory.GetDirectories(ibdir);
@@ -438,7 +451,7 @@ namespace SuperScan
 
             if (imageBankDirs.Length == 0)
             {
-                LogEventHandler("Empty Image Bank");
+                SaveLogEntry("Empty Image Bank");
                 return;
             }
             //Determine if all or just one target is to be tested
@@ -454,7 +467,7 @@ namespace SuperScan
                     if (sys_imd.Name == pickName)
                     {
                         string targetName = sys_imd.Name;
-                        LogEventHandler("Running " + targetName);
+                        SaveLogEntry("Running " + targetName);
                         System.IO.DirectoryInfo sys_gal = new System.IO.DirectoryInfo(galdir);
                         if (sys_gal.GetFiles("NGC*.fit").Length >= 2)
                         {
@@ -475,17 +488,17 @@ namespace SuperScan
                             int subFrameSize = Convert.ToInt32(60 * gMaxArcMin);
 
                             NovaDetection ss_ndo = new NovaDetection();
-                            ss_ndo.LogUpdate += LogEventHandler;
+                            ss_ndo.LogUpdate += SaveLogEntry;
                             ss_ndo.Detect(targetName, subFrameSize, gRA, gDec, curFilePath, refFilePath, galdir);
                         }
                         else
                         {
-                            LogEventHandler("Insufficient Images");
+                            SaveLogEntry("Insufficient Images");
                         }
                     }
                     GalaxyCount.Text = (Convert.ToInt16(GalaxyCount.Text) - 1).ToString();
                 }
-            LogEventHandler("ReScan Done");
+            SaveLogEntry("ReScan Done");
             return;
         }
 
@@ -569,15 +582,6 @@ namespace SuperScan
                 }
             }
             return nextLatestFile;
-        }
-
-        private void LogEventHandler(string logline)
-        {
-            ss_log.LogEntry(logline);
-            LogBox.AppendText(logline + "\r\n");
-            this.Show();
-            System.Windows.Forms.Application.DoEvents();
-            return;
         }
 
         private void OnTopCheckBox_CheckedChanged(object sender, EventArgs e)
@@ -710,20 +714,20 @@ namespace SuperScan
             else
             {
                 //Verify that there is content in the static target file
-                LogEventHandler("Refresh galaxy list deselected -- now using fixed list, if populated.");
+                SaveLogEntry("Refresh galaxy list deselected -- now using fixed list, if populated.");
                 List<string> targetSet = new List<string>();
                 try { targetSet = File.ReadAllLines(ss_cfg.ObservingListPath).ToList(); }
                 catch
                 {
                     ss_cfg.RefreshTargets = "True";
-                    LogEventHandler("Fixed target set file is missing. Make sure that SuperScanObservingList.txt exists and contains targets.");
+                    SaveLogEntry("Fixed target set file is missing. Make sure that SuperScanObservingList.txt exists and contains targets.");
                     RefreshTargetsCheckBox.Checked = true;
                     return;
                 }
                 if (targetSet.Count < 1)
                 {
                     ss_cfg.RefreshTargets = "True";
-                    LogEventHandler("Fixed target set file is empty. Make sure that SuperScanObservingList.txt contains targets.");
+                    SaveLogEntry("Fixed target set file is empty. Make sure that SuperScanObservingList.txt contains targets.");
                     RefreshTargetsCheckBox.Checked = true;
                     return;
                 }
@@ -732,7 +736,7 @@ namespace SuperScan
                     ss_cfg.RefreshTargets = "False";
                     gList = new GalaxyList();
                     GalaxyCount.Text = gList.GalaxyCount.ToString();
-                    LogEventHandler("Fixed target set has " + GalaxyCount.Text + " targets.");
+                    SaveLogEntry("Fixed target set has " + GalaxyCount.Text + " targets.");
                     return;
                 }
             }
@@ -765,11 +769,11 @@ namespace SuperScan
         {
             Configuration cfg = new Configuration();
             cfg.RefreshTargets = "True";
-            LogEventHandler("Refresh galaxy list selected -- launching observing list query");
+            SaveLogEntry("Refresh galaxy list selected -- launching observing list query");
             Cursor.Current = Cursors.WaitCursor;
             gList = new GalaxyList();
             GalaxyCount.Text = gList.GalaxyCount.ToString();
-            LogEventHandler("Queried target set has " + GalaxyCount.Text + " new targets.");
+            SaveLogEntry("Queried target set has " + GalaxyCount.Text + " new targets.");
             return;
         }
     }

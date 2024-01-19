@@ -21,16 +21,13 @@ namespace SuperScan
 {
     public class FreshImage
     {
-        //statements for linking logging method LogUpdate to the main form logging routine.
-        public delegate void LogEventHandler(string LogText);
-        public event LogEventHandler LogUpdate;
+        ////statements for linking logging method LogUpdate to the main form logging routine.
 
         private string freshImagePath = "";
         private string freshImageName = "";
         private double freshImageRA = 0;
         private double freshImageDec = 0;
         private double freshImagePA = 0;
-        //private double freshImageScale = 0;
 
         public FreshImage()
         {
@@ -173,10 +170,12 @@ namespace SuperScan
         public double PA => freshImagePA;
 
         //Method to link to SuperScan main form for logging progress.
+
         private void LogEntry(string upd)
         //Method for projecting log entry to the SuperScan Main Form
         {
-            LogUpdate(upd);
+            Logger lg = new Logger();
+            lg.PostLogEntry(upd);
             return;
         }
 

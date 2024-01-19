@@ -47,11 +47,8 @@ namespace SuperScan
                 {
                     double tAz = tsxt.dAz;
                     tAlt = 80.0;
-                    //turn off tracking to avoid dome error
-                    //DeviceControl dctl = new DeviceControl();
-                    //dctl.DomeTrackingOff();
+                    //move to a position near zenith
                     tsxt.SlewToAzAlt(tAz, tAlt, "AtFocus2ReadyPosition");
-                    //dctl.DomeTrackingOn();
                 }
                 Configuration cfg = new Configuration();
 

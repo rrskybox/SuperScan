@@ -31,11 +31,16 @@ namespace SuperScan
             // use exception handlers to check for dome commands, opt out if none
             //  couple the dome to telescope if everything works out
             sky6Dome tsxd = new sky6Dome();
+            LogEntry("Connecting Dome");
             try { tsxd.Connect(); }
             catch { return false; }
             //If a connection is set, then make sure the dome is coupled to the telescope slews
+            LogEntry("Coupling Dome");
             DeviceControl.IsDomeCoupled = true;
+            LogEntry("Unparking Dome, if needed");
+            System.Threading.Thread.Sleep(5000);
             DeviceControl.UnparkDome();
+            System.Threading.Thread.Sleep(5000);
             return true;
         }
 
@@ -47,45 +52,45 @@ namespace SuperScan
             bool mountedState = DeviceControl.IsMountConnected();
             bool domeState = DeviceControl.IsDomeConnected();
             //Make sure dome decoupled
+            LogEntry("Uncoupling Dome from mount (although this doen't work for tracking, yet");
             DeviceControl.IsDomeCoupled = false;
             //Disconnect the mount so the dome won't chase it
+            LogEntry("Disconnecting Mount");
             DeviceControl.DisconnectMount();
             //Connect the dome, assuming it might be disconnected for some reason, if it fails, reset the connection states
+            LogEntry("Connecting Dome");
             if (!DeviceControl.ConnectDome())
             {
                 if (DeviceControl.IsMountConnected())
                     return false;
             }
             //Stop whatever the dome might have been doing, if it fails, reset the connection states
+            LogEntry("Aborting Dome Commands");
             if (!DeviceControl.AbortDome())
             {
                 if (DeviceControl.IsMountConnected())
                     return false;
             }
-            //Slew dome to home position
-            //ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
-            //Park Dome, if not already parked
-            System.Threading.Thread.Sleep(1000);
-            DeviceControl.FindDomeHome();
-            System.Threading.Thread.Sleep(1000);
-            while (!DeviceControl.IsFindDomeHomeComplete())
-                System.Threading.Thread.Sleep(1000);
-            System.Threading.Thread.Sleep(1000);
-            DeviceControl.ParkDome();
-            while (!DeviceControl.IsParkComplete())
-                System.Threading.Thread.Sleep(1000);
-            System.Threading.Thread.Sleep(1000);
+            //Park Dome
+            LogEntry("Bringing dome to park position");
+            DeviceControl.DomeParkReliably();
             //Open Slit
+            LogEntry("Opening dome slit");
             DeviceControl.OpenDomeSlit();
             //Give a wait to get goint
             System.Threading.Thread.Sleep(5000);
             while (!DeviceControl.IsOpenComplete())
-                System.Threading.Thread.Sleep(1000); //one second wait loop
+                System.Threading.Thread.Sleep(1000);
             //Unpark the dome so it can chase the mount
+            System.Threading.Thread.Sleep(5000);
+            LogEntry("Unparking dome, if parked");
             DeviceControl.UnparkDome();
+            System.Threading.Thread.Sleep(5000);
             while (!DeviceControl.IsUnparkComplete())
                 System.Threading.Thread.Sleep(1000);
             //Enable mount chasing
+            System.Threading.Thread.Sleep(5000);
+            LogEntry("Coupling dome to mount");
             DeviceControl.IsDomeCoupled = true;
 
             //Reset device states
@@ -106,46 +111,36 @@ namespace SuperScan
             bool mountedState = DeviceControl.IsMountConnected();
             bool domeState = DeviceControl.IsDomeConnected();
             //Disconnect the mount
+            LogEntry("Disconnecting mount");
             DeviceControl.DisconnectMount();
             //Decouple the dome
+            LogEntry("Uncoupling dome to mount -- except for tracking as of now");
             DeviceControl.IsDomeCoupled = false;
             //Connect dome and decouple the dome from the mount position, if it fails, reset the connection states
+            LogEntry("Connecting dome, if needed");
             DeviceControl.ConnectDome();
             //Stop whatever the dome might have been doing, if it fails, reset the connection states
+            LogEntry("Aborting any outstanding dome commandes");
             if (!DeviceControl.AbortDome())
                 return false;
-            //Goto home position using goto rather than home
-            //Configuration cfg = new Configuration();
-            //ReliableGoToDomeAz(Convert.ToDouble(cfg.DomeHomeAz));
-            System.Threading.Thread.Sleep(1000);
-            DeviceControl.FindDomeHome();
-            System.Threading.Thread.Sleep(1000);
-            while (!DeviceControl.IsFindDomeHomeComplete())
-                System.Threading.Thread.Sleep(1000);
-            System.Threading.Thread.Sleep(1000);
-            DeviceControl.ParkDome();
-            while (!DeviceControl.IsParkComplete())
-                System.Threading.Thread.Sleep(1000);
-            System.Threading.Thread.Sleep(1000);
+            //Park Dome
+            LogEntry("Bringing dome to home/park positing and unparking there");
+            DeviceControl.DomeParkReliably();
             //Close slit
+            System.Threading.Thread.Sleep(5000);
+            LogEntry("Closing dome slit");
             DeviceControl.CloseDomeSlit();
             // Release task thread so TSX can start Close Slit -- Command in Progress exception otherwise
             System.Threading.Thread.Sleep(5000);
             // Wait for close slit competion or receive timout -- meaning that the battery has failed, probably
-            try
-            {
                 while (!DeviceControl.IsCloseComplete())
                     System.Threading.Thread.Sleep(1000);
-            }
-            catch (Exception ex)
-            {
-                return false;
-            }
             //Reset device states
-            if (domeState) 
+            if (domeState)
                 DeviceControl.ConnectDome();
             if (mountedState)
                 DeviceControl.ConnectMount();
+            LogEntry("Dome closing complete");
             return true;
         }
 
@@ -170,6 +165,15 @@ namespace SuperScan
             }
             return true;
         }
+
+        private static void LogEntry(string upd)
+        //Method for projecting log entry to the SuperScan Main Form
+        {
+            Logger lg = new Logger();
+            lg.PostLogEntry(upd);
+            return;
+        }
+
     }
 }
 

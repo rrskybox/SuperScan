@@ -474,6 +474,77 @@ namespace SuperScan
             return Convert.ToBoolean(tsxd.IsUnparkComplete);
         }
 
+        public static void DomeParkReliably()
+        {
+
+            sky6Dome tsxd = new sky6Dome();
+            DomeCommandStatus dc = new DomeCommandStatus();
+            tsxd.Abort();
+            DomeDriverPropagationTimeout();
+            tsxd.GetAzEl();
+            tsxd.GotoAzEl(tsxd.dAz - 10, 0);
+            while (!(bool)new DomeCommandStatus().GoToDone)
+                DomeDriverWaitTimeout();
+            DomeDriverPropagationTimeout();
+            try { tsxd.FindHome(); } catch { }
+            DomeDriverPropagationTimeout();
+            while (!(bool)new DomeCommandStatus().HomeDone)
+                DomeDriverWaitTimeout();
+
+            //
+            DomeDriverPropagationTimeout();
+            dc = new DomeCommandStatus();
+            tsxd.GetAzEl();
+            tsxd.GotoAzEl(tsxd.dAz - 10, 0);
+            DomeDriverPropagationTimeout();
+            //while (!Convert.ToBoolean(tsxd.IsGotoComplete))
+            while (!(bool)new DomeCommandStatus().GoToDone)
+                DomeDriverWaitTimeout();
+            //Park
+            DomeDriverPropagationTimeout();
+            tsxd.Park();
+            DomeDriverPropagationTimeout();
+            dc = new DomeCommandStatus();
+            while (!(bool)new DomeCommandStatus().ParkDone)
+            {
+                DomeDriverWaitTimeout();
+                dc = new DomeCommandStatus();
+            }
+            DomeDriverPropagationTimeout();
+        }
+
+        private static void DomeDriverPropagationTimeout() => System.Threading.Thread.Sleep(5000);
+
+        private static void DomeDriverWaitTimeout() => System.Threading.Thread.Sleep(1000);
+
+        public class DomeCommandStatus
+        {
+            public bool? GoToDone = null;
+            public bool? OpenDone = null;
+            public bool? CloseDone = null;
+            public bool? ParkDone = null;
+            public bool? UnparkDone = null;
+            public bool? HomeDone = null;
+
+            public DomeCommandStatus()
+            {
+                sky6Dome tsxd = new sky6Dome();
+                try { GoToDone = Convert.ToBoolean(tsxd.IsGotoComplete); }
+                catch { }
+                try { OpenDone = Convert.ToBoolean(tsxd.IsOpenComplete); }
+                catch { }
+                try { CloseDone = Convert.ToBoolean(tsxd.IsCloseComplete); }
+                catch { }
+                try { ParkDone = Convert.ToBoolean(tsxd.IsParkComplete); }
+                catch { }
+                try { UnparkDone = Convert.ToBoolean(tsxd.IsUnparkComplete); }
+                catch { }
+                try { HomeDone = Convert.ToBoolean(tsxd.IsFindHomeComplete); }
+                catch { }
+            }
+        }
+
     }
 }
+
 

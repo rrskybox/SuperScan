@@ -84,8 +84,7 @@ namespace SuperScan
             //
             //Obsfilename has no extension
             //
-            string obsline;
-            const int lastXMLline = 33;
+            //const int lastXMLline = 33;
             char[] spc = new char[] { ' ' };
 
             //Open the output file for writing text, overwriting if the file exists

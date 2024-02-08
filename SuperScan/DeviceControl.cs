@@ -17,16 +17,188 @@
 // ---------------------------------------------------------------------------------
 //
 
-
 using System;
+using System.Data;
+using System.Threading;
 using TheSky64Lib;
 
 namespace SuperScan
+
 
 {
     internal static class DeviceControl
     {
         const int sleepover = 1000;
+
+        #region mount
+        public static bool MountConnect()
+        {
+            sky6RASCOMTele tsxt = new sky6RASCOMTele();
+            tsxt.Connect();
+            return Convert.ToBoolean(tsxt.IsConnected);
+        }
+
+        public static bool MountDisconnect()
+        {
+            sky6RASCOMTele tsxt = new sky6RASCOMTele();
+            tsxt.Disconnect();
+            return Convert.ToBoolean(tsxt.IsConnected);
+        }
+
+        public static bool IsMountConnected()
+        {
+            sky6RASCOMTele tsxt = new sky6RASCOMTele();
+            return Convert.ToBoolean(tsxt.IsConnected);
+        }
+
+        public static void MountReliableSlew(double RA, double Dec, string name, bool hasDome)
+        {
+            //
+            //Checks for dome tracking underway, waits half second if so -- doesn't solve race condition, but may avoid 
+            sky6RASCOMTele tsxt = new sky6RASCOMTele();
+            if (hasDome)
+            {
+                while (IsDomeTrackingUnderway())
+                    System.Threading.Thread.Sleep(500);
+                int result = -1;
+                while (result != 0)
+                {
+                    result = 0;
+                    try { tsxt.SlewToRaDec(RA, Dec, name); }
+                    catch (Exception ex) { result = ex.HResult - 1000; }
+                }
+            }
+            else tsxt.SlewToRaDec(RA, Dec, name);
+            return;
+        }
+
+        public static int MountReliableCLS(double RA, double Dec, string name, bool hasDome, string reductionType)
+        {
+            //Tries to perform CLS without running into dome tracking race condition
+            //
+            //First set camera for image reduction
+            //Then slew to the target ra/dec and pull the dome with you
+            //  while waiting for the dome tracking to catch up.
+            //Then decouple the dome and run the CLS which should
+            //  be very close to the initial slew.
+
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            ClosedLoopSlew tsx_cl = new ClosedLoopSlew();
+            switch (reductionType)
+            {
+                case "None":
+                    { tsxc.ImageReduction = ccdsoftImageReduction.cdNone; break; }
+                case "2":
+                    { tsxc.ImageReduction = ccdsoftImageReduction.cdAutoDark; break; }
+                case "3":
+                    { tsxc.ImageReduction = ccdsoftImageReduction.cdBiasDarkFlat; break; }
+            }
+
+            MountReliableSlew(RA, Dec, name, hasDome);
+            int clsStatus = 123;
+            //If dome, Turn off tracking
+            if (hasDome)
+            {
+                AllDomeCouplingOff();
+                while (clsStatus == 123)
+                {
+                    try { clsStatus = tsx_cl.exec(); }
+                    catch (Exception ex)
+                    {
+                        clsStatus = ex.HResult - 1000;
+                    };
+                    if (clsStatus == 123) System.Threading.Thread.Sleep(500);
+                }
+                AllDomeCouplingOn();
+            }
+            else
+            {
+                try { clsStatus = tsx_cl.exec(); }
+                catch (Exception ex)
+                {
+                    clsStatus = ex.HResult - 1000;
+                };
+            }
+            return clsStatus;
+        }
+
+        public static bool MountFindHome()
+        {
+            sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            try { tsxm.FindHome(); }
+            catch { return false; };
+            return true;
+        }
+
+        public static bool MountPark()
+        {
+            sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            try { tsxm.Park(); }
+            catch { return false; };
+            return true;
+        }
+
+        public static bool MountUnpark()
+        {
+            sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            try { tsxm.Unpark(); }
+            catch { return false; };
+            return true;
+        }
+
+        public static bool MountStartUp()
+        {
+            //Method for connecting and unparking the TSX mount,
+            // leaving it connected
+            sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            if (tsxm.IsConnected == 0)
+                tsxm.Connect();
+            //If parked, try to unpark, if fails return false
+            try
+            { if (tsxm.IsParked()) tsxm.Unpark(); }
+            catch { return false; }
+            //Otherwise return true;
+            return true;
+        }
+
+        public static void MountPrePosition(string side)
+        {
+            // Directs the mount to point either to the "East" or "West" side of the 
+            // meridian at a location of 80 degrees altitude.  Used for autofocus routine
+            // and for starting off the target search
+            sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            tsxm.Asynchronous = 0;
+            tsxm.Connect();
+            if (side == "East")
+            {
+                tsxm.SlewToAzAlt(90.0, 80.0, "");
+                while (tsxm.IsSlewComplete == 0)
+                    System.Threading.Thread.Sleep(1000);
+            }
+            else
+            {
+                tsxm.SlewToAzAlt(270.0, 80.0, "");
+                while (tsxm.IsSlewComplete == 0)
+                    System.Threading.Thread.Sleep(1000);
+            }
+            return;
+        }
+
+        public static bool MountShutDown()
+        //Method for connecting and parking and disconnecting the TSX mount
+        {
+            sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            if (tsxm.IsConnected == 0)
+                tsxm.Connect();
+            try
+            {
+                tsxm.Park();
+                tsxm.Disconnect();
+            }
+            catch
+            { return false; }
+            return true;
+        }
 
         public static bool TelescopeStartUp()
         {
@@ -82,79 +254,6 @@ namespace SuperScan
             return true;
         }
 
-        public static bool CameraStartUp()
-        {
-            //Method for connecting and initializing the TSX camera
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            try
-            { tsxc.Connect(); }
-            catch
-            { return false; }
-            return true;
-        }
-
-        public static bool FocuserStartUp()
-        {
-            //Method for connecting and initializing the TSX camera
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            try { tsxc.focConnect(); }
-            catch { return false; }
-            return true;
-        }
-
-        public static bool RotatorStartUp()
-        {
-            //Method for connecting and initializing the TSX camera
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            try { tsxc.rotatorConnect(); }
-            catch { return false; }
-            return true;
-        }
-
-        public static bool HasRotator()
-        {
-            //Returns true if a rotator is connected, else false
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            if (tsxc.rotatorIsConnected() == 1) //rotator is present and powered up
-                return true;
-            else return false;
-        }
-
-        public static void SetCameraTemperature(double settemp)
-        {
-            //Method for setting TSX camera temp
-            const int temperatureSettlingRange = 5; //in percent
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            tsxc.TemperatureSetPoint = settemp;
-            tsxc.RegulateTemperature = 1;
-            while (!TTUtility.CloseEnough(tsxc.Temperature, settemp, temperatureSettlingRange))
-            {
-                System.Threading.Thread.Sleep(1000);
-            };
-            return;
-        }
-
-        public static void ReliableRADecSlew(double RA, double Dec, string name, bool hasDome)
-        {
-            //
-            //Checks for dome tracking underway, waits half second if so -- doesn't solve race condition, but may avoid 
-            sky6RASCOMTele tsxt = new sky6RASCOMTele();
-            if (hasDome)
-            {
-                while (IsDomeTrackingUnderway())
-                    System.Threading.Thread.Sleep(500);
-                int result = -1;
-                while (result != 0)
-                {
-                    result = 0;
-                    try { tsxt.SlewToRaDec(RA, Dec, name); }
-                    catch (Exception ex) { result = ex.HResult - 1000; }
-                }
-            }
-            else tsxt.SlewToRaDec(RA, Dec, name);
-            return;
-        }
-
         public static int ReliableClosedLoopSlew(double RA, double Dec, string name, bool hasDome, string reductionType)
         {
             //Tries to perform CLS without running into dome tracking race condition
@@ -182,7 +281,7 @@ namespace SuperScan
             //If dome, Turn off tracking
             if (hasDome)
             {
-                DomeCouplingOff();
+                AllDomeCouplingOff();
                 while (clsStatus == 123)
                 {
                     try { clsStatus = tsx_cl.exec(); }
@@ -192,7 +291,7 @@ namespace SuperScan
                     };
                     if (clsStatus == 123) System.Threading.Thread.Sleep(500);
                 }
-                DomeCouplingOn();
+                AllDomeCouplingOn();
             }
             else
             {
@@ -205,45 +304,171 @@ namespace SuperScan
             return clsStatus;
         }
 
-        private static bool IsDomeTrackingUnderway()
+        public static void ReliableRADecSlew(double RA, double Dec, string name, bool hasDome)
         {
-            //Test to see if a dome tracking operation is underway.
-            // If so, doing a IsGotoComplete will throw an Error 212.
-            // return true
-            // otherwise return false
-            return false;
-
-            //sky6Dome tsxd = new sky6Dome();
-            //int testDomeTrack;
-            //try { testDomeTrack = tsxd.IsGotoComplete; }
-            //catch { return true; }
-            //if (testDomeTrack == 0) return true;
-            //else return false;
-        }
-
-        public static void DomeCouplingOn()
-        {
-            //Uncouple dome tracking, then recouple dome tracking (synchronously)
-
-            sky6Dome tsxd = new sky6Dome();
-            tsxd.setIsCoupledToMountTracking(Convert.ToInt32(true));
-            System.Threading.Thread.Sleep(500);
-            while (IsDomeTrackingUnderway())
-            { System.Threading.Thread.Sleep(1000); }
+            //
+            //Checks for dome tracking underway, waits half second if so -- doesn't solve race condition, but may avoid 
+            sky6RASCOMTele tsxt = new sky6RASCOMTele();
+            if (hasDome)
+            {
+                while (IsDomeTrackingUnderway())
+                    System.Threading.Thread.Sleep(500);
+                int result = -1;
+                while (result != 0)
+                {
+                    result = 0;
+                    try { tsxt.SlewToRaDec(RA, Dec, name); }
+                    catch (Exception ex) { result = ex.HResult - 1000; }
+                }
+            }
+            else tsxt.SlewToRaDec(RA, Dec, name);
             return;
         }
 
-        public static void DomeCouplingOff()
+
+
+
+        #endregion
+
+        #region focuser
+
+        public static bool FocuserStartUp()
         {
-            //Uncouple dome tracking, then recouple dome tracking (synchronously)
-            sky6Dome tsxd = new sky6Dome();
-            tsxd.setIsCoupledToMountTracking(Convert.ToInt32(false));
-            System.Threading.Thread.Sleep(500);
-            while (IsDomeTrackingUnderway()) { System.Threading.Thread.Sleep(1000); }
+            //Method for connecting and initializing the TSX camera
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            try { tsxc.focConnect(); }
+            catch { return false; }
+            return true;
+        }
+
+        #endregion
+
+        #region rotator
+
+        public static bool RotatorStartUp()
+        {
+            //Method for connecting and initializing the TSX camera
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            try { tsxc.rotatorConnect(); }
+            catch { return false; }
+            return true;
+        }
+
+        public static bool HasRotator()
+        {
+            //Returns true if a rotator is connected, else false
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            if (tsxc.rotatorIsConnected() == 1) //rotator is present and powered up
+                return true;
+            else return false;
+        }
+
+        #endregion
+
+        #region camera
+
+        public static bool CameraStartUp()
+        {
+            //Method for connecting and initializing the TSX camera
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            try
+            { tsxc.Connect(); }
+            catch
+            { return false; }
+            return true;
+        }
+
+        public static bool CameraConnect()
+        {
+            //Method for connecting and initializing the TSX camera
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            try
+            { tsxc.Connect(); }
+            catch
+            { return false; }
+            return true;
+        }
+
+        public static bool CameraDisconnect()
+        {
+            //Method for connecting and initializing the TSX camera
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            try
+            { tsxc.Disconnect(); }
+            catch
+            { return false; }
+            return true;
+        }
+
+        public static void CameraSetTemperature(double settemp)
+        {
+            //Method for setting TSX camera temp
+            const int temperatureSettlingRange = 5; //in percent
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.TemperatureSetPoint = settemp;
+            tsxc.RegulateTemperature = 1;
+            while (!TTUtility.CloseEnough(tsxc.Temperature, settemp, temperatureSettlingRange))
+            {
+                System.Threading.Thread.Sleep(1000);
+            };
+            return;
+        }
+        public static double CameraTemperature()
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            return tsxc.Temperature;
+        }
+
+        public static void CameraSetAsynchronous(bool state)
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.Asynchronous = Convert.ToInt32(state);
+        }
+
+        public static void CameraSetExposure(double exp)
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.ExposureTime = exp;
+        }
+
+        public static void CameraSetDelay(double delay)
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.Delay = delay;
+        }
+
+        public static void CameraSetFrame(ccdsoftImageFrame frame)
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.Frame = frame;
+        }
+
+        public static void CameraSetFilter(int filter)
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.FilterIndexZeroBased = filter;
+        }
+
+        public static void CameraSetReductionType(ccdsoftImageReduction reductionType)
+        {
+            ccdsoftCamera tsxc = new ccdsoftCamera();
+            tsxc.ImageReduction = reductionType;
+        }
+
+        public static void CameraInitialize(bool async, double exp, double delay, ccdsoftImageFrame frameType, ccdsoftImageReduction reductionType)
+        {
+            ccdsoftCamera tsx_cc = new ccdsoftCamera()
+            {
+                Asynchronous = Convert.ToInt32(async),
+                ExposureTime = exp,
+                Delay = delay,
+                Frame = frameType,
+                ImageReduction = reductionType
+            };
             return;
         }
 
-        public static double? CurrentIPA()
+        public static double? ImageCurrentPA()
         {
             //Will return Image PA of most recent image link
             double? currentImagePA = null;
@@ -257,56 +482,39 @@ namespace SuperScan
             return currentImagePA;
         }
 
-        public static bool RotateToImagePA(double destinationIPA)
-        {
-            //Move the rotator to a position that gives an image position angle of tImagePA
-            //  Assumes that the rotator position angle variables are current
-            //Returns false if failure, true if good
+        //public static bool ImageRotateToPA(double imagePA)
+        //{
+        //    //Move the rotator to a position that gives an image position angle of tImagePA
+        //    //  Assumes that the rotator position angle variables are current
+        //    //Returns false if failure, true if good
 
-            if (!HasRotator())
-                return false;
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            //target rotation PA = current image PA + current rotator PA - target image PA 
+        //    if (!HasRotator())
+        //        return false;
+        //    ccdsoftCamera tsxc = new ccdsoftCamera();
+        //    //target rotation PA = current image PA + current rotator PA - target image PA 
 
-            double rotatorPA = tsxc.rotatorPositionAngle();
-            double destRotationPA = ((double)CurrentIPA() - destinationIPA) + rotatorPA;
-            double destRotationPAnormalized = AstroMath.Transform.NormalizeDegreeRange(destRotationPA);
-            tsxc.rotatorGotoPositionAngle(destRotationPAnormalized);
-            return true;
-        }
+        //    double rotatorPA = tsxc.rotatorPositionAngle();
+        //    double destRotationPA = ((double)ImageCurrentPA() - destinationIPA) + rotatorPA;
+        //    double destRotationPAnormalized = AstroMath.Transform.NormalizeDegreeRange(destRotationPA);
+        //    tsxc.rotatorGotoPositionAngle(destRotationPAnormalized);
+        //    return true;
+        //}
+        #endregion
 
-        public static bool ConnectMount()
-        {
-            sky6RASCOMTele tsxt = new sky6RASCOMTele();
-            tsxt.Connect();
-            return Convert.ToBoolean(tsxt.IsConnected);
-        }
+        #region dome
 
-        public static bool ConnectDome()
+        public static bool DomeConnect()
         {
             sky6Dome tsxd = new sky6Dome();
             tsxd.Connect();
             return Convert.ToBoolean(tsxd.IsConnected);
         }
 
-        public static bool DisconnectMount()
-        {
-            sky6RASCOMTele tsxt = new sky6RASCOMTele();
-            tsxt.Disconnect();
-            return Convert.ToBoolean(tsxt.IsConnected);
-        }
-
-        public static bool DiscnnectDome()
+        public static bool DomeDisconnect()
         {
             sky6Dome tsxd = new sky6Dome();
             tsxd.Disconnect();
             return Convert.ToBoolean(tsxd.IsConnected);
-        }
-
-        public static bool IsMountConnected()
-        {
-            sky6RASCOMTele tsxt = new sky6RASCOMTele();
-            return Convert.ToBoolean(tsxt.IsConnected);
         }
 
         public static bool IsDomeConnected()
@@ -315,22 +523,67 @@ namespace SuperScan
             return Convert.ToBoolean(tsxd.IsConnected);
         }
 
-        public static bool IsDomeCoupled
+        public static bool DomeAbort()
+        {
+            sky6Dome tsxd = new sky6Dome();
+            tsxd.Abort();
+            Thread.Sleep(1000);
+            return true;
+        }
+
+        private static bool IsDomeTrackingUnderway()
+        {
+            //Test to see if a dome tracking operation is underway.
+            // If so, doing a IsGotoComplete will throw an Error 212.
+            // return true
+            // otherwise return false
+
+            sky6Dome tsxd = new sky6Dome();
+            int testDomeTrack;
+            try { testDomeTrack = tsxd.isCoupledToMountTracking(); }
+            catch { return true; }
+            if (testDomeTrack == 0) return true;
+            else return false;
+        }
+
+        public static void AllDomeCouplingOn()
+        {
+            //Uncouple dome tracking, then recouple dome tracking (synchronously)
+
+            sky6Dome tsxd = new sky6Dome();
+            tsxd.setIsCoupledToMountTracking(Convert.ToInt32(true));
+            tsxd.IsCoupled = Convert.ToInt32(true);
+            System.Threading.Thread.Sleep(500);
+            while (IsDomeTrackingUnderway())
+                System.Threading.Thread.Sleep(1000);
+            return;
+        }
+
+        public static void AllDomeCouplingOff()
+        {
+            //Uncouple dome tracking, then recouple dome tracking (synchronously)
+            sky6Dome tsxd = new sky6Dome();
+            tsxd.setIsCoupledToMountTracking(Convert.ToInt32(false));
+            tsxd.IsCoupled = Convert.ToInt32(false);
+        }
+
+        public static bool IsDomeCoupledAtAll
         {
             get
             {
                 sky6Dome tsxd = new sky6Dome();
-                return Convert.ToBoolean(tsxd.IsCoupled);
+                return (Convert.ToBoolean(tsxd.IsCoupled) || Convert.ToBoolean(tsxd.isCoupledToMountTracking()));
             }
             set
             {
                 sky6Dome tsxd = new sky6Dome();
                 tsxd.IsCoupled = Convert.ToInt32(value);
+                tsxd.setIsCoupledToMountTracking(Convert.ToInt32(value));
                 return;
             }
         }
 
-        public static bool AbortDome()
+        public static bool DomeAbortCommand()
         {
             sky6Dome tsxd = new sky6Dome();
             try
@@ -346,7 +599,7 @@ namespace SuperScan
             return true;
         }
 
-        public static bool GoToDomeAzm(double az)
+        public static bool DomeGoTo(double az)
         {
             sky6Dome tsxd = new sky6Dome();
             try
@@ -361,13 +614,13 @@ namespace SuperScan
             return true;
         }
 
-        public static bool IsGoToAzmComplete()
+        public static bool DomeIsGoToComplete()
         {
             sky6Dome tsxd = new sky6Dome();
             return Convert.ToBoolean(tsxd.IsGotoComplete);
         }
 
-        public static bool OpenDomeSlit()
+        public static bool DomeOpen()
         {
             sky6Dome tsxd = new sky6Dome();
             try
@@ -382,13 +635,13 @@ namespace SuperScan
             return true;
         }
 
-        public static bool IsOpenComplete()
+        public static bool IsDomeOpenComplete()
         {
             sky6Dome tsxd = new sky6Dome();
             return Convert.ToBoolean(tsxd.IsOpenComplete);
         }
 
-        public static bool CloseDomeSlit()
+        public static bool DomeClose()
         {
             sky6Dome tsxd = new sky6Dome();
             try
@@ -404,13 +657,13 @@ namespace SuperScan
 
         }
 
-        public static bool IsFindDomeHomeComplete()
+        public static bool IsDomeCloseComplete()
         {
             sky6Dome tsxd = new sky6Dome();
-            return Convert.ToBoolean(tsxd.IsFindHomeComplete);
+            return Convert.ToBoolean(tsxd.IsCloseComplete);
         }
 
-        public static bool FindDomeHome()
+        public static bool DomeFindHome()
         {
             sky6Dome tsxd = new sky6Dome();
             try
@@ -425,19 +678,22 @@ namespace SuperScan
             return true;
         }
 
-        public static bool IsCloseComplete()
+        public static bool? IsDomeFindHomeComplete()
         {
             sky6Dome tsxd = new sky6Dome();
-            return Convert.ToBoolean(tsxd.IsCloseComplete);
+            int fhStatus = 0;
+            try { fhStatus = tsxd.IsFindHomeComplete; }
+            catch { return null; }
+            return Convert.ToBoolean(fhStatus);
         }
 
-        public static bool ParkDome()
+        public static bool DomePark()
         {
             sky6Dome tsxd = new sky6Dome();
             try
             {
                 tsxd.Park();
-                System.Threading.Thread.Sleep(sleepover);
+                Thread.Sleep(sleepover);
             }
             catch
             {
@@ -446,13 +702,28 @@ namespace SuperScan
             return true;
         }
 
-        public static bool IsParkComplete()
+        public static bool IsDomeParkComplete()
         {
             sky6Dome tsxd = new sky6Dome();
             return Convert.ToBoolean(tsxd.IsParkComplete);
         }
 
-        public static bool UnparkDome()
+        public static bool DomeReliablePark()
+        {
+            if (!DomePark())
+                //try one more time
+                DomePark();
+            //wait for complete
+            try
+            {
+                while (!IsDomeParkComplete())
+                    Thread.Sleep(1000);
+            }
+            catch { return false; }
+            return true;
+        }
+
+        public static bool DomeUnpark()
         {
             sky6Dome tsxd = new sky6Dome();
             try
@@ -467,7 +738,7 @@ namespace SuperScan
             return true;
         }
 
-        public static bool IsUnparkComplete()
+        public static bool IsDomeUnparkComplete()
         {
             sky6Dome tsxd = new sky6Dome();
             return Convert.ToBoolean(tsxd.IsUnparkComplete);
@@ -475,13 +746,15 @@ namespace SuperScan
 
         public static void DomeParkReliably()
         {
+            const int domeBackUp = 20;
 
             sky6Dome tsxd = new sky6Dome();
             DomeCommandStatus dc = new DomeCommandStatus();
+            AllDomeCouplingOff();
             tsxd.Abort();
             DomeDriverPropagationTimeout();
             tsxd.GetAzEl();
-            tsxd.GotoAzEl(tsxd.dAz - 10, 0);
+            tsxd.GotoAzEl(tsxd.dAz - domeBackUp, 0);
             while (!(bool)new DomeCommandStatus().GoToDone)
                 DomeDriverWaitTimeout();
             DomeDriverPropagationTimeout();
@@ -490,11 +763,10 @@ namespace SuperScan
             while (!(bool)new DomeCommandStatus().HomeDone)
                 DomeDriverWaitTimeout();
 
-            //
             DomeDriverPropagationTimeout();
             dc = new DomeCommandStatus();
             tsxd.GetAzEl();
-            tsxd.GotoAzEl(tsxd.dAz - 10, 0);
+            tsxd.GotoAzEl(tsxd.dAz - domeBackUp, 0);
             DomeDriverPropagationTimeout();
             //while (!Convert.ToBoolean(tsxd.IsGotoComplete))
             while (!(bool)new DomeCommandStatus().GoToDone)
@@ -509,6 +781,27 @@ namespace SuperScan
                 DomeDriverWaitTimeout();
                 dc = new DomeCommandStatus();
             }
+
+        }
+
+        public static void DomeHomeReliably()
+        {
+            const int domeBackUp = 20;
+
+            sky6Dome tsxd = new sky6Dome();
+            DomeCommandStatus dc = new DomeCommandStatus();
+            AllDomeCouplingOff();
+            tsxd.Abort();
+            DomeDriverPropagationTimeout();
+            tsxd.GetAzEl();
+            tsxd.GotoAzEl(tsxd.dAz - domeBackUp, 0);
+            while (!(bool)new DomeCommandStatus().GoToDone)
+                DomeDriverWaitTimeout();
+            DomeDriverPropagationTimeout();
+            try { tsxd.FindHome(); } catch { }
+            DomeDriverPropagationTimeout();
+            while (!(bool)new DomeCommandStatus().HomeDone)
+                DomeDriverWaitTimeout();
             DomeDriverPropagationTimeout();
         }
 
@@ -544,6 +837,9 @@ namespace SuperScan
         }
 
     }
+
+    #endregion
+
 }
 
 

@@ -174,8 +174,7 @@ namespace SuperScan
         private void LogEntry(string upd)
         //Method for projecting log entry to the SuperScan Main Form
         {
-            Logger lg = new Logger();
-            lg.PostLogEntry(upd);
+            Logger.LogToFileAndScreen(upd);
             return;
         }
 

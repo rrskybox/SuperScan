@@ -41,6 +41,7 @@ namespace SuperScan
             System.Threading.Thread.Sleep(5000);
             DeviceControl.DomeUnpark();
             System.Threading.Thread.Sleep(5000);
+            System.Threading.Thread.Sleep(5000);
             return true;
         }
 

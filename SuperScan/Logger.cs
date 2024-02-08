@@ -40,6 +40,7 @@ namespace SuperScan
             string logfilepath = ss_cfg.LogFolder + "\\" + logfilename;
             System.IO.StreamWriter sys_sw = new System.IO.StreamWriter(logfilepath, true);
             sys_sw.WriteLine(DateTime.Now.ToString("HH:mm:ss") + " :: " + upd);
+            LogToScreen(upd);
             sys_sw.Close();
         }
 

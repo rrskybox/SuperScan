@@ -342,7 +342,7 @@ namespace SuperScan
                             //Get the next galaxy.  display its name and size.
                             string targetName = gList.Next;
                             CurrentGalaxyName.Text = targetName;
-                            CurrentGalaxySizeArcmin.Text = gList.MaxAxis(targetName).ToString();
+                            CurrentGalaxySizeArcmin.Text = gList.MaxAxisArcMin(targetName).ToString();
                             Show();
 
                             LogEntry("Queueing up next galaxy: " + targetName);
@@ -380,7 +380,7 @@ namespace SuperScan
                                     //  if not, then just log the situation and move on
                                     if (sio.MostRecentImagePath != "")
                                     {
-                                        int subFrameSize = Convert.ToInt32(60 * gList.MaxAxis(targetName));
+                                        int subFrameSize = Convert.ToInt32(60 * gList.MaxAxisArcMin(targetName));
                                         LogEntry("Detecting supernova prospects.");
                                         //Check to see if detection is to be run or not
                                         //  if so, open a detection object with the log handler property set up
@@ -390,7 +390,8 @@ namespace SuperScan
                                             NovaDetection ss_ndo = new NovaDetection();
                                             ss_ndo.LogUpdate += LogEntry;
                                             if (ss_ndo.Detect(targetName,
-                                                subFrameSize, gList.RA(targetName),
+                                                subFrameSize, 
+                                                gList.RA(targetName),
                                                 gList.Dec(targetName),
                                                 fso.ImagePath,
                                                 sio.MostRecentImagePath,

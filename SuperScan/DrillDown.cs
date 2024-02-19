@@ -314,7 +314,7 @@ namespace SuperScan
 
         public Image GetFollowUpImage()
         {
-            AstroDisplay ad = new AstroDisplay(TargetFits);
+            AstroDisplay ad = new AstroDisplay(ref TargetFits);
             Point target = new Point((int)TargetX, (int)TargetY);
             ad.AddCrossHair(target, 80, 6);
             return ad.PixImage;
@@ -324,7 +324,7 @@ namespace SuperScan
         {
             FitsFile targetFits;
             targetFits = new FitsFile(CurrentImageFilePath, true);
-            AstroDisplay ad = new AstroDisplay(targetFits);
+            AstroDisplay ad = new AstroDisplay(ref targetFits);
             Point target = new Point((int)TargetX, (int)TargetY);
             ad.AddCrossHair(target, 80, 6);
             Size subSize = new Size(ad.PixImage.Width / zoom, ad.PixImage.Height / zoom);
@@ -335,13 +335,12 @@ namespace SuperScan
         {
             FitsFile targetFits;
             targetFits = new FitsFile(LastImageFilePath, true);
-            AstroDisplay ad = new AstroDisplay(targetFits);
+            AstroDisplay ad = new AstroDisplay(ref targetFits);
             Point target = new Point((int)TargetX, (int)TargetY);
             ad.AddCrossHair(target, 80, 6);
             Size subSize = new Size(ad.PixImage.Width / zoom, ad.PixImage.Height / zoom);
             return ad.Zoom(zoom);
         }
-
 
         public (string, string) GetTwoMostRecentImages()
         {

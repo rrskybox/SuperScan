@@ -193,12 +193,13 @@ namespace SuperScan
             //Check for anomolies using TSX Sextractor (e.g. ShowInventory)
             if (NewStar(gname, dFilePath, rFilePath))
             {
-                //If a suspect is found, take and store a five minute image for later analysis
+                //If a suspect is found, check to see if the suspect is within the galaxy footprint,
+                //if so, take and store a five minute image for later analysis
                 //  Can//t go longer than 5 minutes as Image Link seems to fail a lot with too many stars.
                 //  This is going to take 10 minutes for the shot and dark, plus another dark
                 //  will have to be taken for the regular scan upon resumption.
                 LogEntry("Potential transient identified.  Taking follow up image.");
-                DrillDown ss_dd = new DrillDown(gname,DateTime.Now);
+                DrillDown ss_dd = new DrillDown(gname, DateTime.Now);
 
                 ss_dd.ShootFollowUpImage(gname);
                 LogEntry("Follow up image acquired and stored.");

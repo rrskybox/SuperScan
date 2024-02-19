@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
+using TheSky64Lib;
 
 namespace SuperScan
 {
@@ -61,6 +62,33 @@ namespace SuperScan
             { return true; }
             else
             { return false; }
+        }
+
+        public static bool IsInsideGalacticRadius(double suspectLocRAHrs, double suspectLocDecDeg, double galaxyLocRAHrs, double galaxyLocDecDeg, double radiusDeg)
+        {
+            //Returns true if suspect location susLoc is within radius of galaxy location galLoc
+
+            //Approximation of separation of ra/dec for very small differences (<<1)
+            // separation (radians) theta ~= sqrt {δ x^{2}+δ y^{2}}
+            // where δ x = (α A − α B ) cos ⁡ δ A {\displaystyle δ x = (\alpha _{ A} -\alpha _{ B})\cos δ _{ A} }
+            // and δ y = δ A − δ B {\displaystyle δ y =δ _{ A} -δ _{ B} }
+
+            //Convert hours to radians
+            double sRA = AstroMath.Transform.HoursToRadians(suspectLocRAHrs);
+            double sDec = AstroMath.Transform.DegreesToRadians(suspectLocDecDeg);
+            double gRA = AstroMath.Transform.HoursToRadians(galaxyLocRAHrs);
+            double gDec = AstroMath.Transform.DegreesToRadians(galaxyLocDecDeg);
+
+            double deltaRa = (sRA - gRA) * Math.Cos(sDec);
+            double deltaDec = sDec - gDec;
+            double sepRadians = Math.Sqrt((deltaRa * deltaRa) + (deltaDec * deltaDec));
+            double sepTSXDeg = AstroMath.Transform.RadiansToDegrees(sepRadians);
+
+            if (sepTSXDeg < radiusDeg)
+                return true;
+            else
+                return false;
+
         }
     }
 }

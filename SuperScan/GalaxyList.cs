@@ -431,12 +431,11 @@ namespace SuperScan
             return 0;
         }
 
-        public double MaxAxis(string gname)
+        public double MaxAxisArcMin(string gname)
         {
             //Look up the target by galaxy name and get the Major Axis (in arc secs)
             Configuration ss_cfg = new Configuration();
             XElement gxgalaxies = XElement.Load(ss_cfg.GalaxyListPath);
-
 
             var xgals = from grec in gxgalaxies.Elements("Galaxy") select grec;
             foreach (var grec in xgals)

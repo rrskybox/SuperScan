@@ -31,7 +31,7 @@ namespace SuperScan
         public double SuspectDec { get; set; }
         public string GalaxyName { get; set; }
         public int ImageZoom { get; set; } = 2;
-        public int BlinkZoom { get; set; } = 4;
+        public int BlinkZoom { get; set; } = 2;
         public Suspect CurrentSuspect { get; set; }
         public DrillDown SuspectDrillDown { get; set; }
         public Image SuspectFollowUpImage { get; set; }
@@ -142,16 +142,19 @@ namespace SuperScan
 
                 sky6StarChart tsx_sc = new sky6StarChart();
                 sky6ObjectInformation tsx_oi = new sky6ObjectInformation();
-                //Get the galaxy major axis
+                //Get the galaxy major axis and location
                 tsx_sc.Find(galname);
                 tsx_oi.Index = 0;
                 tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_MAJ_AXIS_MINS);
-                double galaxis = tsx_oi.ObjInfoPropOut;
+                double galaxisArcMin = tsx_oi.ObjInfoPropOut;
                 //Set the FOV size to  the galaxy size
-                tsx_sc.FieldOfView = galaxis / 60;
+                tsx_sc.FieldOfView = galaxisArcMin / 60;
+                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_RA_2000);
+                double galRA = tsx_oi.ObjInfoPropOut;
+                tsx_oi.Property(Sk6ObjectInformationProperty.sk6ObjInfoProp_DEC_2000);
+                double galDec = tsx_oi.ObjInfoPropOut;
                 //Set the center of view to the suspect//s RA/Dec and light up the target icon
                 tsx_sc.Find(CurrentSuspect.SuspectRA.ToString() + ", " + CurrentSuspect.SuspectDec.ToString());
-
                 tsx_sc.RightAscension = CurrentSuspect.SuspectRA;
                 tsx_sc.Declination = CurrentSuspect.SuspectDec;
                 //Check TNS for supernova reports for 60 arc seconds around this location for the last 10 days
@@ -223,12 +226,12 @@ namespace SuperScan
                 ImagePictureBox.Image = BlinkList[0];
                 this.Show();
                 System.Windows.Forms.Application.DoEvents();
-                System.Threading.Thread.Sleep(2000);
+                System.Threading.Thread.Sleep(1000);
 
                 ImagePictureBox.Image = BlinkList[1];
                 this.Show();
                 System.Windows.Forms.Application.DoEvents();
-                System.Threading.Thread.Sleep(2000);
+                System.Threading.Thread.Sleep(1000);
 
                 ImagePictureBox.Image = imageSave;
             }

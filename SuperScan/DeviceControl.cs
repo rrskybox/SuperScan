@@ -141,6 +141,7 @@ namespace SuperScan
         public static bool MountUnpark()
         {
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
+            tsxm.Connect();
             try { tsxm.Unpark(); }
             catch { return false; };
             return true;
@@ -185,60 +186,6 @@ namespace SuperScan
         }
 
         public static bool MountShutDown()
-        //Method for connecting and parking and disconnecting the TSX mount
-        {
-            sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            if (tsxm.IsConnected == 0)
-                tsxm.Connect();
-            try
-            {
-                tsxm.Park();
-                tsxm.Disconnect();
-            }
-            catch
-            { return false; }
-            return true;
-        }
-
-        public static bool TelescopeStartUp()
-        {
-            //Method for connecting and unparking the TSX mount,
-            // leaving it connected
-            sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            if (tsxm.IsConnected == 0)
-                tsxm.Connect();
-            //If parked, try to unpark, if fails return false
-            try
-            { if (tsxm.IsParked()) tsxm.Unpark(); }
-            catch { return false; }
-            //Otherwise return true;
-            return true;
-        }
-
-        public static void TelescopePrePosition(string side)
-        {
-            // Directs the mount to point either to the "East" or "West" side of the 
-            // meridian at a location of 80 degrees altitude.  Used for autofocus routine
-            // and for starting off the target search
-            sky6RASCOMTele tsxm = new sky6RASCOMTele();
-            tsxm.Asynchronous = 0;
-            tsxm.Connect();
-            if (side == "East")
-            {
-                tsxm.SlewToAzAlt(90.0, 80.0, "");
-                while (tsxm.IsSlewComplete == 0)
-                    System.Threading.Thread.Sleep(1000);
-            }
-            else
-            {
-                tsxm.SlewToAzAlt(270.0, 80.0, "");
-                while (tsxm.IsSlewComplete == 0)
-                    System.Threading.Thread.Sleep(1000);
-            }
-            return;
-        }
-
-        public static bool TelescopeShutDown()
         //Method for connecting and parking and disconnecting the TSX mount
         {
             sky6RASCOMTele tsxm = new sky6RASCOMTele();
@@ -326,8 +273,6 @@ namespace SuperScan
         }
 
 
-
-
         #endregion
 
         #region focuser
@@ -372,6 +317,10 @@ namespace SuperScan
             //Method for connecting and initializing the TSX camera
             ccdsoftCamera tsxc = new ccdsoftCamera();
             try
+            { tsxc.Disconnect(); }
+            catch
+            { return false; }
+            try
             { tsxc.Connect(); }
             catch
             { return false; }
@@ -400,23 +349,20 @@ namespace SuperScan
             return true;
         }
 
-        public static void CameraSetTemperature(double settemp)
+        public static double CameraTemperature
         {
-            //Method for setting TSX camera temp
-            const int temperatureSettlingRange = 5; //in percent
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            tsxc.TemperatureSetPoint = settemp;
-            tsxc.RegulateTemperature = 1;
-            while (!TTUtility.CloseEnough(tsxc.Temperature, settemp, temperatureSettlingRange))
+            //Camera temperature property for TSX
+            get
             {
-                System.Threading.Thread.Sleep(1000);
-            };
-            return;
-        }
-        public static double CameraTemperature()
-        {
-            ccdsoftCamera tsxc = new ccdsoftCamera();
-            return tsxc.Temperature;
+                ccdsoftCamera tsxc = new ccdsoftCamera();
+                return tsxc.Temperature;
+            }
+            set
+            {
+                ccdsoftCamera tsxc = new ccdsoftCamera();
+                tsxc.TemperatureSetPoint = value;
+                tsxc.RegulateTemperature = 1;
+            }
         }
 
         public static void CameraSetAsynchronous(bool state)
@@ -544,6 +490,23 @@ namespace SuperScan
             catch { return true; }
             if (testDomeTrack == 0) return true;
             else return false;
+        }
+
+        public static void WaitIfDomeRotating()
+        {
+            //Returns true if the dome isn't "motionless"
+            //  This is a workaround for catching dome tracking activity to
+            //  avoid an Error 123.
+            sky6Dome tsxd = new sky6Dome();
+            int lastAzLocation = -1;
+            int currentAzLocation = 0;
+            while (currentAzLocation != lastAzLocation)
+            {
+                Thread.Sleep(sleepover);
+                lastAzLocation = currentAzLocation;
+                tsxd.GetAzEl();
+                currentAzLocation = (int)tsxd.dAz;
+            };
         }
 
         public static void AllDomeCouplingOn()

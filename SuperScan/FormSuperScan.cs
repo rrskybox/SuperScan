@@ -68,8 +68,8 @@ namespace SuperScan
             this.Show();
 
             //Subscribe to logging entry events from other classes/threads
-           Logger.LogToScreenMethod += PostLogEntry_Handler;
-            
+            Logger.LogToScreenMethod += PostLogEntry_Handler;
+
             gList = new GalaxyList();
             GalaxyCount.Text = gList.GalaxyCount.ToString();
 
@@ -230,14 +230,20 @@ namespace SuperScan
 
             // Scan Running...
             // Connect telescope mount and camera, and dome, if any
-            if (DeviceControl.TelescopeStartUp()) LogEntry("Initializing Mount");
-            else LogEntry("Mount initialization failed");
-            if (DeviceControl.CameraStartUp()) LogEntry("Initializing Camera");
-            else LogEntry("Camera initialization failed");
+            if (DeviceControl.MountStartUp())
+                LogEntry("Initializing Mount");
+            else
+                LogEntry("Mount initialization failed");
+            if (DeviceControl.CameraStartUp())
+                LogEntry("Initializing Camera");
+            else
+                LogEntry("Camera initialization failed");
             if (Convert.ToBoolean(ss_cfg.UsesDome))
             {
-                if (DomeControl.DomeStartUp()) LogEntry("Initializing Dome");
-                else LogEntry("Dome initialization failed");
+                if (DomeControl.DomeStartUp())
+                    LogEntry("Initializing Dome");
+                else
+                    LogEntry("Dome initialization failed");
             }
             ;
             Show();
@@ -247,7 +253,17 @@ namespace SuperScan
             //  and all galaxies that have transited during that time.  Then all galaxies on the list which are east
             //  will be scanned.  Lastly, the scan will return to the west to pick up any galaxies that transited
             //  during the scan on the east side.  Get it?
-            DeviceControl.TelescopePrePosition("West");
+            LogEntry("Unparking mount");
+            DeviceControl.MountUnpark(); //Just in case we're still parked for some reason.
+                                         //If using dome, wait until dome catches up with mount position -- TSX won't do that for you and will throw an error
+            if (Convert.ToBoolean(ss_cfg.UsesDome))
+            {
+                LogEntry("Waiting on Dome Alignment");
+                DeviceControl.WaitIfDomeRotating();
+            }
+            //Now move mount to preposition(s)
+            LogEntry("Prepositioning mount to West");
+            DeviceControl.MountPrePosition("West");
             //Let's do an autofocus to start out.  Set the temperature to -100 to fake out the temperature test
             //  and force an autofocus.
             if (AutoFocusCheckBox.Checked)
@@ -268,11 +284,26 @@ namespace SuperScan
             ss_cfg.AutoFocus = AutoFocusCheckBox.Checked.ToString();
             ss_cfg.WatchWeather = WatchWeatherCheckBox.Checked.ToString();
             LogEntry("Starting Scan");
+
             LogEntry("Bringing camera to temperature");
-            DeviceControl.CameraSetTemperature(Convert.ToDouble(CCDTemperatureSetting.Value));
+            double setTemp = Convert.ToDouble(CCDTemperatureSetting.Value);
+            const int temperatureSettlingRange = 5; //in percent
+            DeviceControl.CameraTemperature = setTemp;
+            DateTime startTime = DateTime.Now;
+            while (!TTUtility.CloseEnough(DeviceControl.CameraTemperature, setTemp, temperatureSettlingRange))
+            {
+                System.Threading.Thread.Sleep(10000);
+                LogEntry("Camera temperature at " + DeviceControl.CameraTemperature.ToString("0.0"));
+                if (DateTime.Now-startTime > TimeSpan.FromMinutes(1))
+                {
+                    LogEntry("Temperature Regulation Timeout at 1 minute");
+                    break;
+                }    
+            };
 
             int gTriedCount = 0;
             int gSuccessfulCount = 0;
+
             //
             //
             //Main Loop on the list of galaxies =================
@@ -292,7 +323,7 @@ namespace SuperScan
                     {
                         LogEntry("Waiting on unsafe weather conditions...");
                         LogEntry("Parking telescope");
-                        if (DeviceControl.TelescopeShutDown())
+                        if (DeviceControl.MountShutDown())
                             LogEntry("Mount parked");
                         else
                             LogEntry("Mount park failed");
@@ -315,14 +346,15 @@ namespace SuperScan
                                 LogEntry("Opening Dome");
                                 if (Convert.ToBoolean(ss_cfg.UsesDome)) DomeControl.OpenDome();
                                 LogEntry("Unparking telescope");
-                                if (DeviceControl.TelescopeStartUp()) LogEntry("Mount unparked");
+                                if (DeviceControl.MountStartUp()) LogEntry("Mount unparked");
 
                                 //Wait for 30 seconds for everything to settle
                                 LogEntry("Waiting for dome to settle");
                                 System.Threading.Thread.Sleep(30000);
                                 //Recouple dome
-                                if (Convert.ToBoolean(ss_cfg.UsesDome)) 
-                                    DeviceControl.AllDomeCouplingOn();                           }
+                                if (Convert.ToBoolean(ss_cfg.UsesDome))
+                                    DeviceControl.AllDomeCouplingOn();
+                            }
                         }
                     }
                     else  //Weather, if checked, is safe
@@ -390,7 +422,7 @@ namespace SuperScan
                                             NovaDetection ss_ndo = new NovaDetection();
                                             ss_ndo.LogUpdate += LogEntry;
                                             if (ss_ndo.Detect(targetName,
-                                                subFrameSize, 
+                                                subFrameSize,
                                                 gList.RA(targetName),
                                                 gList.Dec(targetName),
                                                 fso.ImagePath,
@@ -431,7 +463,7 @@ namespace SuperScan
             LogEntry("SuperScan surveyed " + gSuccessfulCount + " out of " + gTriedCount + " galaxies.");
 
             //Park the telescope so it doesn't drift too low
-            DeviceControl.TelescopeShutDown();
+            DeviceControl.MountShutDown();
             LogEntry("AutoRun Running Shut Down Program **********" + "\r\n");
             Launcher.RunShutDown();
             StartScanButton.BackColor = scanbuttoncolorsave;
@@ -635,11 +667,11 @@ namespace SuperScan
 
             WeatherReader wmon = new WeatherReader();
             //if no weather file or other problem, return false
-            if (wmon == null) 
+            if (wmon == null)
                 return false;
-            if (wmon.AlertFlag == WeatherReader.WeaAlert.Alert) 
+            if (wmon.AlertFlag == WeatherReader.WeaAlert.Alert)
                 return false;
-            else 
+            else
                 return true;
         }
 
@@ -656,7 +688,7 @@ namespace SuperScan
                 cForm.Close();
             }
         }
- 
+
         private void WatchWeatherCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             Configuration ss_cfg = new Configuration();
@@ -664,12 +696,12 @@ namespace SuperScan
             else ss_cfg.WatchWeather = "False";
         }
 
-         private void DomeCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void DomeCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             Configuration ss_cfg = new Configuration();
             if (DomeCheckBox.Checked) ss_cfg.UsesDome = "True";
             else ss_cfg.UsesDome = "False";
-                    }
+        }
 
         private void MinGalaxySetting_ValueChanged(object sender, EventArgs e)
         {

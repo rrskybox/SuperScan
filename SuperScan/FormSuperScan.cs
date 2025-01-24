@@ -294,11 +294,11 @@ namespace SuperScan
             {
                 System.Threading.Thread.Sleep(10000);
                 LogEntry("Camera temperature at " + DeviceControl.CameraTemperature.ToString("0.0"));
-                if (DateTime.Now-startTime > TimeSpan.FromMinutes(1))
+                if (DateTime.Now - startTime > TimeSpan.FromMinutes(1))
                 {
                     LogEntry("Temperature Regulation Timeout at 1 minute");
                     break;
-                }    
+                }
             };
 
             int gTriedCount = 0;
@@ -316,7 +316,8 @@ namespace SuperScan
             {
                 //Check weather conditions, if enabled
                 //  if unsafe then spin until it is safe or endingtime occurs.
-                if (!Launcher.IsSessionElapsed() && WatchWeatherCheckBox.Checked)
+                //if (!Launcher.IsSessionElapsed() && WatchWeatherCheckBox.Checked)
+                if (WatchWeatherCheckBox.Checked)
                 {
                     LogEntry("Checking Weather");
                     if (!IsWeatherSafe())
@@ -357,106 +358,104 @@ namespace SuperScan
                             }
                         }
                     }
-                    else  //Weather, if checked, is safe
+                }
+                //Weather, if checked, is safe and we may still be in session
+                //Check for autofocus selection.  If so then run the autofocus check.
+                if (!Launcher.IsSessionElapsed() && AutoFocusCheckBox.Checked)
+                {
+                    //One stop shopping
+                    LogEntry("Checking Focus");
+                    string focStat = AutoFocus.Check();
+                    LogEntry(focStat);
+                }
+                //Check one more time on session elapsed, if all good then proceed to survey a galaxy
+
+                if (!Launcher.IsSessionElapsed())
+                {
+                    //Get the next galaxy.  display its name and size.
+                    string targetName = gList.Next;
+                    CurrentGalaxyName.Text = targetName;
+                    CurrentGalaxySizeArcmin.Text = gList.MaxAxisArcMin(targetName).ToString();
+                    Show();
+
+                    LogEntry("Queueing up next galaxy: " + targetName);
+
+                    //If altitude too low then pass on this one.
+                    if (gList.Altitude(targetName) < gList.MinAltitude)
+                        LogEntry(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
+                    //If the target was imaged within the last 12 hours then pass on this one.
+                    else if (IsSurveyedCurrentSession(targetName))
+                        LogEntry(targetName + " previously surveyed this session");
+                    else
                     {
-                        //Check for autofocus selection.  If so then run the autofocus check.
-                        if (!Launcher.IsSessionElapsed() && AutoFocusCheckBox.Checked)
+                        //Take fresh image
+                        FreshImage fso = new FreshImage();
+                        //Seek location of next galaxy
+                        //Ignor return value
+                        fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
+                        if (fso.ImagePath == "")
                         {
-                            //One stop shopping
-                            LogEntry("Checking Focus");
-                            string focStat = AutoFocus.Check();
-                            LogEntry(focStat);
+                            LogEntry(targetName + ": " + " Image capture failed -- probably CLS failure.");
+                            LogEntry("");
                         }
-                        //Check one more time on session elapsed, if all good then proceed to survey a galaxy
-
-                        if (!Launcher.IsSessionElapsed())
+                        else
                         {
-                            //Get the next galaxy.  display its name and size.
-                            string targetName = gList.Next;
-                            CurrentGalaxyName.Text = targetName;
-                            CurrentGalaxySizeArcmin.Text = gList.MaxAxisArcMin(targetName).ToString();
-                            Show();
-
-                            LogEntry("Queueing up next galaxy: " + targetName);
-
-                            //If altitude too low then pass on this one.
-                            if (gList.Altitude(targetName) < gList.MinAltitude)
-                                LogEntry(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
-                            //If the target was imaged within the last 12 hours then pass on this one.
-                            else if (IsSurveyedCurrentSession(targetName))
-                                LogEntry(targetName + " previously surveyed this session");
-                            else
+                            LogEntry(targetName + " Image capture complete.");
+                            LogEntry(targetName + " Looking in Image Bank for most recent image.");
+                            //Save Image
+                            ImageBank sio = new ImageBank(targetName);
+                            LogEntry(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
+                            sio.AddImage(ss_cfg.FreshImagePath);
+                            //Increment the galaxy count for reporting purposes
+                            gSuccessfulCount++;
+                            //check for a reference image
+                            //  if so then move on to detecting any prospects
+                            //  if not, then just log the situation and move on
+                            if (sio.MostRecentImagePath != "")
                             {
-                                //Take fresh image
-                                FreshImage fso = new FreshImage();
-                                //Seek location of next galaxy
-                                //Ignor return value
-                                fso.Acquire(targetName, (Convert.ToDouble(ExposureTimeSetting.Value)));
-                                if (fso.ImagePath == "")
+                                int subFrameSize = Convert.ToInt32(60 * gList.MaxAxisArcMin(targetName));
+                                LogEntry("Detecting supernova prospects.");
+                                //Check to see if detection is to be run or not
+                                //  if so, open a detection object with the log handler property set up
+                                //   if not, just move on
+                                if (!PostponeDetectionCheckBox.Checked)
                                 {
-                                    LogEntry(targetName + ": " + " Image capture failed -- probably CLS failure.");
-                                    LogEntry("");
+                                    NovaDetection ss_ndo = new NovaDetection();
+                                    ss_ndo.LogUpdate += LogEntry;
+                                    if (ss_ndo.Detect(targetName,
+                                        subFrameSize,
+                                        gList.RA(targetName),
+                                        gList.Dec(targetName),
+                                        fso.ImagePath,
+                                        sio.MostRecentImagePath,
+                                        sio.WorkingImageFolder))
+                                    {
+                                        SuspectCountLabel.Text = (Convert.ToInt32(SuspectCountLabel.Text) + 1).ToString();
+                                    }
                                 }
                                 else
-                                {
-                                    LogEntry(targetName + " Image capture complete.");
-                                    LogEntry(targetName + " Looking in Image Bank for most recent image.");
-                                    //Save Image
-                                    ImageBank sio = new ImageBank(targetName);
-                                    LogEntry(targetName + ":" + " Banking new image in " + ss_cfg.FreshImagePath);
-                                    sio.AddImage(ss_cfg.FreshImagePath);
-                                    //Increment the galaxy count for reporting purposes
-                                    gSuccessfulCount++;
-                                    //check for a reference image
-                                    //  if so then move on to detecting any prospects
-                                    //  if not, then just log the situation and move on
-                                    if (sio.MostRecentImagePath != "")
-                                    {
-                                        int subFrameSize = Convert.ToInt32(60 * gList.MaxAxisArcMin(targetName));
-                                        LogEntry("Detecting supernova prospects.");
-                                        //Check to see if detection is to be run or not
-                                        //  if so, open a detection object with the log handler property set up
-                                        //   if not, just move on
-                                        if (!PostponeDetectionCheckBox.Checked)
-                                        {
-                                            NovaDetection ss_ndo = new NovaDetection();
-                                            ss_ndo.LogUpdate += LogEntry;
-                                            if (ss_ndo.Detect(targetName,
-                                                subFrameSize,
-                                                gList.RA(targetName),
-                                                gList.Dec(targetName),
-                                                fso.ImagePath,
-                                                sio.MostRecentImagePath,
-                                                sio.WorkingImageFolder))
-                                            {
-                                                SuspectCountLabel.Text = (Convert.ToInt32(SuspectCountLabel.Text) + 1).ToString();
-                                            }
-                                        }
-                                        else
-                                            LogEntry("Supernova detecton postponed per request.");
-                                    }
-                                    else
-                                        LogEntry("No banked image for comparison.");
-                                }
+                                    LogEntry("Supernova detecton postponed per request.");
                             }
-                            //Update tries counter
-                            gTriedCount++;
-                            //Clear galaxy from list and decrement galaxies left to image
-                            gList.Remove(targetName);
-                            GalaxyCount.Text = gList.GalaxyCount.ToString();
-                            Show();
+                            else
+                                LogEntry("No banked image for comparison.");
                         }
-                        //Check for time to shut down, then...
-                        //if we aren't out of time, check to see if we're out of galaxies
-                        //  if so, refresh the list and continue
-                        //  otherwise time to end
-                        LogEntry("Checking for ending time");
-                        if (Convert.ToBoolean(Launcher.IsSessionElapsed()))
-                            LogEntry("Session elapsed.");
-                        else if (gList.GalaxyCount == 0)
-                            RefreshTargetsNow();
                     }
+                    //Update tries counter
+                    gTriedCount++;
+                    //Clear galaxy from list and decrement galaxies left to image
+                    gList.Remove(targetName);
+                    GalaxyCount.Text = gList.GalaxyCount.ToString();
+                    Show();
                 }
+                //Check for time to shut down, then...
+                //if we aren't out of time, check to see if we're out of galaxies
+                //  if so, refresh the list and continue
+                //  otherwise time to end
+                LogEntry("Checking for ending time");
+                if (Convert.ToBoolean(Launcher.IsSessionElapsed()))
+                    LogEntry("Session elapsed.");
+                else if (gList.GalaxyCount == 0)
+                    RefreshTargetsNow();
             }
 
             LogEntry("Session Completed");
@@ -469,6 +468,7 @@ namespace SuperScan
             StartScanButton.BackColor = scanbuttoncolorsave;
             return;
         }
+
 
         private void RefreshScanList()
         {

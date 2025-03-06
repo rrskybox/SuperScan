@@ -299,7 +299,8 @@ namespace SuperScan
                     LogEntry("Temperature Regulation Timeout at 1 minute");
                     break;
                 }
-            };
+            }
+            ;
 
             int gTriedCount = 0;
             int gSuccessfulCount = 0;
@@ -536,7 +537,7 @@ namespace SuperScan
             return;
         }
 
-        private DateTime GetDate(string fname)
+        private DateTime? GetDate(string fname)
         {
             //fname format expected to be *_dd_MM_yyy_hh_mm.fit"
             //Parse fname the substrings, then convert to datetime
@@ -546,13 +547,21 @@ namespace SuperScan
             string daystr = fname.Substring(uscr + 9, 2);
             string hourstr = fname.Substring(uscr + 12, 2);
             string minstr = fname.Substring(uscr + 14, 2);
-            DateTime fdate = new DateTime(
+            DateTime? fdate = null;
+            try
+            {
+                fdate = new DateTime(
                 Convert.ToInt32(yearstr),
                 Convert.ToInt32(monstr),
                 Convert.ToInt32(daystr),
                 Convert.ToInt32(hourstr),
                 Convert.ToInt32(minstr),
                 0);
+            }
+            catch
+            {
+                LogEntry("Invalid Filename Format: " + fname);
+            }
             return fdate;
         }
 
@@ -565,7 +574,8 @@ namespace SuperScan
             var galImages = sys_ibd.GetFiles("NGC*.fit");
             for (int i = 0; i < galImages.Length; i++)
             {
-                if (GetDate(galImages.ElementAt(i).FullName) > latestDate)
+                DateTime? imageDate = GetDate(galImages.ElementAt(i).FullName);
+                if (imageDate != null && imageDate > latestDate)
                 {
                     latestFile = galImages.ElementAt(i).FullName;
                 }
@@ -573,20 +583,20 @@ namespace SuperScan
             return latestFile;
         }
 
-        private DateTime LatestImageTime(string dname)
+        private DateTime? LatestImageTime(string dname)
         {
             //Returns most current image file of target dname
             Configuration ss_cfg = new Configuration();
             string ibdir = ss_cfg.ImageBankFolder;
-            DateTime latestDate = new DateTime(0);
+            DateTime? latestDate = null;
             if (!Directory.Exists(ibdir + "\\" + dname))
                 Directory.CreateDirectory(ibdir + "\\" + dname);
             System.IO.DirectoryInfo sys_ibd = new System.IO.DirectoryInfo(ibdir + "\\" + dname);
             var galImages = sys_ibd.GetFiles("NGC*.fit");
             for (int i = 0; i < galImages.Length; i++)
             {
-                DateTime imageDate = GetDate(galImages.ElementAt(i).FullName);
-                if (imageDate > latestDate)
+                DateTime? imageDate = GetDate(galImages.ElementAt(i).FullName);
+                if (imageDate != null && imageDate > latestDate)
                     latestDate = imageDate;
             }
             return latestDate;
@@ -609,7 +619,8 @@ namespace SuperScan
             var galImages = sys_ibd.GetFiles("NGC*.fit");
             for (int i = 0; i < galImages.Length; i++)
             {
-                if ((GetDate(galImages.ElementAt(i).FullName) > nextLatestDate)
+                DateTime? imageDate = GetDate(galImages.ElementAt(i).FullName);
+                if (imageDate != null && (GetDate(galImages.ElementAt(i).FullName) > nextLatestDate)
                     && (galImages.ElementAt(i).FullName != latestFile))
                 {
                     nextLatestFile = galImages.ElementAt(i).FullName;

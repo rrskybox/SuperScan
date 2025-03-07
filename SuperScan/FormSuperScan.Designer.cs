@@ -44,6 +44,8 @@
             this.CurrentGalaxySizeArcmin = new System.Windows.Forms.Label();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.label8 = new System.Windows.Forms.Label();
+            this.FollowUpExposureTime = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.CLSReductionBox = new System.Windows.Forms.ComboBox();
             this.label5 = new System.Windows.Forms.Label();
@@ -66,16 +68,14 @@
             this.CullButton = new System.Windows.Forms.Button();
             this.SuspectCountLabel = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
-            this.label8 = new System.Windows.Forms.Label();
-            this.FollowUpExposureTime = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.ExposureTimeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinAltitudeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FilterNumberSetting)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.FollowUpExposureTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinGalaxySetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CCDTemperatureSetting)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.FollowUpExposureTime)).BeginInit();
             this.SuspendLayout();
             // 
             // StartScanButton
@@ -296,6 +296,39 @@
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Configuration";
             // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Location = new System.Drawing.Point(10, 69);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(152, 13);
+            this.label8.TabIndex = 29;
+            this.label8.Text = "Follow Up Exposure (Seconds)";
+            // 
+            // FollowUpExposureTime
+            // 
+            this.FollowUpExposureTime.Location = new System.Drawing.Point(185, 65);
+            this.FollowUpExposureTime.Maximum = new decimal(new int[] {
+            6000,
+            0,
+            0,
+            0});
+            this.FollowUpExposureTime.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.FollowUpExposureTime.Name = "FollowUpExposureTime";
+            this.FollowUpExposureTime.Size = new System.Drawing.Size(61, 20);
+            this.FollowUpExposureTime.TabIndex = 28;
+            this.FollowUpExposureTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.FollowUpExposureTime.Value = new decimal(new int[] {
+            600,
+            0,
+            0,
+            0});
+            this.FollowUpExposureTime.ValueChanged += new System.EventHandler(this.FollowUpExposureTime_ValueChanged);
+            // 
             // label7
             // 
             this.label7.AutoSize = true;
@@ -331,8 +364,6 @@
             // RefreshTargetsCheckBox
             // 
             this.RefreshTargetsCheckBox.AutoSize = true;
-            this.RefreshTargetsCheckBox.Checked = true;
-            this.RefreshTargetsCheckBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.RefreshTargetsCheckBox.Location = new System.Drawing.Point(12, 269);
             this.RefreshTargetsCheckBox.Name = "RefreshTargetsCheckBox";
             this.RefreshTargetsCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
@@ -558,39 +589,6 @@
             this.label6.TabIndex = 22;
             this.label6.Text = "Suspects";
             // 
-            // label8
-            // 
-            this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(10, 69);
-            this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(152, 13);
-            this.label8.TabIndex = 29;
-            this.label8.Text = "Follow Up Exposure (Seconds)";
-            // 
-            // FollowUpExposureTime
-            // 
-            this.FollowUpExposureTime.Location = new System.Drawing.Point(185, 65);
-            this.FollowUpExposureTime.Maximum = new decimal(new int[] {
-            6000,
-            0,
-            0,
-            0});
-            this.FollowUpExposureTime.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.FollowUpExposureTime.Name = "FollowUpExposureTime";
-            this.FollowUpExposureTime.Size = new System.Drawing.Size(61, 20);
-            this.FollowUpExposureTime.TabIndex = 28;
-            this.FollowUpExposureTime.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.FollowUpExposureTime.Value = new decimal(new int[] {
-            600,
-            0,
-            0,
-            0});
-            this.FollowUpExposureTime.ValueChanged += new System.EventHandler(this.FollowUpExposureTime_ValueChanged);
-            // 
             // FormSuperScan
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -618,9 +616,9 @@
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.FollowUpExposureTime)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinGalaxySetting)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CCDTemperatureSetting)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.FollowUpExposureTime)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

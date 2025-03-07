@@ -405,9 +405,18 @@ namespace SuperScan
                 tsx_img.Open();
                 tsx_img.DetachOnClose = 0;
 
-                double pixSize = Convert.ToDouble(tsx_img.FITSKeyword("XPIXSZ"));
-                double focLen = Convert.ToDouble(tsx_img.FITSKeyword("FOCALLEN"));
-                tsx_img.ScaleInArcsecondsPerPixel = (pixSize * 206.265) / focLen;
+                try
+                {
+                    double pixSize = Convert.ToDouble(tsx_img.FITSKeyword("XPIXSZ"));
+                    double focLen = Convert.ToDouble(tsx_img.FITSKeyword("FOCALLEN"));
+                    tsx_img.ScaleInArcsecondsPerPixel = (pixSize * 206.265) / focLen;
+                }
+                catch
+                {
+                    tsx_img.Close();
+                    plateSolveResult = false;
+                    return;
+                }
 
                 try
                 {
@@ -430,7 +439,8 @@ namespace SuperScan
                 if ((targetX < 0) || (targetX > imagewidth) || (targetY < 0) || (targetY > imageheight))
                 { plateSolveResult = false; }
                 else
-                { plateSolveResult = true; };
+                { plateSolveResult = true; }
+                ;
 
                 tsx_img.Close();
                 return;

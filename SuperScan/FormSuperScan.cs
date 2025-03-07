@@ -377,18 +377,22 @@ namespace SuperScan
                     string targetName = gList.Next;
                     CurrentGalaxyName.Text = targetName;
                     CurrentGalaxySizeArcmin.Text = gList.MaxAxisArcMin(targetName).ToString();
-                    Show();
+                    //Show();
 
-                    LogEntry("Queueing up next galaxy: " + targetName);
 
                     //If altitude too low then pass on this one.
                     if (gList.Altitude(targetName) < gList.MinAltitude)
-                        LogEntry(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
+                    {
+                        //LogEntry(targetName + " at " + gList.Altitude(targetName).ToString("0.0") + " degrees Alt is below minimum");
+                    }
                     //If the target was imaged within the last 12 hours then pass on this one.
                     else if (IsSurveyedCurrentSession(targetName))
-                        LogEntry(targetName + " previously surveyed this session");
+                    {
+                        //LogEntry(targetName + " previously surveyed this session");
+                    }
                     else
                     {
+                        LogEntry("Queueing up next galaxy: " + targetName);
                         //Take fresh image
                         FreshImage fso = new FreshImage();
                         //Seek location of next galaxy
@@ -455,7 +459,7 @@ namespace SuperScan
                 LogEntry("Checking for ending time");
                 if (Convert.ToBoolean(Launcher.IsSessionElapsed()))
                     LogEntry("Session elapsed.");
-                else if (gList.GalaxyCount == 0)
+                else if (gList.GalaxyCount == 0 && ss_cfg.RefreshTargets == "True")
                     RefreshTargetsNow();
             }
 
@@ -588,7 +592,7 @@ namespace SuperScan
             //Returns most current image file of target dname
             Configuration ss_cfg = new Configuration();
             string ibdir = ss_cfg.ImageBankFolder;
-            DateTime? latestDate = null;
+            DateTime? latestDate = new DateTime(0);
             if (!Directory.Exists(ibdir + "\\" + dname))
                 Directory.CreateDirectory(ibdir + "\\" + dname);
             System.IO.DirectoryInfo sys_ibd = new System.IO.DirectoryInfo(ibdir + "\\" + dname);
@@ -731,32 +735,33 @@ namespace SuperScan
             Configuration ss_cfg = new Configuration();
             if (RefreshTargetsCheckBox.Checked)
             {
+                ss_cfg.RefreshTargets = "True";
                 RefreshTargetsNow();
                 return;
             }
             else
             {
+                ss_cfg.RefreshTargets = "False";
                 //Verify that there is content in the static target file
                 LogEntry("Refresh galaxy list deselected -- now using fixed list, if populated.");
                 List<string> targetSet = new List<string>();
                 try { targetSet = File.ReadAllLines(ss_cfg.ObservingListPath).ToList(); }
                 catch
                 {
-                    ss_cfg.RefreshTargets = "True";
+                    //ss_cfg.RefreshTargets = "True";
                     LogEntry("Fixed target set file is missing. Make sure that SuperScanObservingList.txt exists and contains targets.");
-                    RefreshTargetsCheckBox.Checked = true;
+                    //RefreshTargetsCheckBox.Checked = true;
                     return;
                 }
                 if (targetSet.Count < 1)
                 {
-                    ss_cfg.RefreshTargets = "True";
+                    //ss_cfg.RefreshTargets = "True";
                     LogEntry("Fixed target set file is empty. Make sure that SuperScanObservingList.txt contains targets.");
-                    RefreshTargetsCheckBox.Checked = true;
+                    //RefreshTargetsCheckBox.Checked = true;
                     return;
                 }
                 else
                 {
-                    ss_cfg.RefreshTargets = "False";
                     gList = new GalaxyList();
                     GalaxyCount.Text = gList.GalaxyCount.ToString();
                     LogEntry("Fixed target set has " + GalaxyCount.Text + " targets.");
@@ -788,7 +793,7 @@ namespace SuperScan
         private void RefreshTargetsNow()
         {
             Configuration cfg = new Configuration();
-            cfg.RefreshTargets = "True";
+            //cfg.RefreshTargets = "True";
             LogEntry("Refresh galaxy list selected -- launching observing list query");
             Cursor.Current = Cursors.WaitCursor;
             gList = new GalaxyList();

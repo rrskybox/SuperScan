@@ -545,6 +545,8 @@ namespace SuperScan
         {
             //fname format expected to be *_dd_MM_yyy_hh_mm.fit"
             //Parse fname the substrings, then convert to datetime
+            //The fname is possibily a path that contains an underscore, so isolate the filename first
+            string filenameonly = Path.GetFileName(fname);
             int uscr = fname.IndexOf("_");
             string yearstr = fname.Substring(uscr + 1, 4);
             string monstr = fname.Substring(uscr + 6, 2);

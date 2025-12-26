@@ -548,12 +548,21 @@ namespace SuperScan
             //Parse fname the substrings, then convert to datetime
             //The fname is possibily a path that contains an underscore, so isolate the filename first
             string filenameonly = Path.GetFileName(fname);
-            int uscr = fname.IndexOf("_");
+
+            //int uscr = fname.IndexOf("_");
+            //string yearstr = fname.Substring(uscr + 1, 4);
+            //string monstr = fname.Substring(uscr + 6, 2);
+            //string daystr = fname.Substring(uscr + 9, 2);
+            //string hourstr = fname.Substring(uscr + 12, 2);
+            //string minstr = fname.Substring(uscr + 14, 2);
+
+            int uscr = fname.Length - 20;
             string yearstr = fname.Substring(uscr + 1, 4);
             string monstr = fname.Substring(uscr + 6, 2);
             string daystr = fname.Substring(uscr + 9, 2);
             string hourstr = fname.Substring(uscr + 12, 2);
             string minstr = fname.Substring(uscr + 14, 2);
+
             DateTime? fdate = null;
             try
             {

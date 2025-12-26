@@ -68,6 +68,8 @@
             this.CullButton = new System.Windows.Forms.Button();
             this.SuspectCountLabel = new System.Windows.Forms.Label();
             this.label6 = new System.Windows.Forms.Label();
+            this.label9 = new System.Windows.Forms.Label();
+            this.RefocusTriggerBox = new System.Windows.Forms.NumericUpDown();
             ((System.ComponentModel.ISupportInitialize)(this.ExposureTimeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinAltitudeSetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.FilterNumberSetting)).BeginInit();
@@ -76,12 +78,13 @@
             ((System.ComponentModel.ISupportInitialize)(this.FollowUpExposureTime)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinGalaxySetting)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CCDTemperatureSetting)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RefocusTriggerBox)).BeginInit();
             this.SuspendLayout();
             // 
             // StartScanButton
             // 
             this.StartScanButton.BackColor = System.Drawing.Color.LightGreen;
-            this.StartScanButton.Location = new System.Drawing.Point(12, 715);
+            this.StartScanButton.Location = new System.Drawing.Point(13, 748);
             this.StartScanButton.Name = "StartScanButton";
             this.StartScanButton.Size = new System.Drawing.Size(75, 54);
             this.StartScanButton.TabIndex = 0;
@@ -92,7 +95,7 @@
             // CloseButton
             // 
             this.CloseButton.BackColor = System.Drawing.Color.LightGreen;
-            this.CloseButton.Location = new System.Drawing.Point(196, 746);
+            this.CloseButton.Location = new System.Drawing.Point(197, 779);
             this.CloseButton.Name = "CloseButton";
             this.CloseButton.Size = new System.Drawing.Size(75, 23);
             this.CloseButton.TabIndex = 1;
@@ -146,7 +149,7 @@
             // MinAltitudeLabel
             // 
             this.MinAltitudeLabel.AutoSize = true;
-            this.MinAltitudeLabel.Location = new System.Drawing.Point(10, 91);
+            this.MinAltitudeLabel.Location = new System.Drawing.Point(10, 88);
             this.MinAltitudeLabel.Name = "MinAltitudeLabel";
             this.MinAltitudeLabel.Size = new System.Drawing.Size(169, 13);
             this.MinAltitudeLabel.TabIndex = 4;
@@ -183,7 +186,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(10, 112);
+            this.label1.Location = new System.Drawing.Point(10, 109);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(135, 13);
             this.label1.TabIndex = 8;
@@ -265,6 +268,8 @@
             // groupBox2
             // 
             this.groupBox2.BackColor = System.Drawing.Color.LightSeaGreen;
+            this.groupBox2.Controls.Add(this.RefocusTriggerBox);
+            this.groupBox2.Controls.Add(this.label9);
             this.groupBox2.Controls.Add(this.label8);
             this.groupBox2.Controls.Add(this.FollowUpExposureTime);
             this.groupBox2.Controls.Add(this.label7);
@@ -291,7 +296,7 @@
             this.groupBox2.ForeColor = System.Drawing.Color.White;
             this.groupBox2.Location = new System.Drawing.Point(12, 112);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(260, 299);
+            this.groupBox2.Size = new System.Drawing.Size(260, 346);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Configuration";
@@ -299,7 +304,7 @@
             // label8
             // 
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(10, 69);
+            this.label8.Location = new System.Drawing.Point(10, 67);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(152, 13);
             this.label8.TabIndex = 29;
@@ -332,7 +337,7 @@
             // label7
             // 
             this.label7.AutoSize = true;
-            this.label7.Location = new System.Drawing.Point(10, 176);
+            this.label7.Location = new System.Drawing.Point(10, 172);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(79, 13);
             this.label7.TabIndex = 27;
@@ -354,7 +359,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(10, 155);
+            this.label5.Location = new System.Drawing.Point(10, 151);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(88, 13);
             this.label5.TabIndex = 25;
@@ -364,7 +369,7 @@
             // RefreshTargetsCheckBox
             // 
             this.RefreshTargetsCheckBox.AutoSize = true;
-            this.RefreshTargetsCheckBox.Location = new System.Drawing.Point(12, 269);
+            this.RefreshTargetsCheckBox.Location = new System.Drawing.Point(13, 308);
             this.RefreshTargetsCheckBox.Name = "RefreshTargetsCheckBox";
             this.RefreshTargetsCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.RefreshTargetsCheckBox.Size = new System.Drawing.Size(102, 17);
@@ -376,7 +381,7 @@
             // DomeCheckBox
             // 
             this.DomeCheckBox.AutoSize = true;
-            this.DomeCheckBox.Location = new System.Drawing.Point(169, 269);
+            this.DomeCheckBox.Location = new System.Drawing.Point(170, 308);
             this.DomeCheckBox.Name = "DomeCheckBox";
             this.DomeCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.DomeCheckBox.Size = new System.Drawing.Size(76, 17);
@@ -401,7 +406,7 @@
             // WatchWeatherCheckBox
             // 
             this.WatchWeatherCheckBox.AutoSize = true;
-            this.WatchWeatherCheckBox.Location = new System.Drawing.Point(12, 248);
+            this.WatchWeatherCheckBox.Location = new System.Drawing.Point(13, 287);
             this.WatchWeatherCheckBox.Name = "WatchWeatherCheckBox";
             this.WatchWeatherCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.WatchWeatherCheckBox.Size = new System.Drawing.Size(102, 17);
@@ -439,7 +444,7 @@
             // label3
             // 
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(10, 133);
+            this.label3.Location = new System.Drawing.Point(10, 130);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(106, 13);
             this.label3.TabIndex = 15;
@@ -468,7 +473,7 @@
             // AutoFocusCheckBox
             // 
             this.AutoFocusCheckBox.AutoSize = true;
-            this.AutoFocusCheckBox.Location = new System.Drawing.Point(169, 248);
+            this.AutoFocusCheckBox.Location = new System.Drawing.Point(170, 287);
             this.AutoFocusCheckBox.Name = "AutoFocusCheckBox";
             this.AutoFocusCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.AutoFocusCheckBox.Size = new System.Drawing.Size(77, 17);
@@ -480,7 +485,7 @@
             // OnTopCheckBox
             // 
             this.OnTopCheckBox.AutoSize = true;
-            this.OnTopCheckBox.Location = new System.Drawing.Point(12, 225);
+            this.OnTopCheckBox.Location = new System.Drawing.Point(13, 264);
             this.OnTopCheckBox.Name = "OnTopCheckBox";
             this.OnTopCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.OnTopCheckBox.Size = new System.Drawing.Size(98, 17);
@@ -492,7 +497,7 @@
             // AutoRunCheckBox
             // 
             this.AutoRunCheckBox.AutoSize = true;
-            this.AutoRunCheckBox.Location = new System.Drawing.Point(169, 225);
+            this.AutoRunCheckBox.Location = new System.Drawing.Point(170, 264);
             this.AutoRunCheckBox.Name = "AutoRunCheckBox";
             this.AutoRunCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.AutoRunCheckBox.Size = new System.Drawing.Size(68, 17);
@@ -504,7 +509,7 @@
             // PostponeDetectionCheckBox
             // 
             this.PostponeDetectionCheckBox.AutoSize = true;
-            this.PostponeDetectionCheckBox.Location = new System.Drawing.Point(12, 198);
+            this.PostponeDetectionCheckBox.Location = new System.Drawing.Point(13, 237);
             this.PostponeDetectionCheckBox.Name = "PostponeDetectionCheckBox";
             this.PostponeDetectionCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.PostponeDetectionCheckBox.Size = new System.Drawing.Size(120, 17);
@@ -516,7 +521,7 @@
             // ReScanButton
             // 
             this.ReScanButton.BackColor = System.Drawing.Color.LightGreen;
-            this.ReScanButton.Location = new System.Drawing.Point(105, 715);
+            this.ReScanButton.Location = new System.Drawing.Point(106, 748);
             this.ReScanButton.Name = "ReScanButton";
             this.ReScanButton.Size = new System.Drawing.Size(75, 23);
             this.ReScanButton.TabIndex = 17;
@@ -528,7 +533,7 @@
             // 
             this.LogBox.BackColor = System.Drawing.Color.LightSeaGreen;
             this.LogBox.ForeColor = System.Drawing.Color.White;
-            this.LogBox.Location = new System.Drawing.Point(12, 422);
+            this.LogBox.Location = new System.Drawing.Point(12, 464);
             this.LogBox.Multiline = true;
             this.LogBox.Name = "LogBox";
             this.LogBox.ReadOnly = true;
@@ -539,7 +544,7 @@
             // SuspectsButton
             // 
             this.SuspectsButton.BackColor = System.Drawing.Color.LightGreen;
-            this.SuspectsButton.Location = new System.Drawing.Point(105, 746);
+            this.SuspectsButton.Location = new System.Drawing.Point(106, 779);
             this.SuspectsButton.Name = "SuspectsButton";
             this.SuspectsButton.Size = new System.Drawing.Size(75, 23);
             this.SuspectsButton.TabIndex = 19;
@@ -550,7 +555,7 @@
             // AbortButton
             // 
             this.AbortButton.BackColor = System.Drawing.Color.LightGreen;
-            this.AbortButton.Location = new System.Drawing.Point(196, 686);
+            this.AbortButton.Location = new System.Drawing.Point(197, 719);
             this.AbortButton.Name = "AbortButton";
             this.AbortButton.Size = new System.Drawing.Size(75, 23);
             this.AbortButton.TabIndex = 20;
@@ -561,7 +566,7 @@
             // CullButton
             // 
             this.CullButton.BackColor = System.Drawing.Color.LightGreen;
-            this.CullButton.Location = new System.Drawing.Point(196, 715);
+            this.CullButton.Location = new System.Drawing.Point(197, 748);
             this.CullButton.Name = "CullButton";
             this.CullButton.Size = new System.Drawing.Size(75, 23);
             this.CullButton.TabIndex = 21;
@@ -573,7 +578,7 @@
             // 
             this.SuspectCountLabel.AutoSize = true;
             this.SuspectCountLabel.ForeColor = System.Drawing.Color.White;
-            this.SuspectCountLabel.Location = new System.Drawing.Point(98, 686);
+            this.SuspectCountLabel.Location = new System.Drawing.Point(99, 719);
             this.SuspectCountLabel.Name = "SuspectCountLabel";
             this.SuspectCountLabel.Size = new System.Drawing.Size(29, 13);
             this.SuspectCountLabel.TabIndex = 23;
@@ -583,18 +588,48 @@
             // 
             this.label6.AutoSize = true;
             this.label6.ForeColor = System.Drawing.Color.White;
-            this.label6.Location = new System.Drawing.Point(12, 686);
+            this.label6.Location = new System.Drawing.Point(13, 719);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(51, 13);
             this.label6.TabIndex = 22;
             this.label6.Text = "Suspects";
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Location = new System.Drawing.Point(10, 193);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(110, 13);
+            this.label9.TabIndex = 31;
+            this.label9.Text = "Refocus Trigger (deg)";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
+            // RefocusTriggerBox
+            // 
+            this.RefocusTriggerBox.DecimalPlaces = 1;
+            this.RefocusTriggerBox.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.RefocusTriggerBox.Location = new System.Drawing.Point(185, 193);
+            this.RefocusTriggerBox.Name = "RefocusTriggerBox";
+            this.RefocusTriggerBox.Size = new System.Drawing.Size(61, 20);
+            this.RefocusTriggerBox.TabIndex = 32;
+            this.RefocusTriggerBox.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.RefocusTriggerBox.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            65536});
+            this.RefocusTriggerBox.ValueChanged += new System.EventHandler(this.RefocusTriggerBox_ValueChanged);
             // 
             // FormSuperScan
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.DarkCyan;
-            this.ClientSize = new System.Drawing.Size(284, 784);
+            this.ClientSize = new System.Drawing.Size(284, 814);
             this.Controls.Add(this.SuspectCountLabel);
             this.Controls.Add(this.label6);
             this.Controls.Add(this.CullButton);
@@ -619,6 +654,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.FollowUpExposureTime)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.MinGalaxySetting)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CCDTemperatureSetting)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RefocusTriggerBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -666,6 +702,8 @@
         private System.Windows.Forms.ComboBox CLSReductionBox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.NumericUpDown FollowUpExposureTime;
+        private System.Windows.Forms.NumericUpDown RefocusTriggerBox;
+        private System.Windows.Forms.Label label9;
     }
 }
 

@@ -56,7 +56,7 @@ namespace SuperScan
             MinGalaxySetting.Value = Convert.ToDecimal(ss_cfg.MinGalaxySize);
             CCDTemperatureSetting.Value = Convert.ToDecimal(ss_cfg.CCDTemp);
             CLSReductionBox.SelectedItem = ss_cfg.CLSReductionType;
-
+            RefocusTriggerBox.Value = Convert.ToDecimal(ss_cfg.RefocusTrigger);
             try
             { this.Text = ApplicationDeployment.CurrentDeployment.CurrentVersion.ToString(); }
             catch
@@ -283,6 +283,7 @@ namespace SuperScan
             ss_cfg.AutoStart = AutoRunCheckBox.Checked.ToString();
             ss_cfg.AutoFocus = AutoFocusCheckBox.Checked.ToString();
             ss_cfg.WatchWeather = WatchWeatherCheckBox.Checked.ToString();
+            ss_cfg.RefocusTrigger = RefocusTriggerBox.Value.ToString();
             LogEntry("Starting Scan");
 
             LogEntry("Bringing camera to temperature");
@@ -543,7 +544,7 @@ namespace SuperScan
 
         private DateTime? GetDate(string fname)
         {
-            //fname format expected to be *_dd_MM_yyy_hh_mm.fit"
+            //fname format expected to be *_dd-MM-yyyy-hh-mm.fit"
             //Parse fname the substrings, then convert to datetime
             //The fname is possibily a path that contains an underscore, so isolate the filename first
             string filenameonly = Path.GetFileName(fname);
@@ -678,6 +679,13 @@ namespace SuperScan
             ss_cfg.CCDTemp = CCDTemperatureSetting.Value.ToString();
         }
 
+        private void RefocusTriggerBox_ValueChanged(object sender, EventArgs e)
+        {
+            Configuration ss_cfg = new Configuration();
+            ss_cfg.RefocusTrigger = RefocusTriggerBox.Value.ToString();
+        }
+
+
         private bool IsWeatherSafe()
         {
             //Returns true if no weather alert, false if it is unsafe
@@ -731,6 +739,8 @@ namespace SuperScan
             GalaxyCount.Text = gList.GalaxyCount.ToString();
             MinGalaxySetting.BackColor = oldColor;
         }
+
+
 
         private void RefreshTargetsCheckBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -802,7 +812,6 @@ namespace SuperScan
             GalaxyCount.Text = gList.GalaxyCount.ToString();
             LogEntry("Queried target set has " + GalaxyCount.Text + " new targets.");
         }
-
 
     }
 }

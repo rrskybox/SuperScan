@@ -34,6 +34,7 @@ namespace SuperScan
         string SuperScanConfigurationFilename = "Configuration.xml";
         string SuperScanSuspectsFilename = "suspects.xml";
         string SuperScanObservingListFilename = "SuperScanObservingList.txt";
+        string SuperScanRefocusTrigger = "1.0";
 
         const string DomeHomeAzX = "DomeHomeAz";
 
@@ -93,6 +94,7 @@ namespace SuperScan
                     new XElement("FormOnTop", "False"),
                     new XElement("RefreshTargets", "True"),
                     new XElement("CalibrationType", "1"),
+                    new XElement("RefocusTrigger", "1.0"),
                     new XElement(DomeHomeAzX, "220"));
 
                 cDefaultX.Save(ssdir + "\\" + SuperScanConfigurationFilename);
@@ -338,6 +340,25 @@ namespace SuperScan
                 XElement sscfgXf = XElement.Load(sscfgfilename);
                 XElement sscfgXel = sscfgXf.Element("CCDTemp");
                 sscfgXel.ReplaceWith(new XElement("CCDTemp", value));
+                sscfgXf.Save(sscfgfilename);
+                return;
+            }
+        }
+
+        public string RefocusTrigger
+        {
+            get
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                return (sscfgXf.Element("RefocusTrigger").Value);
+            }
+            set
+            {
+                string sscfgfilename = ssdir + "\\" + SuperScanConfigurationFilename;
+                XElement sscfgXf = XElement.Load(sscfgfilename);
+                XElement sscfgXel = sscfgXf.Element("RefocusTrigger");
+                sscfgXel.ReplaceWith(new XElement("RefocusTrigger", value));
                 sscfgXf.Save(sscfgfilename);
                 return;
             }

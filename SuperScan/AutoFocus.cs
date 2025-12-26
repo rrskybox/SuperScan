@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SuperScan.Properties;
+using System;
 
 using TheSky64Lib;
 
@@ -32,10 +33,12 @@ namespace SuperScan
             //  altitude that is no more than 80 degrees at the same azimuth of the current position in order
             //  to avoid a flip and subsequent bullshit happening
 
+            Configuration cfg = new Configuration();
             ccdsoftCamera tsxc = new ccdsoftCamera();
             tsxc.Connect();
             double currentTemp = tsxc.focTemperature;
-            if (Math.Abs(currentTemp - afLastTemp) > 1)
+            double refocusTrigger = Convert.ToDouble(cfg.RefocusTrigger);
+            if (Math.Abs(currentTemp - afLastTemp) > refocusTrigger)
             {
                 //Going to have to refocus.  
 
@@ -50,7 +53,6 @@ namespace SuperScan
                     //move to a position near zenith
                     tsxt.SlewToAzAlt(tAz, tAlt, "AtFocus2ReadyPosition");
                 }
-                Configuration cfg = new Configuration();
 
                 //reset last temp
                 afLastTemp = currentTemp;
